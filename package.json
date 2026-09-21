@@ -1,7 +1,7 @@
 {
-  "name": "wargame-naval",
+  "name": "falklands-malvinas",
   "version": "0.1.0",
-  "description": "Operação Atlântico Sul — Wargame Naval Multiplayer por Turnos",
+  "description": "Guerra das Malvinas/Falkland 1982 — Wargame Naval Histórico Multiplayer por Turnos",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

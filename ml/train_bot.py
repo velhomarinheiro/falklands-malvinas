@@ -1,5 +1,5 @@
 """
-train_bot.py — Pipeline de treinamento do bot para Operação Atlântico Sul
+train_bot.py — Pipeline de treinamento do bot para Guerra das Malvinas/Falkland 1982
 
 Execução:
     python ml/train_bot.py
@@ -24,7 +24,7 @@ LOG_DIR    = pathlib.Path(__file__).parent.parent / "data" / "game-logs"
 MODEL_DIR  = pathlib.Path(__file__).parent / "models"
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
-GRID_H, GRID_W = 10, 16
+GRID_H, GRID_W = 10, 20
 N_CHANNELS = 9          # canais de features por célula do grid
 BATCH_SIZE = 64
 EPOCHS     = 40

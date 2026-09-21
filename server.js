@@ -22,24 +22,24 @@ const {
 const gameLogger = require('./game_logger');
 
 const PORT   = process.env.PORT || 3000;
-const GRID_W = 16;
+const GRID_W = 20;
 const GRID_H = 10;
 // Limite operacional em dias de jogo (turnos dia+noite); configurável p/ testes
-const MAX_TURNS = parseInt(process.env.MAX_TURNS, 10) || 12;
+const MAX_TURNS = parseInt(process.env.MAX_TURNS, 10) || 8;
 
 // ─── Terrain (mirror of public/js/terrain.js) ────────────────────────────────
-const T_LAND = 0, T_SHALLOW = 1, T_SHELF = 2, T_DEEP = 3, T_OIL = 4;
+const T_LAND = 0, T_SHALLOW = 1, T_SHELF = 2, T_DEEP = 3;
 const TERRAIN_MAP = [
-  [0,0,0,0,0,0,1,2,3,3,3,3,3,3,3,3],
-  [0,0,0,0,0,1,1,2,3,3,3,3,3,3,3,3],
-  [0,0,0,0,1,1,2,4,3,3,3,3,3,3,3,3],
-  [0,0,0,1,1,2,4,4,3,3,3,3,3,3,3,3],
-  [0,0,1,1,2,4,4,2,3,3,3,3,3,3,3,3],
-  [0,1,1,2,4,4,2,3,3,3,3,3,3,3,3,3],
-  [1,1,2,4,4,2,3,3,3,3,3,3,3,3,3,3],
-  [1,2,2,4,2,2,3,3,3,3,3,3,3,3,3,3],
-  [1,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3],
-  [1,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3],
+  [0,0,1,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+  [0,0,1,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+  [0,0,1,2,2,3,3,3,3,3,3,2,1,0,2,3,3,3,3,3],
+  [0,1,2,2,3,3,3,3,3,3,2,0,1,0,2,3,3,3,3,3],
+  [0,1,2,2,3,3,3,3,3,3,2,0,1,0,2,3,3,3,2,0],
+  [0,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,0],
+  [1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,0],
+  [2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+  [2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+  [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
 ];
 function getTerrain(col, row) {
   if (row < 0 || row >= GRID_H || col < 0 || col >= GRID_W) return T_LAND;
@@ -78,11 +78,11 @@ const COMP_DISPLAY_TYPE = {
   'bateria_costeira':      'bateria_costeira',
   'bateria_ada':           'bateria_ada',
   'base_naval':            'bateria_ada',
-  'plataforma':            'fpso',
+  'infantaria':            'infantaria',
   'porto':                 'porto',
   'aeroporto':             'aeroporto',
 };
-const DISPLAY_TYPE_FALLBACK = { surface: 'fragata', submarine: 'submarino', air: 'patrulha', land: 'corveta', specops: 'specops' };
+const DISPLAY_TYPE_FALLBACK = { surface: 'fragata', submarine: 'submarino', air: 'patrulha', land: 'infantaria', specops: 'specops' };
 
 // ─── Range helper ─────────────────────────────────────────────────────────────
 function rangeAgainst(rangeTable, targetCategory) {
@@ -617,25 +617,27 @@ function finishCombatPhase(room) {
 // (botObjectiveWeights) para que a IA persiga exatamente o que pontua.
 const OBJECTIVE_IDS = {
   blueTargets: {
-    carrier:   'RED-GBPA',
-    logistics: ['RED-AOR-G', 'RED-GLOG', 'RED-AKE'],
-    amphib:    'RED-GANF',
-    nucsub:    'RED-KSN',
-    surface:   ['RED-GBPA', 'RED-GE-1', 'RED-GE-2', 'RED-GE-3', 'RED-GANF'],
+    carrier:   'RED-HERMES',
+    logistics: ['RED-LOG-1', 'RED-LOG-2', 'RED-LOG-3'],
+    amphib:    'RED-LPD',
+    nucsub:    'RED-SUB-CONQ',
+    surface:   ['RED-HERMES', 'RED-INVINCIBLE', 'RED-SCR-1', 'RED-SCR-2', 'RED-ESC-1', 'RED-ESC-2', 'RED-TRAIL', 'RED-LAND-SCR', 'RED-SG-SCR', 'RED-TROOP'],
   },
   redTargets: {
-    fpsos: ['BLUE-FPSO1', 'BLUE-FPSO2', 'BLUE-FPSO3', 'BLUE-FPSO4'],
-    ports: ['BLUE-PORTO-S', 'BLUE-PORTO-RJ', 'BLUE-PORTO-V', 'BLUE-PORTO-ACU'],
+    airfields: ['BLUE-AERO-N', 'BLUE-AERO-RG', 'BLUE-AERO-RGR'],
+    garrison:  ['BLUE-GARR-STANLEY', 'BLUE-EXOCET-STANLEY', 'BLUE-GARR-GOOSE'],
   },
 };
 
 // Limiares das condições de vitória — fonte única; os rótulos exibidos são
 // derivados destes números para que UI e regra nunca divirjam.
 const OBJECTIVE_THRESHOLDS = {
-  blueLogisticsKills: 2,   // de 3 navios logísticos vermelhos
+  blueLogisticsKills: 2,   // de 3 petroleiros vermelhos
   blueSurfaceDegPct:  50,  // % do SP agregado dos combatentes de superfície
-  redFpsoKills:       3,   // de 4 plataformas FPSO
-  redPortDegPct:      40,  // % do SP agregado dos 4 portos
+  redAirfieldKills:   1,   // de 3 bases aéreas continentais argentinas — alvo profundo em
+                           // território hostil (regra histórica de engajamento restringia
+                           // ataques ao continente; só a Op. Black Buck o fez, e uma vez bastava)
+  redGarrisonDegPct:  40,  // % do SP agregado da guarnição das ilhas
 };
 
 // `progress` é a fração real de conclusão (0..1) de cada condição, inclusive
@@ -690,23 +692,23 @@ function computeObjectives(state) {
   const blueAchieved = blueConds.filter(c => c.met).length;
 
   // ─── Red objectives (need both) ──────────────────────────────────────────────
-  const fpsoUnits = RT.fpsos.map(id => u.find(x => x.id === id)).filter(Boolean);
-  const fpsoNeut  = fpsoUnits.filter(x => x.hp <= 0).length;
-  const fpsoMet   = fpsoNeut >= TH.redFpsoKills;
+  const airfieldUnits = RT.airfields.map(id => u.find(x => x.id === id)).filter(Boolean);
+  const airfieldNeut  = airfieldUnits.filter(x => x.hp <= 0).length;
+  const airfieldMet   = airfieldNeut >= TH.redAirfieldKills;
 
-  const portUnits = RT.ports.map(id => u.find(x => x.id === id)).filter(Boolean);
-  const portMax   = portUnits.reduce((s, x) => s + x.maxHp, 0);
-  const portCur   = portUnits.reduce((s, x) => s + Math.max(0, x.hp), 0);
-  const portDegPct = portMax > 0 ? Math.round((1 - portCur / portMax) * 100) : 0;
-  const portsMet  = portDegPct >= TH.redPortDegPct;
+  const garrUnits = RT.garrison.map(id => u.find(x => x.id === id)).filter(Boolean);
+  const garrMax   = garrUnits.reduce((s, x) => s + x.maxHp, 0);
+  const garrCur   = garrUnits.reduce((s, x) => s + Math.max(0, x.hp), 0);
+  const garrDegPct = garrMax > 0 ? Math.round((1 - garrCur / garrMax) * 100) : 0;
+  const garrMet   = garrDegPct >= TH.redGarrisonDegPct;
 
   const redConds = [
-    { id: 'fpsos', label: `Neutralizar ${TH.redFpsoKills} de ${fpsoUnits.length} FPSOs`, met: fpsoMet,
-      progress: frac(fpsoNeut, TH.redFpsoKills),
-      current: `${fpsoNeut}/${fpsoUnits.length} neutralizadas (precisa ${TH.redFpsoKills})` },
-    { id: 'ports', label: `Degradar ≥${TH.redPortDegPct}% Portos`,   met: portsMet,
-      progress: frac(portDegPct, TH.redPortDegPct),
-      current: `${portDegPct}% degradado  (SP: ${portCur}/${portMax})` },
+    { id: 'airfields', label: `Neutralizar ${TH.redAirfieldKills} de ${airfieldUnits.length} Bases Aéreas`, met: airfieldMet,
+      progress: frac(airfieldNeut, TH.redAirfieldKills),
+      current: `${airfieldNeut}/${airfieldUnits.length} neutralizadas (precisa ${TH.redAirfieldKills})` },
+    { id: 'garrison', label: `Degradar ≥${TH.redGarrisonDegPct}% Guarnição das Ilhas`, met: garrMet,
+      progress: frac(garrDegPct, TH.redGarrisonDegPct),
+      current: `${garrDegPct}% degradado  (SP: ${garrCur}/${garrMax})` },
   ];
   const redAchieved = redConds.filter(c => c.met).length;
 
@@ -902,8 +904,8 @@ function botObjectiveWeights(state, botTeam) {
   } else {
     const met = Object.fromEntries(obj.red.conditions.map(c => [c.id, c.met]));
     const T   = OBJECTIVE_IDS.redTargets;
-    if (!met.fpsos) T.fpsos.forEach(id => w.set(id, 0));
-    if (!met.ports) T.ports.forEach(id => w.set(id, 0));
+    if (!met.airfields) T.airfields.forEach(id => w.set(id, 0));
+    if (!met.garrison)  T.garrison.forEach(id => w.set(id, 0));
   }
   return w;
 }
@@ -927,7 +929,7 @@ function botPickTarget(unit, enemies, objWeights = new Map()) {
 }
 
 // Provedor de reabastecimento aliado mais próximo cujo hex a unidade pode ocupar
-// (PORTO-S fica em terra — inacessível a navios; portos rasos, a submarinos).
+// (portos ficam em terra — inacessíveis a navios/submarinos).
 function botRefuelProvider(unit, state) {
   let best = null, bestD = Infinity;
   for (const o of state.units) {

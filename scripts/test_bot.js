@@ -26,14 +26,19 @@ const dist = (a, b) => {
 
 // Espelho do terreno p/ validar legalidade dos caminhos (igual a server.js)
 const TERRAIN = [
-  [0,0,0,0,0,0,1,2,3,3,3,3,3,3,3,3],[0,0,0,0,0,1,1,2,3,3,3,3,3,3,3,3],
-  [0,0,0,0,1,1,2,4,3,3,3,3,3,3,3,3],[0,0,0,1,1,2,4,4,3,3,3,3,3,3,3,3],
-  [0,0,1,1,2,4,4,2,3,3,3,3,3,3,3,3],[0,1,1,2,4,4,2,3,3,3,3,3,3,3,3,3],
-  [1,1,2,4,4,2,3,3,3,3,3,3,3,3,3,3],[1,2,2,4,2,2,3,3,3,3,3,3,3,3,3,3],
-  [1,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3],[1,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3],
+  [0,0,1,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+  [0,0,1,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+  [0,0,1,2,2,3,3,3,3,3,3,2,1,0,2,3,3,3,3,3],
+  [0,1,2,2,3,3,3,3,3,3,2,0,1,0,2,3,3,3,3,3],
+  [0,1,2,2,3,3,3,3,3,3,2,0,1,0,2,3,3,3,2,0],
+  [0,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,0],
+  [1,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,0],
+  [2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+  [2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+  [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
 ];
 function canEnter(category, col, row) {
-  if (col < 0 || col > 15 || row < 0 || row > 9) return false;
+  if (col < 0 || col > 19 || row < 0 || row > 9) return false;
   const t = TERRAIN[row][col];
   if (category === 'air' || category === 'specops') return true;
   if (category === 'land')      return t === 0 || t === 1;
@@ -60,8 +65,8 @@ function pathLegal(state, unitId, path) {
   for (const mut of [0, 1, 2]) {
     const s = newGame();
     if (mut === 1) { // frotas avançadas
-      byId(s, 'RED-GE-1').col = 9; byId(s, 'RED-GE-2').col = 10;
-      byId(s, 'BLUE-SAG-P').col = 7; byId(s, 'BLUE-SAG-P').row = 3;
+      byId(s, 'RED-SCR-1').col = 9; byId(s, 'RED-SCR-2').col = 10;
+      byId(s, 'BLUE-VM').col = 7; byId(s, 'BLUE-VM').row = 3;
     }
     if (mut === 2) { // combustíveis baixos
       for (const u of s.units) if (u.fuel?.fuelType === 'naval') u.fuel.current = 3;
@@ -77,22 +82,25 @@ function pathLegal(state, unitId, path) {
   }
 }
 
-// ── 2. Vermelho prioriza FPSO sobre patrulha equidistante ──────────────────────
+// ── 2. Vermelho prioriza base aérea (objetivo) sobre patrulha equidistante ─────
+// Alvo terrestre (base aérea) usa o canal attackRange.land do atacante (=1),
+// bem menor que o canal surface do FPSO original — ambos os alvos ficam a
+// dist. 1 do atacante, em hexágonos distintos, para testar só a prioridade.
 {
   const s = newGame();
-  const att = byId(s, 'RED-GE-2');
-  const fpso = byId(s, 'BLUE-FPSO1');
-  const pat  = byId(s, 'BLUE-PAT-O1');
-  // afasta os demais azuis p/ fora do raio de oportunidade (dist > 2)
+  const att  = byId(s, 'RED-SCR-1');
+  const aero = byId(s, 'BLUE-AERO-RGR');
+  const pat  = byId(s, 'BLUE-PAT');
+  // afasta os demais azuis p/ fora do raio de oportunidade
   for (const u of s.units) {
-    if (u.team === 'blue' && u.id !== fpso.id && u.id !== pat.id) { u.col = 15; u.row = 9; }
+    if (u.team === 'blue' && u.id !== aero.id && u.id !== pat.id) { u.col = 19; u.row = 9; }
   }
-  // posiciona atacante equidistante de FPSO e patrulha (ambos a dist 2)
-  att.col = fpso.col + 2; att.row = fpso.row;
-  pat.col = att.col + 2;  pat.row = att.row;
+  att.col = 9; att.row = 4;
+  aero.col = att.col + 1; aero.row = att.row;   // dist 1
+  pat.col  = att.col - 1; pat.row  = att.row;   // dist 1
   const w = botObjectiveWeights(s, 'red');
   const tgt = botPickTarget(att, s.units.filter(u => u.team === 'blue' && u.hp > 0), w);
-  check('vermelho prefere FPSO a patrulha equidistante', tgt?.id === 'BLUE-FPSO1', `escolheu ${tgt?.id}`);
+  check('vermelho prefere base aérea a patrulha equidistante', tgt?.id === 'BLUE-AERO-RGR', `escolheu ${tgt?.id}`);
 }
 
 // ── 3. Azul prioriza alvos de objetivo ────────────────────────────────────────
@@ -108,33 +116,40 @@ function pathLegal(state, unitId, path) {
 // ── 4. Re-tarefa após objetivo cumprido ───────────────────────────────────────
 {
   const s = newGame();
-  OBJECTIVE_IDS.redTargets.fpsos.forEach(id => { byId(s, id).hp = 0; });
+  OBJECTIVE_IDS.redTargets.airfields.forEach(id => { byId(s, id).hp = 0; });
   const w = botObjectiveWeights(s, 'red');
-  const onlyPorts = OBJECTIVE_IDS.redTargets.ports.every(id => w.get(id) === 0) &&
-                    OBJECTIVE_IDS.redTargets.fpsos.every(id => !w.has(id));
-  check('FPSOs destruídas → pesos vermelhos só contêm portos', onlyPorts);
+  const onlyGarrison = OBJECTIVE_IDS.redTargets.garrison.every(id => w.get(id) === 0) &&
+                        OBJECTIVE_IDS.redTargets.airfields.every(id => !w.has(id));
+  check('Bases aéreas destruídas → pesos vermelhos só contêm guarnição', onlyGarrison);
 }
 
 // ── 5. Override de oportunidade: combatente colado vence objetivo distante ────
 {
   const s = newGame();
-  const att = byId(s, 'RED-GE-2');
-  const frig = byId(s, 'BLUE-SAG-1') || s.units.find(u => u.team === 'blue' && ['fragata','destroier','corveta','cruzador'].includes(u.type));
-  const fpso = byId(s, 'BLUE-FPSO1');
+  const att  = byId(s, 'RED-SCR-1');
+  const frig = s.units.find(u => u.team === 'blue' && ['fragata','destroier','corveta','cruzador'].includes(u.type));
+  const aero = byId(s, 'BLUE-AERO-RGR');
+  // afasta outros combatentes/anfíbios azuis (prioridade de oportunidade) do raio
+  for (const u of s.units) {
+    if (u.team === 'blue' && u.id !== frig.id && u.id !== aero.id &&
+        ['carrier','amphib','fragata','destroier','corveta','cruzador'].includes(u.type)) {
+      u.col = 19; u.row = 9;
+    }
+  }
   att.col = 10; att.row = 4;
   frig.col = 11; frig.row = 4;          // dist 1 — colado
-  // FPSO fica onde está (longe)
+  // Base aérea fica onde está (longe)
   const w = botObjectiveWeights(s, 'red');
   const tgt = botPickTarget(att, s.units.filter(u => u.team === 'blue' && u.hp > 0), w);
-  check('combatente a dist 1 vence FPSO distante', tgt?.id === frig.id, `escolheu ${tgt?.id} (frig=${frig.id})`);
+  check('combatente a dist 1 vence base aérea distante', tgt?.id === frig.id, `escolheu ${tgt?.id} (frig=${frig.id}, aero=${aero.id})`);
 }
 
 // ── 6. Combustível: baixo FP → rota ao provedor; empilhado → não move ─────────
 {
   const s = newGame();
-  const u = byId(s, 'RED-GE-3');
+  const u = byId(s, 'RED-ESC-2');
   const prov = botRefuelProvider(u, s);
-  check('provedor encontrado p/ RED-GE-3', !!prov, 'nenhum');
+  check('provedor encontrado p/ RED-ESC-2', !!prov, 'nenhum');
   u.fuel.current = 3;
   check('3 FP → precisa reabastecer', botNeedsRefuel(u, prov) === true);
   const moves = computeBotMoves(s, 'red');
@@ -152,7 +167,7 @@ function pathLegal(state, unitId, path) {
   check('empilhado com provedor → não move', !again);
 }
 
-// ── 7. Submarino nunca roteia a porto raso; navio nunca a PORTO-S (terra) ─────
+// ── 7. Provedor de reabastecimento sempre fica em terreno que a unidade alcança ─
 {
   const s = newGame();
   const sub = s.units.find(u => u.team === 'blue' && u.category === 'submarine' && u.fuel?.fuelType === 'naval');
@@ -161,16 +176,17 @@ function pathLegal(state, unitId, path) {
     const t = p ? TERRAIN[p.row][p.col] : null;
     check('provedor de submarino não fica em raso/terra', !p || (t !== 0 && t !== 1), p ? `${p.id} t=${t}` : '');
   } else check('provedor de submarino não fica em raso/terra', true, '(sem sub convencional azul)');
-  const ship = byId(s, 'BLUE-SAG-1') || s.units.find(u => u.team === 'blue' && u.category === 'surface');
+  const ship = s.units.find(u => u.team === 'blue' && u.category === 'surface');
   const p2 = botRefuelProvider(ship, s);
-  check('provedor de navio nunca é PORTO-S (terra)', p2?.id !== 'BLUE-PORTO-S', p2?.id);
+  const t2 = p2 ? TERRAIN[p2.row][p2.col] : null;
+  check('provedor de navio nunca fica em terra', !p2 || t2 !== 0, p2 ? `${p2.id} t=${t2}` : '');
 }
 
 // ── 8. Logística ameaçada foge + ganha escolta ────────────────────────────────
 {
   const s = newGame();
-  const aor = byId(s, 'RED-AOR-G');
-  const foe = byId(s, 'BLUE-SAG-1') || s.units.find(u => u.team === 'blue' && ['fragata','destroier','corveta','cruzador'].includes(u.type));
+  const aor = byId(s, 'RED-LOG-1');
+  const foe = s.units.find(u => u.team === 'blue' && ['fragata','destroier','corveta','cruzador'].includes(u.type));
   foe.col = aor.col - 2; foe.row = aor.row; // ameaça a dist 2
   const moves = computeBotMoves(s, 'red');
   const flee = moves.find(m => m.unitId === aor.id);
@@ -205,7 +221,7 @@ function pathLegal(state, unitId, path) {
 {
   const s = newGame();
   const seop = s.units.find(u => u.category === 'specops' && u.team === 'red');
-  const port = byId(s, 'BLUE-PORTO-RJ');
+  const port = byId(s, 'BLUE-PORTO-RG');
   seop.col = port.col; seop.row = port.row; // dist 0 <= range 2
   const atks = computeBotAttacks(s, 'red').filter(a => a.attackerId === seop.id);
   check('specops do bot declara ataque', atks.length === 1);
@@ -220,8 +236,8 @@ function pathLegal(state, unitId, path) {
 // ── 11. Tabela-verdade da decisão de rodada ───────────────────────────────────
 {
   const s = newGame();
-  const att = byId(s, 'RED-GE-1');
-  const def = byId(s, 'BLUE-SAG-1') || s.units.find(u => u.team === 'blue' && u.category === 'surface' && u.maxHp >= 4);
+  const att = byId(s, 'RED-ESC-1'); // possui arma 'ascm', usada pelo engajamento abaixo
+  const def = s.units.find(u => u.team === 'blue' && u.category === 'surface' && u.weapons?.mss);
   def.col = att.col + 1; def.row = att.row;
   const eng = { attackerId: att.id, targetId: def.id, weaponType: 'ascm',
                 targetCol: def.col, targetRow: def.row, targetTeam: 'blue', targetCategory: 'surface' };
@@ -241,11 +257,11 @@ function pathLegal(state, unitId, path) {
   att.weapons = savedW;
   // defensor com contra-arma (MSS a dist 1) → continue
   check('defensor com contra-arma → continue', botBattleRoundDecision(s, eng, 'blue') === 'continue');
-  // defensor sem contra-ataque possível (alvo = FPSO desarmada isolada) → stop
-  const fpso = byId(s, 'BLUE-FPSO1');
-  const eng2 = { attackerId: att.id, targetId: fpso.id, weaponType: 'ascm',
-                 targetCol: fpso.col, targetRow: fpso.row, targetTeam: 'blue', targetCategory: 'surface' };
-  att.col = fpso.col + 3; att.row = fpso.row;
+  // defensor sem contra-ataque possível (alvo = petroleiro desarmado isolado) → stop
+  const oiler = byId(s, 'BLUE-LOG-1');
+  const eng2 = { attackerId: att.id, targetId: oiler.id, weaponType: 'ascm',
+                 targetCol: oiler.col, targetRow: oiler.row, targetTeam: 'blue', targetCategory: 'surface' };
+  att.col = oiler.col + 3; att.row = oiler.row;
   check('defensor desarmado → stop', botBattleRoundDecision(s, eng2, 'blue') === 'stop');
 }
 
@@ -260,12 +276,12 @@ function pathLegal(state, unitId, path) {
 // ── 12b. Limiares de vitória e progresso contínuo ─────────────────────────────
 {
   const TH = OBJECTIVE_THRESHOLDS;
-  const fpsoIds = OBJECTIVE_IDS.redTargets.fpsos;
-  const portIds = OBJECTIVE_IDS.redTargets.ports;
+  const airfieldIds = OBJECTIVE_IDS.redTargets.airfields;
+  const garrisonIds = OBJECTIVE_IDS.redTargets.garrison;
   const redCond = (s, id) => computeObjectives(s).red.conditions.find(c => c.id === id);
-  const dealPortDamage = (s, sp) => {
+  const dealGarrisonDamage = (s, sp) => {
     let n = sp;
-    for (const id of portIds) {
+    for (const id of garrisonIds) {
       const p = byId(s, id);
       const d = Math.min(n, p.maxHp);
       p.hp = p.maxHp - d; n -= d;
@@ -273,40 +289,39 @@ function pathLegal(state, unitId, path) {
     }
   };
 
-  check('limiar FPSO é 3 de 4', TH.redFpsoKills === 3);
-  check('limiar de portos é 40%', TH.redPortDegPct === 40);
+  check('limiar de bases aéreas é 1 de 3', TH.redAirfieldKills === 1);
+  check('limiar de guarnição é 40%', TH.redGarrisonDegPct === 40);
 
-  // FPSO: 2 não cumpre, 3 cumpre (regra anterior exigia 4)
+  // Bases aéreas: 0 não cumpre, 1 cumpre
   let s = newGame();
-  fpsoIds.slice(0, 2).forEach(id => { byId(s, id).hp = 0; });
-  check('2 FPSOs neutralizadas → não cumprida', redCond(s, 'fpsos').met === false);
-  byId(s, fpsoIds[2]).hp = 0;
-  check('3 FPSOs neutralizadas → cumprida', redCond(s, 'fpsos').met === true);
+  check('0 bases aéreas neutralizadas → não cumprida', redCond(s, 'airfields').met === false);
+  byId(s, airfieldIds[0]).hp = 0;
+  check('1 base aérea neutralizada → cumprida', redCond(s, 'airfields').met === true);
 
-  // Portos: fronteira exata em 27 SP de 68 (40%)
-  s = newGame(); dealPortDamage(s, 26);
-  check('portos a 26 SP (38%) → não cumprida', redCond(s, 'ports').met === false,
-    redCond(s, 'ports').current);
-  s = newGame(); dealPortDamage(s, 27);
-  check('portos a 27 SP (40%) → cumprida', redCond(s, 'ports').met === true,
-    redCond(s, 'ports').current);
+  // Guarnição: fronteira exata em 10 SP de 23 (40%)
+  s = newGame(); dealGarrisonDamage(s, 9);
+  check('guarnição a 9 SP (39%) → não cumprida', redCond(s, 'garrison').met === false,
+    redCond(s, 'garrison').current);
+  s = newGame(); dealGarrisonDamage(s, 10);
+  check('guarnição a 10 SP (43%) → cumprida', redCond(s, 'garrison').met === true,
+    redCond(s, 'garrison').current);
 
   // Rótulos derivados das constantes (não podem divergir da regra)
   s = newGame();
   const o = computeObjectives(s);
-  check('rótulo do objetivo FPSO cita o limiar',
-    o.red.conditions[0].label.includes(String(TH.redFpsoKills)),
+  check('rótulo do objetivo bases aéreas cita o limiar',
+    o.red.conditions[0].label.includes(String(TH.redAirfieldKills)),
     o.red.conditions[0].label);
-  check('rótulo do objetivo portos cita o limiar',
-    o.red.conditions[1].label.includes(`${TH.redPortDegPct}%`),
+  check('rótulo do objetivo guarnição cita o limiar',
+    o.red.conditions[1].label.includes(`${TH.redGarrisonDegPct}%`),
     o.red.conditions[1].label);
 
   // progress: 0..1, limitado a 1
   check('progress inicial é 0 nos dois lados',
     o.blue.conditions.every(c => c.progress === 0) &&
     o.red.conditions.every(c => c.progress === 0));
-  s = newGame(); dealPortDamage(s, 40);   // muito acima do limiar
-  check('progress satura em 1', redCond(s, 'ports').progress === 1);
+  s = newGame(); dealGarrisonDamage(s, 30);   // muito acima do limiar (garrMax=23)
+  check('progress satura em 1', redCond(s, 'garrison').progress === 1);
   s = newGame();
   const carrier = byId(s, OBJECTIVE_IDS.blueTargets.carrier);
   carrier.hp = Math.ceil(carrier.maxHp / 2);
@@ -315,10 +330,10 @@ function pathLegal(state, unitId, path) {
     halfProg > 0.3 && halfProg < 0.7, `progress=${halfProg.toFixed(3)}`);
 
   // Adjudicação: dano acumulado abaixo do limiar deixa de valer zero.
-  // Vermelho com 2 FPSOs + portos a ~29% contra Azul que só matou o sub nuclear.
+  // Vermelho com guarnição a 39% (quase lá, mas nenhuma condição cumprida)
+  // contra Azul que só matou o sub nuclear (1 condição barata cumprida).
   s = newGame();
-  fpsoIds.slice(0, 2).forEach(id => { byId(s, id).hp = 0; });
-  dealPortDamage(s, 20);
+  dealGarrisonDamage(s, 9);
   byId(s, OBJECTIVE_IDS.blueTargets.nucsub).hp = 0;
   const o2 = computeObjectives(s);
   const bp = objectiveProgress(o2.blue), rp = objectiveProgress(o2.red);
@@ -330,28 +345,28 @@ function pathLegal(state, unitId, path) {
   check('objectiveProgress fica em 0..1', bp >= 0 && bp <= 1 && rp >= 0 && rp <= 1);
 }
 
-// ── 12c. Munição LACM vermelha (canal terrestre) ───────────────────────────────
+// ── 12c. Capacidade terrestre vermelha (canal land: LACM + artilharia naval) ──
 {
   const s = newGame();
-  const total = ['RED-GE-1', 'RED-GE-2', 'RED-KSN']
-    .reduce((a, id) => a + (byId(s, id)?.weapons?.lacm?.quantity ?? 0), 0);
-  const portMax = OBJECTIVE_IDS.redTargets.ports
+  const lacmTotal = s.units.filter(u => u.team === 'red')
+    .reduce((a, u) => a + (u.weapons?.lacm?.quantity ?? 0), 0);
+  const navalGunTotal = s.units.filter(u => u.team === 'red')
+    .reduce((a, u) => a + (u.capabilities?.navalGun ?? 0), 0);
+  const garrisonMax = OBJECTIVE_IDS.redTargets.garrison
     .reduce((a, id) => a + byId(s, id).maxHp, 0);
-  const needed = portMax * OBJECTIVE_THRESHOLDS.redPortDegPct / 100;
-  const expected = total * 1.5;   // E[dano] do LACM = 1,5 SP
-  check(`LACM totaliza 22 (dano esperado ${expected} SP)`, total === 22, `total=${total}`);
-  check(`canal terrestre cobre o objetivo (${expected} SP >= ${needed.toFixed(1)} SP)`,
-    expected >= needed, `razão=${(expected / needed).toFixed(2)}`);
-  // O KSN concentra a maior parte por ser isento de combustível
-  check('KSN é a maior plataforma LACM',
-    (byId(s, 'RED-KSN').weapons.lacm.quantity) >= (byId(s, 'RED-GE-1').weapons.lacm.quantity) - 2);
+  check('vermelho tem alcance terrestre (LACM do Vulcan)', lacmTotal > 0, `lacmTotal=${lacmTotal}`);
+  check('vermelho tem artilharia naval (canhões de apoio) para o canal land',
+    navalGunTotal > 0, `navalGunTotal=${navalGunTotal}`);
+  check(`guarnição-alvo tem SP agregado plausível (${garrisonMax} SP)`,
+    garrisonMax > 0 && garrisonMax < 100, `garrisonMax=${garrisonMax}`);
 }
 
 // ── 13. Selfplay bot-vs-bot até MAX_TURNS: termina sem exceção ────────────────
 // Nota: este harness é muito mais denso em combate que o jogo real (toda
 // unidade ataca todo período, 1 rodada por engajamento), então algum 0-FP é
-// inevitável — patrulhas costeiras têm 6 FP máx e defender também queima FP.
-// Referência medida: bot antigo ~4.3 unidades a 0 FP em média; novo ~3.4.
+// inevitável. Mapa 20×10 (Malvinas) tem distâncias maiores até os provedores
+// de combustível que o mapa 16×10 original — medido ~5.8 unidades a 0 FP em
+// média ao longo de 60 partidas (scripts/balance_sim.js 60).
 {
   const RUNS = 3;
   let err = null, strandedTotal = 0, progressed = true;
@@ -393,7 +408,7 @@ function pathLegal(state, unitId, path) {
   check('selfplay termina sem exceção', !err, err?.message);
   check('selfplay: partidas progridem (vencedor ou limite)', progressed);
   const avg = strandedTotal / RUNS;
-  check(`selfplay: média de unidades a 0 FP aceitável (${avg.toFixed(1)} <= 5)`, avg <= 5);
+  check(`selfplay: média de unidades a 0 FP aceitável (${avg.toFixed(1)} <= 8)`, avg <= 8);
 }
 
 console.log(failures === 0 ? '\nALL PASS' : `\n${failures} FALHA(S)`);

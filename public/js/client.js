@@ -155,7 +155,7 @@ const mapImg  = new Image();
 let   mapReady = false;
 mapImg.onload  = () => { mapReady = true;  if (gameState) render(); };
 mapImg.onerror = () => { mapReady = false; if (gameState) render(); };
-mapImg.src = '/mapa.jpeg';
+mapImg.src = '/mapa.png';
 
 // ─── Game state ───────────────────────────────────────────────────────────────
 let myTeam      = null;
@@ -165,55 +165,66 @@ let currentRoomId = null;
 let prevUnitPos = new Map(); // unitId → {col, row} — for movement flash detection
 let selUnitId   = null;
 
-// ─── Unit card images ─────────────────────────────────────────────────────────
+// ─── Unit card images (geradas por scripts/gen_unit_cards.js) ────────────────
 const UNIT_CARD = {
-  'BLUE-SAG-P':    'Blue_SAG_P.PNG',
-  'BLUE-SAG-S1':   'Blue_SAG_S1.jpg',
-  'BLUE-SAG-S2':   'Blue_SAG_S2.jpg',
-  'BLUE-ANFIB':    'Blue_ANFIB.jpg',
-  'BLUE-LOG-A':    'Blue_LOG_A.jpg',
-  'BLUE-LOG-T':    'Blue_LOG_T.jpg',
-  'BLUE-PAT-O1':   'Blue_PAT_01.jpg',
-  'BLUE-PAT-O2':   'Blue_PAT_02.jpg',
-  'BLUE-PAT-C1':   'Blue_PAT_C1.jpg',
-  'BLUE-PAT-C2':   'Blue_PAT_C2.jpg',
-  'BLUE-SUB-N':    'Blue_SUB_N.jpg',
-  'BLUE-SUB-1':    'Blue_SUB_1.jpg',
-  'BLUE-SUB-2':    'Blue_SUB_2.jpg',
-  'BLUE-SUB-3':    'Blue_SUB_3.jpg',
-  'BLUE-MPRA-1':   'Blue_MPRA_1.jpg',
-  'BLUE-MPRA-2':   'Blue_MPRA_2.jpg',
-  'BLUE-CACA-1':   'Blue_CACA_1.jpg',
-  'BLUE-CACA-2':   'Blue_CACA_2.jpg',
-  'BLUE-CJAT-1':   'Blue_CJAT_1.jpg',
-  'BLUE-CJAT-2':   'Blue_CJAT_2.jpg',
-  'BLUE-DCOST1':   'Blue_DCOST1.jpg',
-  'BLUE-DCOST2':   'Blue_DCOST2.jpg',
-  'BLUE-ADA-1':    'Blue_ADA_1.jpg',
-  'BLUE-ADA-2':    'Blue_ADA_2.jpg',
-  'BLUE-FPSO1':    'Blue_FPSO1.jpg',
-  'BLUE-FPSO2':    'Blue_FPSO2.jpg',
-  'BLUE-FPSO3':    'Blue_FPSO3.jpg',
-  'BLUE-FPSO4':    'Blue_FPSO4.jpg',
-  'BLUE-PORTO-S':  'Blue_PORTO_S.jpg',
-  'BLUE-PORTO-RJ': 'Blue_PORTO_RJ.jpg',
-  'BLUE-PORTO-V':  'Blue_PORTO_V.jpg',
-  'BLUE-PORTO-ACU':'Blue_PORTO_ACU.jpg',
-  'RED-GBPA':      'Red_GBPA.jpg',
-  'RED-GE-1':      'Red_GE_1.jpg',
-  'RED-GE-2':      'Red_GE_2.jpg',
-  'RED-GE-3':      'Red_GE_3.jpg',
-  'RED-AOR-G':     'Red_AOR_G.jpg',
-  'RED-GANF':      'Red_GANF.jpg',
-  'RED-GLOG':      'Red_GLOG.jpg',
-  'RED-AKE':       'Red_AKE.jpg',
-  'RED-KSN':       'Red_KSN.jpg',
-  'RED-KS-1':      'Red_KS1.jpg',
-  'RED-KMF-1':     'Red_KMF_1.jpg',
-  'RED-KMF-2':     'Red_KMF_2.jpg',
-  'RED-MPRA-K1':   'Red_MPRA_K1.jpg',
-  'RED-MPRA-K2':   'Red_MPRA_K2.jpg',
-  'RED-AWACS-K':   'Red_AWACS_K.jpg',
+  'BLUE-VM':            'Blue_VM.jpg',
+  'BLUE-VM-AIR':        'Blue_VM_AIR.jpg',
+  'BLUE-VE':            'Blue_VE.jpg',
+  'BLUE-BV':            'Blue_BV.jpg',
+  'BLUE-B':             'Blue_B.jpg',
+  'BLUE-BS':            'Blue_BS.jpg',
+  'BLUE-LOG-1':         'Blue_LOG_1.jpg',
+  'BLUE-LOG-2':         'Blue_LOG_2.jpg',
+  'BLUE-SUB-1':         'Blue_SUB_1.jpg',
+  'BLUE-SUB-2':         'Blue_SUB_2.jpg',
+  'BLUE-PAT':           'Blue_PAT.jpg',
+  'BLUE-MCM':           'Blue_MCM.jpg',
+  'BLUE-ISR':           'Blue_ISR.jpg',
+  'BLUE-LG':            'Blue_LG.jpg',
+  'BLUE-CARGO':         'Blue_CARGO.jpg',
+  'BLUE-SOF':           'Blue_SOF.jpg',
+  'BLUE-CACA':          'Blue_CACA.jpg',
+  'BLUE-ATQ-SKYHAWK':   'Blue_ATQ_SKYHAWK.jpg',
+  'BLUE-ATQ-ETEN':      'Blue_ATQ_ETEN.jpg',
+  'BLUE-BOM-CANB':      'Blue_BOM_CANB.jpg',
+  'BLUE-ISR-AIR':       'Blue_ISR_AIR.jpg',
+  'BLUE-PUCARA':        'Blue_PUCARA.jpg',
+  'BLUE-GARR-STANLEY':  'Blue_GARR_STANLEY.jpg',
+  'BLUE-EXOCET-STANLEY':'Blue_EXOCET_STANLEY.jpg',
+  'BLUE-GARR-GOOSE':    'Blue_GARR_GOOSE.jpg',
+  'BLUE-GARR-WEST':     'Blue_GARR_WEST.jpg',
+  'BLUE-GARR-SG':       'Blue_GARR_SG.jpg',
+  'BLUE-AERO-N':        'Blue_AERO_N.jpg',
+  'BLUE-AERO-RG':       'Blue_AERO_RG.jpg',
+  'BLUE-PORTO-RG':      'Blue_PORTO_RG.jpg',
+  'BLUE-AERO-RGR':      'Blue_AERO_RGR.jpg',
+  'RED-HERMES':         'Red_HERMES.jpg',
+  'RED-HAR-1':          'Red_HAR_1.jpg',
+  'RED-INVINCIBLE':     'Red_INVINCIBLE.jpg',
+  'RED-HAR-2':          'Red_HAR_2.jpg',
+  'RED-SCR-1':          'Red_SCR_1.jpg',
+  'RED-SCR-2':          'Red_SCR_2.jpg',
+  'RED-ESC-1':          'Red_ESC_1.jpg',
+  'RED-ESC-2':          'Red_ESC_2.jpg',
+  'RED-TRAIL':          'Red_TRAIL.jpg',
+  'RED-LAND-SCR':       'Red_LAND_SCR.jpg',
+  'RED-SG-SCR':         'Red_SG_SCR.jpg',
+  'RED-SG-ICE':         'Red_SG_ICE.jpg',
+  'RED-SOF':            'Red_SOF.jpg',
+  'RED-SUB-CONQ':       'Red_SUB_CONQ.jpg',
+  'RED-SUB-SPART':      'Red_SUB_SPART.jpg',
+  'RED-SUB-SPLEN':      'Red_SUB_SPLEN.jpg',
+  'RED-LPD':            'Red_LPD.jpg',
+  'RED-TROOP':          'Red_TROOP.jpg',
+  'RED-LOG-1':          'Red_LOG_1.jpg',
+  'RED-LOG-2':          'Red_LOG_2.jpg',
+  'RED-LOG-3':          'Red_LOG_3.jpg',
+  'RED-TANK':           'Red_TANK.jpg',
+  'RED-MCM':            'Red_MCM.jpg',
+  'RED-HOSP':           'Red_HOSP.jpg',
+  'RED-MPRA':           'Red_MPRA.jpg',
+  'RED-BOM':            'Red_BOM.jpg',
+  'RED-TANKER-AIR':     'Red_TANKER_AIR.jpg',
 };
 function cardUrl(unitId) {
   const f = UNIT_CARD[unitId];
@@ -509,7 +520,7 @@ socket.on('game_start', ({team, state, solo, roomId, rejoinToken, rejoined}) => 
   hideReconnectBanner();
   disconnected.classList.add('hidden');
   if (rejoined) { gameState.log?.unshift('🔌 Você reconectou à partida.'); }
-  if (isSolo) document.title = 'Operação Atlântico Sul · Solo vs BOT';
+  if (isSolo) document.title = 'Guerra das Malvinas / Falkland · Solo vs BOT';
   selUnitId = null; selGroupIds = []; moveHexes = []; atkHexes = []; reachableHexes = new Map(); pendingAtks = [];
   activePath = []; plannedMoves.clear(); hideStackPicker(); hideTargetPicker(); closeWeaponPicker();
   closeBrPanel();
@@ -1635,7 +1646,7 @@ function exportLog() {
   const teamLabel = myTeam === 'blue' ? 'Força Azul' : 'Força Vermelha';
   const lines = [
     '══════════════════════════════════════════════',
-    '       OPERAÇÃO ATLÂNTICO SUL — LOG DE JOGO  ',
+    '   GUERRA DAS MALVINAS / FALKLAND — LOG DE JOGO  ',
     '══════════════════════════════════════════════',
     `Equipe:   ${teamLabel}`,
     `Turno:    ${gameState.turn}`,

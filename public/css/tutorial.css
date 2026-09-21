@@ -66,7 +66,7 @@
 /* ── Step 0: O Jogo — cards on map bg ── */
 .tvi-map-bg {
   position: absolute; inset: 0;
-  background-image: url('/mapa.jpeg');
+  background-image: url('/mapa.png');
   background-size: cover; background-position: center 30%;
   filter: brightness(0.28) saturate(0.6);
 }
@@ -168,7 +168,7 @@
 }
 .tvph-phase::before {
   content: ''; position: absolute; inset: 0;
-  background-image: url('/mapa.jpeg');
+  background-image: url('/mapa.png');
   background-size: cover; background-position: center;
   filter: brightness(0.18) saturate(0.5);
 }

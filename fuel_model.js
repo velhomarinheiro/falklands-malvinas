@@ -10,35 +10,45 @@ const NAVAL_FP = {
 
 // Per-unit FP overrides (surface ships only; subs use NAVAL_FP.submarine)
 const UNIT_FP = {
-  // ── Força Azul ──────────────────────────────────────────────────────────────
-  'BLUE-SAG-P':   12,   // SAG Principal
-  'BLUE-SAG-S1':  10,   // SAG-1 (Tamandaré)
-  'BLUE-SAG-S2':  10,   // SAG-2 (Tamandaré+Barroso)
-  'BLUE-ANFIB':    8,   // Força de Desembarque
-  'BLUE-LOG-A':   30,   // Navio Apoio Logístico
-  'BLUE-LOG-T':   40,   // Navio Tanque
-  'BLUE-PAT-O1':  10,   // Patrulha Oceânica 1
-  'BLUE-PAT-O2':  10,   // Patrulha Oceânica 2
-  'BLUE-PAT-C1':   6,   // Patrulha Costeira 1
-  'BLUE-PAT-C2':   6,   // Patrulha Costeira 2
-  // ── Força Vermelha ──────────────────────────────────────────────────────────
-  // RED-GBPA is nuclear-exempt — no FP entry needed
-  'RED-GE-1':     12,   // Escolta CSG (CG+2DDG)
-  'RED-GE-2':     12,   // SAG-1 (DDG+2FFG)
-  'RED-GE-3':     10,   // SAG-2 (3 FFG)
-  'RED-AOR-G':    24,   // Petroleiro CSG
-  'RED-GANF':     12,   // Grupo Anfíbio
-  'RED-GLOG':     30,   // Grupo Logístico (AOR+AOT)
-  'RED-AKE':       8,   // Navio Munições
+  // ── Força Azul (Argentina) ──────────────────────────────────────────────────
+  'BLUE-VM':       14,   // GT Porta-Aviões
+  'BLUE-VE':       10,   // Escolta GT-PA
+  'BLUE-BV':       10,   // Esquadra de Corvetas
+  'BLUE-B':        10,   // Belgrano
+  'BLUE-BS':       10,   // Escolta Belgrano
+  'BLUE-LOG-1':    30,   // Petroleiro GT-PA
+  'BLUE-LOG-2':    34,   // Petroleiro Geral
+  'BLUE-PAT':       8,   // Patrulha Costeira
+  'BLUE-MCM':       8,   // Grupo Caça-Minas
+  'BLUE-ISR':      10,   // Piquete de Vigilância
+  'BLUE-LG':        8,   // Grupo de Desembarque
+  'BLUE-CARGO':    30,   // Cargueiros de Suprimento
+  // ── Força Vermelha (Reino Unido) ────────────────────────────────────────────
+  'RED-HERMES':    14,   // HMS Hermes
+  'RED-INVINCIBLE':14,   // HMS Invincible
+  'RED-SCR-1':     10,   // Screen 1
+  'RED-SCR-2':     10,   // Screen 2
+  'RED-ESC-1':     10,   // Escort 1
+  'RED-ESC-2':     10,   // Escort 2
+  'RED-TRAIL':     10,   // Trail Screen
+  'RED-LAND-SCR':  10,   // Landing Screen
+  'RED-SG-SCR':    10,   // South Georgia Screen
+  'RED-SG-ICE':    10,   // HMS Endurance
+  'RED-LPD':       10,   // Fearless / Intrepid
+  'RED-TROOP':     10,   // Canberra / QE2 / Atlantic Conveyor
+  'RED-LOG-1':     30,   // Petroleiro do GT-PA
+  'RED-LOG-2':     34,   // Petroleiro de Escolta
+  'RED-LOG-3':     34,   // Petroleiro de Desembarque
+  'RED-TANK':      40,   // Petroleiros-Lançadeira
+  'RED-MCM':        8,   // Esquadrilha Caça-Minas
+  'RED-HOSP':      12,   // Navio-Hospital
 };
 
 // unit.type values (from COMP_DISPLAY_TYPE in server.js)
 const NUCLEAR_SUB_TYPE    = 'sub_nuclear';
-const RED_NUCLEAR_CARRIER = 'RED-GBPA';   // by unit ID
 
 // ─── Classification ───────────────────────────────────────────────────────────
 function isNuclearSub(unit)     { return unit.category === 'submarine' && unit.type === NUCLEAR_SUB_TYPE; }
-function isRedNucCarrier(unit)  { return unit.id === RED_NUCLEAR_CARRIER; }
 function isConventionalSub(unit){ return unit.category === 'submarine' && !isNuclearSub(unit); }
 function isTanker(unit)         { return unit.type === 'tanque'; }
 function isLogistics(unit)      { return unit.type === 'logistico'; }
@@ -51,8 +61,7 @@ function isNavalRefuelProvider(unit) {
 
 // Does this unit consume naval FP?
 function usesNavalFuel(unit) {
-  if (isRedNucCarrier(unit) || isNuclearSub(unit)) return false;
-  if (unit.type === 'fpso') return false;          // fixed offshore platform
+  if (isNuclearSub(unit)) return false;
   if (unit.category === 'surface') return true;
   return isConventionalSub(unit);
 }

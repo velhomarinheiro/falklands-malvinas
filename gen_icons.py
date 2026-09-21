@@ -1,4 +1,4 @@
-"""gen_icons.py — gera os 22 ícones SVG militares para Operação Atlântico Sul."""
+"""gen_icons.py — gera os 22 ícones SVG militares genéricos por tipo de plataforma."""
 
 import os, math
 

@@ -1,27 +1,26 @@
 'use strict';
 
 // ═════════════════════════════════════════════════════════════════════════════
-// HEX GRID — MAPA "OPERAÇÃO ATLÂNTICO SUL"
-// Grade calibrada para coincidir com mapa.jpeg
+// HEX GRID — MAPA "OPERAÇÃO CORPORATE / GUERRA DAS MALVINAS"
+// Grade calibrada para coincidir com mapa.png (carta estilizada gerada)
 // Flat-top hexagons (topo reto)
 // ═════════════════════════════════════════════════════════════════════════════
 
-const GRID_W = 16; // A–P
+const GRID_W = 20; // A–T
 const GRID_H = 10; // 1–10
 
 // ─── Geometria da grade ────────────────────────────────────────────────────
-const HEX_R = 67.5;
+const HEX_R = 58;
 const HEX_W = HEX_R * 2;
 const HEX_H = HEX_R * Math.sqrt(3);
 
-// ─── Canvas: imagem 3446×2832 exibida a 50% ───────────────────────────────
-const CVS_W = 1723;
-const CVS_H = 1416;
+// ─── Canvas ─────────────────────────────────────────────────────────────────
+const CVS_W = 1830;
+const CVS_H = 1150;
 
 // ─── Origem da grade sobre o mapa ──────────────────────────────────────────
-// Centro do hexágono A-1 (= pixel (238,372) na imagem original ÷ 2)
-const OX = 119;
-const OY = 186;
+const OX = 80;
+const OY = 90;
 
 // ═════════════════════════════════════════════════════════════════════════════
 // CONVERSÕES

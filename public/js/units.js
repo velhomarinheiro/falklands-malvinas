@@ -21,7 +21,7 @@ const TYPE_ABBR = {
   helicoptero:      'HE',
   bateria_costeira: 'BC',
   bateria_ada:      'AD',
-  fpso:             'FP',
+  infantaria:       'IN',
   porto:            'PT',
   aeroporto:        'BA',
 };
@@ -45,8 +45,8 @@ const ICON_TYPES = [
   'patrulha_oc','patrulha_c','logistico','tanque',
   'submarino','sub_nuclear',
   'patrulha','caca','ataque','aew','helicoptero',
-  'bateria_costeira','bateria_ada',
-  'fpso','porto','aeroporto',
+  'bateria_costeira','bateria_ada','infantaria',
+  'porto','aeroporto',
 ];
 
 // Maps unit type → PNG filename in public/icons/ (white-bg, black-stroke icons)
@@ -69,7 +69,7 @@ const PNG_TYPE_MAP = {
   aew:              'aviao-de-combate.png',
   bateria_costeira: 'Military Tank.png',
   bateria_ada:      'Military Tank.png',
-  fpso:             'plataforma-de-petroleo.png',
+  infantaria:       'Military Tank.png',
   porto:            'porto.png',
   aeroporto:        'aeroporto.png',
   // helicoptero: no PNG available → falls back to SVG
@@ -245,7 +245,7 @@ function drawPlatformSilhouette(ctx, type, cx, cy, sz, color) {
     case 'helicoptero': drawHelicopterShape(ctx, cx, cy, sz); break;
     case 'bateria_costeira': drawBatteryShape(ctx, cx, cy, sz); break;
     case 'bateria_ada':      drawADAShape(ctx, cx, cy, sz); break;
-    case 'fpso':       drawFPSOShape(ctx, cx, cy, sz); break;
+    case 'infantaria': drawInfantryShape(ctx, cx, cy, sz); break;
     case 'porto':      drawPortShape(ctx, cx, cy, sz); break;
     case 'aeroporto':  drawAirportShape(ctx, cx, cy, sz); break;
     default: drawShipShape(ctx, cx, cy, sz, 0.48, 0.52); break;
@@ -524,17 +524,20 @@ function drawADAShape(ctx, cx, cy, sz) {
   ctx.fillRect(cx - sz * 0.40, cy + sz * 0.28, sz * 0.80, sz * 0.12);
 }
 
-function drawFPSOShape(ctx, cx, cy, sz) {
-  const s = sz * 0.56;
-  ctx.fillRect(cx - s / 2, cy - s / 2, s, s);
-  ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,0.40)';
-  const legS = sz * 0.12;
-  [[-s/2,-s/2],[s/2-legS,-s/2],[-s/2,s/2-legS],[s/2-legS,s/2-legS]]
-    .forEach(([lx, ly]) => ctx.fillRect(cx + lx, cy + ly, legS, legS));
-  ctx.fillStyle = 'rgba(0,0,0,0.50)';
-  ctx.fillRect(cx - sz * 0.08, cy - sz * 0.18, sz * 0.16, sz * 0.36);
-  ctx.restore();
+function drawInfantryShape(ctx, cx, cy, sz) {
+  ctx.beginPath();
+  ctx.arc(cx, cy - sz * 0.30, sz * 0.14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineWidth = Math.max(1.5, sz * 0.10);
+  ctx.beginPath();
+  ctx.moveTo(cx - sz * 0.20, cy - sz * 0.10);
+  ctx.lineTo(cx + sz * 0.20, cy - sz * 0.10);
+  ctx.moveTo(cx, cy - sz * 0.10);
+  ctx.lineTo(cx, cy + sz * 0.34);
+  ctx.moveTo(cx - sz * 0.18, cy + sz * 0.44);
+  ctx.lineTo(cx, cy + sz * 0.34);
+  ctx.lineTo(cx + sz * 0.18, cy + sz * 0.44);
+  ctx.stroke();
 }
 
 function drawPortShape(ctx, cx, cy, sz) {

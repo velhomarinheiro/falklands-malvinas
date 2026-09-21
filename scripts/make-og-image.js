@@ -2,7 +2,7 @@
 /**
  * make-og-image.js — Gera a imagem de compartilhamento social (1200×630).
  *
- * Compõe o mapa real do teatro (public/mapa.jpeg) como fundo, com um overlay
+ * Compõe o mapa real do teatro (public/mapa.png) como fundo, com um overlay
  * escuro para legibilidade e a marca do jogo (classificação, título, tagline,
  * chips das forças e rosa-dos-ventos) por cima. Saída: public/og-image.jpg.
  *
@@ -16,7 +16,7 @@ const sharp = require('sharp');
 
 const W = 1200, H = 630;
 const PUBLIC = path.join(__dirname, '..', 'public');
-const MAP    = path.join(PUBLIC, 'mapa.jpeg');
+const MAP    = path.join(PUBLIC, 'mapa.png');
 const OUT    = path.join(PUBLIC, 'og-image.jpg');
 
 const FONT = 'DejaVu Sans Mono';
@@ -46,31 +46,31 @@ const overlay = Buffer.from(`
 
   <g font-family="${FONT}, monospace">
     <!-- Classificação -->
-    <rect x="70" y="108" width="360" height="40" fill="none"
+    <rect x="70" y="108" width="440" height="40" fill="none"
           stroke="#c9a84c" stroke-opacity="0.8" stroke-width="1.5"/>
-    <text x="90" y="135" font-size="22" letter-spacing="6" fill="#c9a84c"
-          font-weight="bold">SIMULAÇÃO TÁTICA NAVAL</text>
+    <text x="90" y="135" font-size="20" letter-spacing="4" fill="#c9a84c"
+          font-weight="bold">SIMULAÇÃO HISTÓRICA NAVAL · 1982</text>
 
     <!-- Título -->
-    <text x="68" y="270" font-size="78" letter-spacing="6" font-weight="bold"
-          fill="#d6e8f7">OPERAÇÃO</text>
-    <text x="68" y="356" font-size="78" letter-spacing="6" font-weight="bold"
-          fill="#c9a84c">ATLÂNTICO SUL</text>
+    <text x="68" y="270" font-size="66" letter-spacing="4" font-weight="bold"
+          fill="#d6e8f7">GUERRA DAS</text>
+    <text x="68" y="356" font-size="62" letter-spacing="3" font-weight="bold"
+          fill="#c9a84c">MALVINAS · FALKLAND</text>
 
     <!-- Tagline -->
     <text x="72" y="418" font-size="27" letter-spacing="3" fill="#82b1ff"
-          font-weight="bold">Wargame Naval por Turnos</text>
+          font-weight="bold">Wargame Naval Histórico por Turnos</text>
     <text x="72" y="454" font-size="22" letter-spacing="2" fill="#7aa5c5">Multiplayer Online · Combate Hexagonal</text>
 
     <!-- Chips das forças -->
     <g font-size="20" font-weight="bold" letter-spacing="2">
-      <rect x="72" y="500" width="180" height="44" rx="3"
+      <rect x="72" y="500" width="200" height="44" rx="3"
             fill="#0c2d5a" stroke="#82b1ff" stroke-opacity="0.7" stroke-width="1.5"/>
-      <text x="100" y="528" fill="#82b1ff">FORÇA AZUL</text>
+      <text x="100" y="528" fill="#82b1ff">ARGENTINA</text>
 
-      <rect x="272" y="500" width="240" height="44" rx="3"
+      <rect x="292" y="500" width="230" height="44" rx="3"
             fill="#5a0c0c" stroke="#ff8a80" stroke-opacity="0.7" stroke-width="1.5"/>
-      <text x="300" y="528" fill="#ff8a80">FORÇA VERMELHA</text>
+      <text x="320" y="528" fill="#ff8a80">REINO UNIDO</text>
     </g>
   </g>
 
