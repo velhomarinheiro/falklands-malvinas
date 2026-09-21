@@ -1,0 +1,59 @@
+══════════════════════════════════════════════
+       OPERAÇÃO ATLÂNTICO SUL — LOG DE JOGO  
+══════════════════════════════════════════════
+Equipe:   Força Vermelha
+Turno:    3
+Período:  Diurno
+Exportado: 19/06/2026, 13:36:42
+
+── REGISTRO DE BATALHA ──────────────────────
+Fase de Movimentação iniciada.
+──── Turno 3 · Período Diurno ────
+⛽ ANFIB-E(red) reabasteceu: 12/12 FP.
+⛽ SAG2(red) reabasteceu: 10/10 FP.
+⛽ SAG1(red) reabasteceu: 12/12 FP.
+⛽ ESCCSG(red) reabasteceu: 12/12 FP.
+⛽ REAB(blue) reabasteceu: 40/40 FP.
+── Fase de Combate encerrada. ──
+[ENG-05·BR1] Unidade destruída — engajamento encerrado.
+💥 FPSO3 DESTRUÍDO por SB [TORPEDO]
+──── ENG-04·BR1 ────
+💥 FPSO1 DESTRUÍDO por SBN [ASCM]
+──── ENG-03·BR2 ────
+✗ SBN → FPSO1 falhou [ASCM]
+──── ENG-03·BR1 ────
+✗ SBN → Porto de Vitória falhou [LACM]
+──── ENG-02·BR1 ────
+✓ ESCCSG → Porto de Vitória −7SP [LACM]
+──── ENG-01·BR1 ────
+── Resolução de Combate ──
+Força Azul (BOT) confirmou 0 ataque(s).
+Força Vermelha confirmou 5 ataque(s).
+Fase de Combate iniciada. Declare seus ataques.
+⛽ PATC2(blue) sem combustível: não pode mover, atacar ou se defender.
+⛽ PATC1(blue) sem combustível: não pode mover, atacar ou se defender.
+⛽ ANFIB(blue) sem combustível: não pode mover, atacar ou se defender.
+APAER2(blue) → I4
+APAER1(blue) → I4
+SB3(blue) → M5
+SB2(blue) → L5
+ANFIB(blue) → K5
+Força Vermelha encerrou a movimentação. Aguardando Força Azul...
+LOG2(red) → K8
+SAG1(red) → K8
+LOG1(red) → M2
+ANFIB-E(red) → M2
+ESCCSG(red) → M2
+REAB(red) → M2
+SAG2(red) → M2
+Fase de Movimentação iniciada.
+──── Turno 2 · Período Noturno ────
+⛽ ANFIB-E(red) reabasteceu: 12/12 FP.
+⛽ SAG2(red) reabasteceu: 10/10 FP.
+⛽ SAG1(red) reabasteceu: 12/12 FP.
+⛽ ESCCSG(red) reabasteceu: 12/12 FP.
+⛽ REAB(blue) reabasteceu: 40/40 FP.
+── Fase de Combate encerrada. ──
+💥 APLOG DESTRUÍDO por SB [TORPEDO]
+──── ENG-10·BR1 ────
+✓ OpEsp Verm 2 → FPSO3 −1SP [OP.ESP.]

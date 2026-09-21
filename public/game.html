@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operação Atlântico Sul — Teatro de Operações</title>
+  <meta name="description" content="Teatro de operações do wargame naval Operação Atlântico Sul.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="css/tutorial.css">
+</head>
+<body>
+
+<!-- ── GAME SCREEN ──────────────────────────────────────────────────────── -->
+<div id="game-screen">
+
+  <!-- Header bar -->
+  <header class="game-header">
+    <div class="header-title">OPERAÇÃO ATLÂNTICO SUL</div>
+    <div id="my-turn-banner" class="my-turn-banner">▶ SUA VEZ</div>
+    <div class="header-meta">
+      <span id="team-badge"   class="team-badge"></span>
+      <span id="turn-label"   class="meta-item">Turno 1</span>
+      <span id="period-label" class="meta-item">☀ Diurno</span>
+      <span id="phase-label"  class="meta-item phase">Movimentação</span>
+      <button id="sfx-toggle" class="sfx-toggle" title="Som (S)">🔊</button>
+      <button id="help-toggle" class="sfx-toggle" title="Ajuda (H)" aria-label="Abrir ajuda">?</button>
+      <button id="sidebar-toggle" class="sidebar-toggle-btn" title="Abrir painel lateral" aria-label="Abrir painel lateral"
+        onclick="document.querySelector('.game-body').classList.toggle('sidebar-open')">☰</button>
+    </div>
+  </header>
+
+  <!-- Main area -->
+  <div class="game-body">
+
+    <!-- Canvas -->
+    <div class="canvas-wrap">
+      <canvas id="game-canvas" aria-label="Tabuleiro hexagonal do teatro de operações"></canvas>
+      <div class="zoom-controls">
+        <button id="zoom-in"    class="zoom-btn" title="Zoom in (+)">+</button>
+        <button id="zoom-reset" class="zoom-btn" title="Resetar zoom">⊙</button>
+        <button id="zoom-out"   class="zoom-btn" title="Zoom out (−)">−</button>
+      </div>
+      <div id="terrain-tip" class="terrain-tip"></div>
+      <div id="error-flash" class="error-flash hidden" role="alert"></div>
+      <div id="reconnect-banner" class="reconnect-banner hidden" role="status"></div>
+      <div id="stack-picker" class="stack-picker hidden">
+        <div class="sp-title">UNIDADES EMPILHADAS</div>
+        <div id="sp-list"></div>
+        <button id="sp-group-btn" class="act-btn blue sp-group">▶ Grupo (juntos)</button>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-backdrop"
+      onclick="document.querySelector('.game-body').classList.remove('sidebar-open')"></div>
+    <aside class="sidebar" aria-label="Painel de controle">
+      <button class="sidebar-close-btn" title="Fechar painel" aria-label="Fechar painel lateral"
+        onclick="document.querySelector('.game-body').classList.remove('sidebar-open')">✕</button>
+
+      <div class="panel fleet-panel">
+        <div class="panel-title">FROTAS</div>
+        <div class="fleet-row blue"><span id="fleet-blue">Azul: 9</span></div>
+        <div class="fleet-row red" ><span id="fleet-red" >Verm: 9</span></div>
+      </div>
+
+      <div class="panel unit-info-panel">
+        <div class="panel-title">UNIDADE SELECIONADA</div>
+        <div id="unit-panel"><p class="no-sel">Clique em uma unidade sua</p></div>
+      </div>
+
+      <div class="panel actions-panel">
+        <div class="panel-title">AÇÕES</div>
+        <button id="end-phase-btn"  class="act-btn yellow hidden">Encerrar Movimentação</button>
+        <button id="combat-btn"     class="act-btn orange hidden">Confirmar Ataques (0)</button>
+        <button id="undo-step-btn"  class="act-btn gray   hidden">↩ Desfazer Passo</button>
+        <button id="cancel-btn"     class="act-btn gray   hidden">Cancelar Seleção</button>
+        <div class="phase-legend">
+          <div class="leg-row"><span class="leg-swatch green"></span>Hexágonos de movimento</div>
+          <div class="leg-row"><span class="leg-swatch red"  ></span>Alvos no alcance</div>
+        </div>
+        <div class="action-divider"></div>
+        <button id="export-log-btn" class="act-btn gray hidden">📋 Exportar Log</button>
+        <button id="export-full-log-btn" class="act-btn gray hidden">📦 Exportar Log Completo</button>
+        <button id="abandon-btn"    class="act-btn red-dim hidden">🏳 Abandonar Jogo</button>
+      </div>
+
+      <!-- Objectives panel -->
+      <div class="panel objectives-panel">
+        <div class="panel-title">OBJETIVOS DE VITÓRIA</div>
+        <div id="objectives-content">
+          <p class="no-sel">Aguardando início...</p>
+        </div>
+      </div>
+
+      <div class="panel log-panel">
+        <div class="panel-title">RELATÓRIO DE BATALHA</div>
+        <div id="battle-log" class="battle-log"></div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<!-- ── LOBBY SCREEN ─────────────────────────────────────────────────────── -->
+<div id="lobby-screen">
+  <div class="lobby-box">
+    <h1>⚓ OPERAÇÃO ATLÂNTICO SUL</h1>
+    <p>Wargame Naval · 2 jogadores</p>
+    <div id="lobby-menu">
+      <button id="btn-create" class="act-btn blue">Criar Nova Sala</button>
+      <div class="or-sep">— ou —</div>
+      <div class="join-row">
+        <input id="room-input" type="text" maxlength="6" placeholder="CÓDIGO DA SALA" autocomplete="off">
+        <button id="btn-join" class="act-btn red">Entrar</button>
+      </div>
+      <p id="lobby-err" class="lobby-err hidden"></p>
+    </div>
+    <div id="lobby-waiting" class="hidden">
+      <p>Sala criada! Compartilhe o código:</p>
+      <div id="room-display" class="room-code">——</div>
+      <button type="button" class="btn-copy"
+        onclick="const c=document.getElementById('room-display').textContent.trim(); if(navigator.clipboard){navigator.clipboard.writeText(c);} const t=this.textContent; this.textContent='✓ Copiado'; this.classList.add('copied'); setTimeout(()=>{this.textContent=t; this.classList.remove('copied');},1500);">
+        ⧉ Copiar código
+      </button>
+      <p class="spinner">Aguardando oponente...</p>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- ── BATTLE ROUND PANEL ─────────────────────────────────────────────────── -->
+<div id="br-panel" class="overlay hidden">
+  <div class="br-box">
+    <div id="br-panel-header" class="br-header">── Engajamento ──</div>
+    <div id="br-panel-body"   class="br-log"></div>
+    <div id="br-decision"     class="br-decision hidden">
+      <div class="br-question">Continuar o combate neste engajamento?</div>
+      <div class="br-btns">
+        <button id="br-btn-continue" class="act-btn green">▶ CONTINUAR</button>
+        <button id="br-btn-stop"     class="act-btn red">■ PARAR</button>
+      </div>
+    </div>
+    <div id="br-waiting" class="br-waiting hidden">⌛ Aguardando decisão do adversário...</div>
+    <div id="br-ok-area" class="br-ok-area hidden">
+      <button id="br-btn-ok" class="act-btn blue">OK — Próximo ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── GAME OVER ─────────────────────────────────────────────────────────── -->
+<div id="game-over" class="overlay hidden">
+  <div class="over-box over-box-wide">
+    <div id="winner-msg"   class="victory">VITÓRIA!</div>
+    <div id="winner-sub"   class="over-sub"></div>
+    <div id="over-objectives" class="over-objectives"></div>
+    <div class="over-actions">
+      <button id="btn-export-over" class="act-btn yellow">📋 Exportar Log</button>
+      <button id="btn-export-full-over" class="act-btn yellow">📦 Exportar Log Completo</button>
+      <button id="btn-restart"     class="act-btn blue">Jogar Novamente</button>
+      <button id="btn-back"        class="act-btn gray">Voltar ao Lobby</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DISCONNECTED ──────────────────────────────────────────────────────── -->
+<div id="disconnected" class="overlay hidden">
+  <div class="over-box">
+    <div class="disconnect-msg" id="disconnect-msg">Oponente desconectou.</div>
+    <button onclick="location.href='/'" class="act-btn gray">Voltar ao Lobby</button>
+  </div>
+</div>
+
+<!-- ── TARGET PICKER (stacked enemy units) ──────────────────────────────── -->
+<div id="target-picker" class="stack-picker hidden">
+  <div class="sp-title">SELECIONAR ALVO</div>
+  <div id="tp-list"></div>
+</div>
+
+<!-- ── WEAPON PICKER ──────────────────────────────────────────────────────── -->
+<div id="weapon-picker" class="weapon-picker hidden">
+  <div class="wp-title">SELECIONAR ARMAMENTO</div>
+  <div class="wp-subtitle" id="wp-target-name"></div>
+  <div id="wp-body" class="wp-list"></div>
+  <div class="wp-footer">
+    <button id="wp-cancel"  class="act-btn gray">Cancelar</button>
+    <button id="wp-confirm" class="act-btn green">Confirmar ▶</button>
+  </div>
+</div>
+
+<!-- ── HELP MODAL ─────────────────────────────────────────────────────────── -->
+<div id="help-modal" class="overlay hidden">
+  <div class="help-box">
+    <button id="help-close" class="card-modal-close" title="Fechar (ESC)">✕</button>
+    <div class="help-title">MANUAL RÁPIDO</div>
+    <div class="help-tabs" id="help-tabs" role="tablist">
+      <button class="help-tab active" data-tab="fases"     role="tab">Fases</button>
+      <button class="help-tab" data-tab="combate"   role="tab">Combate</button>
+      <button class="help-tab" data-tab="logistica" role="tab">Logística</button>
+      <button class="help-tab" data-tab="vitoria"   role="tab">Vitória</button>
+      <button class="help-tab" data-tab="glossario" role="tab">Glossário</button>
+    </div>
+    <div class="help-content" id="help-content"></div>
+  </div>
+</div>
+
+<!-- ── UNIT TOOLTIP (tier 1: hover stats) ─────────────────────────────────── -->
+<div id="unit-tooltip" class="unit-tooltip hidden"></div>
+
+<!-- ── CARD MODAL (tier 3: right-click / thumbnail click) ────────────────── -->
+<div id="card-modal" class="overlay hidden">
+  <div class="card-modal-box">
+    <button id="card-modal-close" class="card-modal-close" title="Fechar (ESC)">✕</button>
+    <img id="card-modal-img" class="card-modal-img" src="" alt="Card da unidade">
+  </div>
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/hex.js"></script>
+<script src="js/terrain.js"></script>
+<script src="js/units.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/client.js"></script>
+</body>
+</html>

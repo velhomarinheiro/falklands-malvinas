@@ -1,0 +1,66 @@
+name: Sync Game Logs
+
+# Baixa periodicamente os logs de partidas (data/game-logs/*.jsonl) gerados
+# pelos servidores em produção (Railway / Render) via GET /api/export-logs
+# e os comita no repositório, para alimentar o dataset de treinamento de ML.
+#
+# Configuração necessária (Settings > Secrets and variables > Actions):
+#   RAILWAY_LOGS_URL  - URL base do deploy no Railway (ex: https://meu-jogo.up.railway.app)
+#   RENDER_LOGS_URL   - URL base do deploy no Render  (ex: https://meu-jogo.onrender.com)
+# Qualquer um dos dois pode ser omitido se a plataforma não estiver em uso.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # a cada 15 minutos
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync-logs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Baixar logs dos servidores
+        env:
+          RAILWAY_LOGS_URL: ${{ secrets.RAILWAY_LOGS_URL }}
+          RENDER_LOGS_URL:  ${{ secrets.RENDER_LOGS_URL }}
+        run: |
+          mkdir -p data/game-logs
+          fetch_logs() {
+            local name="$1" url="$2"
+            if [ -z "$url" ]; then
+              echo "[$name] URL não configurada, pulando."
+              return
+            fi
+            echo "[$name] Buscando logs em $url/api/export-logs ..."
+            local zip="/tmp/${name}-logs.zip"
+            local code
+            code=$(curl -sL -o "$zip" -w '%{http_code}' "${url%/}/api/export-logs")
+            if [ "$code" = "200" ]; then
+              unzip -o -q "$zip" -d data/game-logs/
+              echo "[$name] Logs extraídos."
+            elif [ "$code" = "404" ]; then
+              echo "[$name] Nenhum log novo no servidor."
+            else
+              echo "[$name] Falha ao baixar (HTTP $code)."
+            fi
+            rm -f "$zip"
+          }
+          fetch_logs "railway" "$RAILWAY_LOGS_URL"
+          fetch_logs "render"  "$RENDER_LOGS_URL"
+
+      - name: Commit e push se houver logs novos
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/game-logs/
+          if git diff --cached --quiet; then
+            echo "Nenhum log novo para commitar."
+          else
+            git commit -m "Sync game logs from Railway/Render"
+            git push
+          fi
