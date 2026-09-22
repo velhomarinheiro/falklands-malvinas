@@ -89,6 +89,9 @@ const COMP_DISPLAY_TYPE = {
   'infantaria':            'infantaria',
   'porto':                 'porto',
   'aeroporto':             'aeroporto',
+  'reabastecedor':         'patrulha',
+  'campo_minado':          'bateria_costeira',
+  'bateria_artilharia':    'bateria_ada',
 };
 const DISPLAY_TYPE_FALLBACK = { surface: 'fragata', submarine: 'submarino', air: 'patrulha', land: 'infantaria', specops: 'specops' };
 

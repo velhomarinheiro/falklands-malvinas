@@ -455,7 +455,10 @@
     "patrulha_maritima": "maritime patrol",
     "porto": "port",
     "submarino_convencional": "conventional submarine",
-    "submarino_nuclear": "nuclear submarine"
+    "submarino_nuclear": "nuclear submarine",
+    "reabastecedor": "air tanker",
+    "campo_minado": "minefield",
+    "bateria_artilharia": "artillery battery"
   },
   "terrain": {
     "land": "Land Area",

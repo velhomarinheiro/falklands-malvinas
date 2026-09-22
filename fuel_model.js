@@ -8,40 +8,52 @@ const NAVAL_FP = {
   submarine: 20,  // 20 turns = 10 days at 2 turns/day (conventional AIP)
 };
 
-// Per-unit FP overrides (surface ships only; subs use NAVAL_FP.submarine)
+// Per-unit FP overrides (surface ships only; subs use NAVAL_FP.submarine).
+// v2: valores das tabelas de Fuel Points dos dois cadernos (planilha do autor,
+// aba "Divergências e Notas" — unidades sem entrada aqui usam NAVAL_FP.surface).
 const UNIT_FP = {
   // ── Força Azul (Argentina) ──────────────────────────────────────────────────
-  'BLUE-VM':       14,   // GT Porta-Aviões
+  'BLUE-VM':       12,   // GT Porta-Aviões
   'BLUE-VE':       10,   // Escolta GT-PA
   'BLUE-BV':       10,   // Esquadra de Corvetas
   'BLUE-B':        10,   // Belgrano
   'BLUE-BS':       10,   // Escolta Belgrano
-  'BLUE-LOG-1':    30,   // Petroleiro GT-PA
-  'BLUE-LOG-2':    34,   // Petroleiro Geral
-  'BLUE-PAT':       8,   // Patrulha Costeira
-  'BLUE-MCM':       8,   // Grupo Caça-Minas
-  'BLUE-ISR':      10,   // Piquete de Vigilância
-  'BLUE-LG':        8,   // Grupo de Desembarque
-  'BLUE-CARGO':    30,   // Cargueiros de Suprimento
+  'BLUE-LOG-1':    24,   // Petroleiro ARA Punta Médanos
+  'BLUE-LOG-2':    24,   // Petroleiro ARA Punta Delgada
+  'BLUE-LOG-3':    24,   // Petroleiro de Serviço Geral
+  'BLUE-MCM':       6,   // Grupo Caça-Minas
+  'BLUE-LG':       12,   // Grupo de Desembarque
   // ── Força Vermelha (Reino Unido) ────────────────────────────────────────────
-  'RED-HERMES':    14,   // HMS Hermes
-  'RED-INVINCIBLE':14,   // HMS Invincible
+  'RED-HERMES':    12,   // HMS Hermes
+  'RED-INVINCIBLE':12,   // HMS Invincible
   'RED-SCR-1':     10,   // Screen 1
   'RED-SCR-2':     10,   // Screen 2
   'RED-ESC-1':     10,   // Escort 1
   'RED-ESC-2':     10,   // Escort 2
-  'RED-TRAIL':     10,   // Trail Screen
-  'RED-LAND-SCR':  10,   // Landing Screen
+  'RED-LOG-1':     24,   // RFA Olmeda
+  'RED-LOG-2':     24,   // RFA Appleleaf
   'RED-SG-SCR':    10,   // South Georgia Screen
   'RED-SG-ICE':    10,   // HMS Endurance
-  'RED-LPD':       10,   // Fearless / Intrepid
-  'RED-TROOP':     10,   // Canberra / QE2 / Atlantic Conveyor
-  'RED-LOG-1':     30,   // Petroleiro do GT-PA
-  'RED-LOG-2':     34,   // Petroleiro de Escolta
-  'RED-LOG-3':     34,   // Petroleiro de Desembarque
-  'RED-TANK':      40,   // Petroleiros-Lançadeira
-  'RED-MCM':        8,   // Esquadrilha Caça-Minas
+  'RED-LOG-3':     24,   // RFA Tidespring
+  'RED-TRAIL':     10,   // Trail Screen
+  'RED-LOG-4':     24,   // RFA Plumleaf
+  'RED-TANK':      48,   // RFA British Tay
+  'RED-LAND-SCR':  10,   // Landing Screen
+  'RED-LPD':       12,   // Fearless / Intrepid
+  'RED-TROOP':     10,   // SS Canberra / QE2
+  'RED-AC':        10,   // SS Atlantic Conveyor
+  'RED-LOG-5':     24,   // RFA Bayleaf
+  'RED-MCM':        6,   // Esquadrilha Caça-Minas
   'RED-HOSP':      12,   // Navio-Hospital
+  'RED-LR':        10,   // SS Norland / Atlantic Causeway
+  'RED-TANK-2':    48,   // RFA British Tamar / British Esk
+};
+
+// Unidades que começam com o tanque pela metade (petroleiros de escalões
+// posteriores, ainda não completados na zona de exclusão) — mesma fonte.
+const UNIT_FP_INITIAL = {
+  'BLUE-LOG-1': 12, 'BLUE-LOG-2': 12,
+  'RED-LOG-1': 12, 'RED-LOG-2': 12, 'RED-LOG-3': 12, 'RED-LOG-4': 12, 'RED-LOG-5': 12,
 };
 
 // unit.type values (from COMP_DISPLAY_TYPE in server.js)
@@ -93,7 +105,7 @@ function initializeFuel(unit) {
   unit.fuel = {
     usesFuel: true,
     fuelType: 'naval',
-    current:  max,
+    current:  UNIT_FP_INITIAL[unit.id] ?? max,
     max,
     spentThisTurn: 0,
   };
