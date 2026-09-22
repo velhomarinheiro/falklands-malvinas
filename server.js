@@ -624,8 +624,13 @@ const OBJECTIVE_IDS = {
     surface:   ['RED-HERMES', 'RED-INVINCIBLE', 'RED-SCR-1', 'RED-SCR-2', 'RED-ESC-1', 'RED-ESC-2', 'RED-TRAIL', 'RED-LAND-SCR', 'RED-SG-SCR', 'RED-TROOP'],
   },
   redTargets: {
-    airfields: ['BLUE-AERO-N', 'BLUE-AERO-RG', 'BLUE-AERO-RGR'],
-    garrison:  ['BLUE-GARR-STANLEY', 'BLUE-EXOCET-STANLEY', 'BLUE-GARR-GOOSE'],
+    // O Reino Unido operava sob regras de engajamento que proibiam ataques ao
+    // território continental argentino (RCE do OAF Doc britânico) — por isso
+    // nenhum objetivo vermelho mira as bases aéreas do continente; ambos miram
+    // exclusivamente ativos nas próprias ilhas, coerente com os objetivos
+    // operacionais reais (superioridade aérea/naval local + reposse das ilhas).
+    airsup:   ['BLUE-PUCARA', 'BLUE-PAT', 'BLUE-MCM'],
+    garrison: ['BLUE-GARR-STANLEY', 'BLUE-EXOCET-STANLEY', 'BLUE-GARR-GOOSE'],
   },
 };
 
@@ -634,9 +639,7 @@ const OBJECTIVE_IDS = {
 const OBJECTIVE_THRESHOLDS = {
   blueLogisticsKills: 2,   // de 3 petroleiros vermelhos
   blueSurfaceDegPct:  50,  // % do SP agregado dos combatentes de superfície
-  redAirfieldKills:   1,   // de 3 bases aéreas continentais argentinas — alvo profundo em
-                           // território hostil (regra histórica de engajamento restringia
-                           // ataques ao continente; só a Op. Black Buck o fez, e uma vez bastava)
+  redAirSupDegPct:    50,  // % do SP agregado da presença aérea/naval local argentina
   redGarrisonDegPct:  40,  // % do SP agregado da guarnição das ilhas
 };
 
@@ -691,10 +694,12 @@ function computeObjectives(state) {
   ];
   const blueAchieved = blueConds.filter(c => c.met).length;
 
-  // ─── Red objectives (need both) ──────────────────────────────────────────────
-  const airfieldUnits = RT.airfields.map(id => u.find(x => x.id === id)).filter(Boolean);
-  const airfieldNeut  = airfieldUnits.filter(x => x.hp <= 0).length;
-  const airfieldMet   = airfieldNeut >= TH.redAirfieldKills;
+  // ─── Red objectives (need both — ambos restritos ao teatro insular) ──────────
+  const airsupUnits = RT.airsup.map(id => u.find(x => x.id === id)).filter(Boolean);
+  const airsupMax   = airsupUnits.reduce((s, x) => s + x.maxHp, 0);
+  const airsupCur   = airsupUnits.reduce((s, x) => s + Math.max(0, x.hp), 0);
+  const airsupDegPct = airsupMax > 0 ? Math.round((1 - airsupCur / airsupMax) * 100) : 0;
+  const airsupMet   = airsupDegPct >= TH.redAirSupDegPct;
 
   const garrUnits = RT.garrison.map(id => u.find(x => x.id === id)).filter(Boolean);
   const garrMax   = garrUnits.reduce((s, x) => s + x.maxHp, 0);
@@ -703,9 +708,9 @@ function computeObjectives(state) {
   const garrMet   = garrDegPct >= TH.redGarrisonDegPct;
 
   const redConds = [
-    { id: 'airfields', label: `Neutralizar ${TH.redAirfieldKills} de ${airfieldUnits.length} Bases Aéreas`, met: airfieldMet,
-      progress: frac(airfieldNeut, TH.redAirfieldKills),
-      current: `${airfieldNeut}/${airfieldUnits.length} neutralizadas (precisa ${TH.redAirfieldKills})` },
+    { id: 'airsup',   label: `Degradar ≥${TH.redAirSupDegPct}% Presença Aérea/Naval Local (Pucará, patrulhas, caça-minas)`, met: airsupMet,
+      progress: frac(airsupDegPct, TH.redAirSupDegPct),
+      current: `${airsupDegPct}% degradado  (SP: ${airsupCur}/${airsupMax})` },
     { id: 'garrison', label: `Degradar ≥${TH.redGarrisonDegPct}% Guarnição das Ilhas`, met: garrMet,
       progress: frac(garrDegPct, TH.redGarrisonDegPct),
       current: `${garrDegPct}% degradado  (SP: ${garrCur}/${garrMax})` },
@@ -904,8 +909,8 @@ function botObjectiveWeights(state, botTeam) {
   } else {
     const met = Object.fromEntries(obj.red.conditions.map(c => [c.id, c.met]));
     const T   = OBJECTIVE_IDS.redTargets;
-    if (!met.airfields) T.airfields.forEach(id => w.set(id, 0));
-    if (!met.garrison)  T.garrison.forEach(id => w.set(id, 0));
+    if (!met.airsup)   T.airsup.forEach(id => w.set(id, 0));
+    if (!met.garrison) T.garrison.forEach(id => w.set(id, 0));
   }
   return w;
 }

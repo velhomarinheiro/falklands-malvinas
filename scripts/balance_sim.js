@@ -33,14 +33,14 @@ function playOne() {
 
   const obj = computeObjectives(s);
   const garrisonCond  = obj.red.conditions.find(c => c.id === 'garrison');
-  const airfieldCond  = obj.red.conditions.find(c => c.id === 'airfields');
+  const airsupCond    = obj.red.conditions.find(c => c.id === 'airsup');
   const strandedNaval = s.units.filter(u =>
     u.hp > 0 && u.fuel?.fuelType === 'naval' && u.fuel.current === 0).length;
   return {
     winner: s.winner, turn: s.turn,
     blueAchieved: obj.blue.achieved, redAchieved: obj.red.achieved,
     garrisonPct: parseInt(String(garrisonCond?.current).match(/(\d+)%/)?.[1] ?? '0', 10),
-    airfieldsNeut: parseInt(String(airfieldCond?.current).match(/^(\d+)/)?.[1] ?? '0', 10),
+    airsupMet: !!airsupCond?.met,
     strandedNaval,
   };
 }
@@ -60,5 +60,5 @@ console.log(`\nTurno médio final: ${avg(r => r.turn).toFixed(1)} (limite ${MAX_
 console.log(`Objetivos médios — Azul ${avg(r => r.blueAchieved).toFixed(2)}/3 · Vermelho ${avg(r => r.redAchieved).toFixed(2)}/2`);
 console.log(`\nProgresso vermelho:`);
 console.log(`  guarnição das ilhas degradada: média ${avg(r => r.garrisonPct).toFixed(1)}% · máx ${Math.max(...runs.map(r => r.garrisonPct))}%`);
-console.log(`  bases aéreas neutralizadas: média ${avg(r => r.airfieldsNeut).toFixed(2)}/3 · partidas com >=2: ${count(r => r.airfieldsNeut >= 2)}`);
+console.log(`  esquadrão Pucará destruído: ${count(r => r.airsupMet)} partidas (${pct(count(r => r.airsupMet))})`);
 console.log(`\nUnidades navais a 0 FP ao fim da partida: média ${avg(r => r.strandedNaval).toFixed(1)}`);

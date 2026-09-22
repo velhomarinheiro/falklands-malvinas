@@ -82,25 +82,29 @@ function pathLegal(state, unitId, path) {
   }
 }
 
-// ── 2. Vermelho prioriza base aérea (objetivo) sobre patrulha equidistante ─────
-// Alvo terrestre (base aérea) usa o canal attackRange.land do atacante (=1),
-// bem menor que o canal surface do FPSO original — ambos os alvos ficam a
-// dist. 1 do atacante, em hexágonos distintos, para testar só a prioridade.
+// ── 2. Vermelho prioriza guarnição (objetivo) sobre cargueiro equidistante ─────
+// botPickTarget ordena TODOS os alvos "atacáveis por tipo de arma" por peso de
+// objetivo, não só os próximos — usa um alvo fora de qualquer lista de
+// objetivo (cargueiro) e mesma prioridade genérica (5, "outros") que a
+// guarnição, para isolar o efeito do peso puro sem interferência de
+// desempate por tipo de plataforma.
 {
   const s = newGame();
-  const att  = byId(s, 'RED-SCR-1');
-  const aero = byId(s, 'BLUE-AERO-RGR');
-  const pat  = byId(s, 'BLUE-PAT');
-  // afasta os demais azuis p/ fora do raio de oportunidade
+  const att   = byId(s, 'RED-SCR-1');
+  const garr  = byId(s, 'BLUE-GARR-STANLEY');
+  const cargo = byId(s, 'BLUE-CARGO');
+  // neutraliza os outros alvos do objetivo "airsup" (peso 0, prioridade
+  // genérica mais alta que garr) para não interferirem no desempate
+  for (const id of OBJECTIVE_IDS.redTargets.airsup) byId(s, id).hp = 0;
   for (const u of s.units) {
-    if (u.team === 'blue' && u.id !== aero.id && u.id !== pat.id) { u.col = 19; u.row = 9; }
+    if (u.team === 'blue' && u.id !== garr.id && u.id !== cargo.id) { u.col = 19; u.row = 9; }
   }
   att.col = 9; att.row = 4;
-  aero.col = att.col + 1; aero.row = att.row;   // dist 1
-  pat.col  = att.col - 1; pat.row  = att.row;   // dist 1
+  garr.col  = att.col + 1; garr.row  = att.row;   // dist 1
+  cargo.col = att.col - 1; cargo.row = att.row;   // dist 1
   const w = botObjectiveWeights(s, 'red');
   const tgt = botPickTarget(att, s.units.filter(u => u.team === 'blue' && u.hp > 0), w);
-  check('vermelho prefere base aérea a patrulha equidistante', tgt?.id === 'BLUE-AERO-RGR', `escolheu ${tgt?.id}`);
+  check('vermelho prefere guarnição a cargueiro equidistante', tgt?.id === 'BLUE-GARR-STANLEY', `escolheu ${tgt?.id}`);
 }
 
 // ── 3. Azul prioriza alvos de objetivo ────────────────────────────────────────
@@ -116,11 +120,11 @@ function pathLegal(state, unitId, path) {
 // ── 4. Re-tarefa após objetivo cumprido ───────────────────────────────────────
 {
   const s = newGame();
-  OBJECTIVE_IDS.redTargets.airfields.forEach(id => { byId(s, id).hp = 0; });
+  OBJECTIVE_IDS.redTargets.airsup.forEach(id => { byId(s, id).hp = 0; });
   const w = botObjectiveWeights(s, 'red');
   const onlyGarrison = OBJECTIVE_IDS.redTargets.garrison.every(id => w.get(id) === 0) &&
-                        OBJECTIVE_IDS.redTargets.airfields.every(id => !w.has(id));
-  check('Bases aéreas destruídas → pesos vermelhos só contêm guarnição', onlyGarrison);
+                        OBJECTIVE_IDS.redTargets.airsup.every(id => !w.has(id));
+  check('Presença aérea/naval local destruída → pesos vermelhos só contêm guarnição', onlyGarrison);
 }
 
 // ── 5. Override de oportunidade: combatente colado vence objetivo distante ────
@@ -128,20 +132,20 @@ function pathLegal(state, unitId, path) {
   const s = newGame();
   const att  = byId(s, 'RED-SCR-1');
   const frig = s.units.find(u => u.team === 'blue' && ['fragata','destroier','corveta','cruzador'].includes(u.type));
-  const aero = byId(s, 'BLUE-AERO-RGR');
+  const garr = byId(s, 'BLUE-GARR-STANLEY');
   // afasta outros combatentes/anfíbios azuis (prioridade de oportunidade) do raio
   for (const u of s.units) {
-    if (u.team === 'blue' && u.id !== frig.id && u.id !== aero.id &&
+    if (u.team === 'blue' && u.id !== frig.id && u.id !== garr.id &&
         ['carrier','amphib','fragata','destroier','corveta','cruzador'].includes(u.type)) {
       u.col = 19; u.row = 9;
     }
   }
   att.col = 10; att.row = 4;
   frig.col = 11; frig.row = 4;          // dist 1 — colado
-  // Base aérea fica onde está (longe)
+  // Guarnição (objetivo) fica onde está (longe)
   const w = botObjectiveWeights(s, 'red');
   const tgt = botPickTarget(att, s.units.filter(u => u.team === 'blue' && u.hp > 0), w);
-  check('combatente a dist 1 vence base aérea distante', tgt?.id === frig.id, `escolheu ${tgt?.id} (frig=${frig.id}, aero=${aero.id})`);
+  check('combatente a dist 1 vence guarnição distante', tgt?.id === frig.id, `escolheu ${tgt?.id} (frig=${frig.id}, garr=${garr.id})`);
 }
 
 // ── 6. Combustível: baixo FP → rota ao provedor; empilhado → não move ─────────
@@ -276,27 +280,34 @@ function pathLegal(state, unitId, path) {
 // ── 12b. Limiares de vitória e progresso contínuo ─────────────────────────────
 {
   const TH = OBJECTIVE_THRESHOLDS;
-  const airfieldIds = OBJECTIVE_IDS.redTargets.airfields;
+  const airsupIds   = OBJECTIVE_IDS.redTargets.airsup;
   const garrisonIds = OBJECTIVE_IDS.redTargets.garrison;
   const redCond = (s, id) => computeObjectives(s).red.conditions.find(c => c.id === id);
-  const dealGarrisonDamage = (s, sp) => {
+  const dealDamage = (s, ids, sp) => {
     let n = sp;
-    for (const id of garrisonIds) {
+    for (const id of ids) {
       const p = byId(s, id);
       const d = Math.min(n, p.maxHp);
       p.hp = p.maxHp - d; n -= d;
       if (n <= 0) break;
     }
   };
+  const dealGarrisonDamage = (s, sp) => dealDamage(s, garrisonIds, sp);
 
-  check('limiar de bases aéreas é 1 de 3', TH.redAirfieldKills === 1);
   check('limiar de guarnição é 40%', TH.redGarrisonDegPct === 40);
+  check('limiar de presença aérea/naval local é 50%', TH.redAirSupDegPct === 50);
+  check('nenhum objetivo vermelho mira o continente (RCE histórica)',
+    !garrisonIds.some(id => id.includes('AERO')) && !airsupIds.some(id => id.includes('AERO')));
 
-  // Bases aéreas: 0 não cumpre, 1 cumpre
+  // Presença aérea/naval local: fronteira exata em 9 SP de 17 (50%)
   let s = newGame();
-  check('0 bases aéreas neutralizadas → não cumprida', redCond(s, 'airfields').met === false);
-  byId(s, airfieldIds[0]).hp = 0;
-  check('1 base aérea neutralizada → cumprida', redCond(s, 'airfields').met === true);
+  check('presença aérea/naval intacta → não cumprida', redCond(s, 'airsup').met === false);
+  dealDamage(s, airsupIds, 8);
+  check('presença a 8 SP (47%) → não cumprida', redCond(s, 'airsup').met === false,
+    redCond(s, 'airsup').current);
+  s = newGame(); dealDamage(s, airsupIds, 9);
+  check('presença a 9 SP (53%) → cumprida', redCond(s, 'airsup').met === true,
+    redCond(s, 'airsup').current);
 
   // Guarnição: fronteira exata em 10 SP de 23 (40%)
   s = newGame(); dealGarrisonDamage(s, 9);
@@ -309,8 +320,8 @@ function pathLegal(state, unitId, path) {
   // Rótulos derivados das constantes (não podem divergir da regra)
   s = newGame();
   const o = computeObjectives(s);
-  check('rótulo do objetivo bases aéreas cita o limiar',
-    o.red.conditions[0].label.includes(String(TH.redAirfieldKills)),
+  check('rótulo do objetivo aéreo cita o Pucará',
+    o.red.conditions[0].label.includes('Pucará'),
     o.red.conditions[0].label);
   check('rótulo do objetivo guarnição cita o limiar',
     o.red.conditions[1].label.includes(`${TH.redGarrisonDegPct}%`),
