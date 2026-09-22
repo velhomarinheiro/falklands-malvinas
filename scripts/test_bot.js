@@ -309,12 +309,13 @@ function pathLegal(state, unitId, path) {
   check('presença a 9 SP (53%) → cumprida', redCond(s, 'airsup').met === true,
     JSON.stringify(redCond(s, 'airsup').currentParams));
 
-  // Guarnição: fronteira exata em 10 SP de 23 (40%)
-  s = newGame(); dealGarrisonDamage(s, 9);
-  check('guarnição a 9 SP (39%) → não cumprida', redCond(s, 'garrison').met === false,
+  // Guarnição: fronteira exata em 12 SP de 29 (41%) — pool cresceu após o
+  // ajuste de BLUE-GARR-GOOSE (6→12 SP) para bater com o OAF original.
+  s = newGame(); dealGarrisonDamage(s, 11);
+  check('guarnição a 11 SP (38%) → não cumprida', redCond(s, 'garrison').met === false,
     JSON.stringify(redCond(s, 'garrison').currentParams));
-  s = newGame(); dealGarrisonDamage(s, 10);
-  check('guarnição a 10 SP (43%) → cumprida', redCond(s, 'garrison').met === true,
+  s = newGame(); dealGarrisonDamage(s, 12);
+  check('guarnição a 12 SP (41%) → cumprida', redCond(s, 'garrison').met === true,
     JSON.stringify(redCond(s, 'garrison').currentParams));
 
   // Rótulos (por código, i18n-friendly) derivados das constantes — não podem divergir da regra
