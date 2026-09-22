@@ -55,12 +55,13 @@ const WEAPON_TARGETS = {
   lacm:['land'], asbm:['surface'], navalGun:['surface','land'],
   airDefense:['air'], bmd:['air'], asw:['submarine'],
   airAttack:['surface','air','land'], raid:['land','surface'],
+  aam:['air'],
 };
-const WEAPON_EXPENDABLE = {ascm:true,mss:true,torpedo:true,lacm:true,asbm:true};
+const WEAPON_EXPENDABLE = {ascm:true,mss:true,torpedo:true,lacm:true,asbm:true,aam:true};
 const WEAPON_LABELS = {
   ascm:'ASCM', mss:'MSS', torpedo:'TORPEDO', lacm:'LACM', asbm:'ASBM',
   navalGun:'CANHÃO', airDefense:'DEFA', bmd:'BMD', asw:'ASW',
-  airAttack:'AT.AÉR', raid:'OP.ESP.',
+  airAttack:'AT.AÉR', raid:'OP.ESP.', aam:'AAM', mines:'MINAS',
 };
 // Nomes por extenso (tooltips e glossário da ajuda) — fallback PT; localizado via
 // weaponLabel()/weaponGlossary() abaixo, que leem locales/{pt,en}.json quando prontos.
@@ -76,6 +77,8 @@ const WEAPON_GLOSSARY = {
   asw:        'Guerra Antissubmarino — detecção e ataque a submarinos',
   airAttack:  'Ataque Aéreo — aeronaves contra navios, aeronaves ou alvos terrestres',
   raid:       'Incursão de Operações Especiais — ataques a instalações e navios',
+  aam:        'Míssil Ar-Ar — combate entre caças, não interceptável',
+  mines:      'Campo Minado — dano passivo a quem cruza o hex; só é varrido por caça-minas',
 };
 function weaponLabel(k) {
   const dict = (typeof tRaw === 'function' && tRaw('weapon.labels')) || WEAPON_LABELS;
@@ -131,7 +134,7 @@ function logText(entry) {
 // Default ranges for capability-based weapons (not present in unit.weapons)
 const WEAPON_DEFAULT_RANGE = {
   ascm:6, mss:3, torpedo:2, lacm:10, asbm:10,
-  navalGun:1, airDefense:1, bmd:1, asw:2, airAttack:4, raid:2,
+  navalGun:1, airDefense:1, bmd:1, asw:2, airAttack:4, raid:2, aam:1,
 };
 
 function unitMovementRange(unit) {

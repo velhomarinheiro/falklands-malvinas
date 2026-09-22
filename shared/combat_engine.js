@@ -151,6 +151,46 @@ function resolveEngagement({ attacker, defender, defenders, weaponType, amount, 
   };
 }
 
+// Campo minado atingindo uma unidade que entrou no seu hex. Diferente de
+// resolveEngagement, não passa por weaponProfiles/alcance/interceptação — é
+// um acionamento passivo (ver server.js, fase de movimento). Cada mina é de
+// uso único: acerte ou erre, uma unidade de `weapons.mines.quantity` é
+// consumida, e o campo se esgota (hp=0) quando chega a zero.
+function resolveMineHit(minefield, victim) {
+  const mines = minefield.weapons?.mines;
+  if (!mines || mines.quantity <= 0) {
+    return { ok: false, reasonCode: 'NO_MINES_LEFT' };
+  }
+  const roll = resolveDamageRoll(minefield.team, 'mines', victim.category);
+  applyDamage(victim, roll.damage);
+  mines.quantity = Math.max(0, mines.quantity - 1);
+  const minefieldSpent = mines.quantity <= 0;
+  if (minefieldSpent) minefield.hp = 0;
+  return {
+    ok: true,
+    minefieldId:   minefield.id,
+    victimId:      victim.id,
+    roll,
+    damage:        roll.damage,
+    remainingHp:   victim.hp,
+    destroyed:     victim.hp <= 0,
+    minefieldSpent,
+  };
+}
+
+// Caça-minas varrendo (não detonando) uma mina do campo — sem dano ao
+// varredor, consome 1 unidade de `weapons.mines.quantity` do campo.
+function resolveMineSweep(minefield) {
+  const mines = minefield.weapons?.mines;
+  if (!mines || mines.quantity <= 0) {
+    return { ok: false, reasonCode: 'NO_MINES_LEFT' };
+  }
+  mines.quantity = Math.max(0, mines.quantity - 1);
+  const cleared = mines.quantity <= 0;
+  if (cleared) minefield.hp = 0;
+  return { ok: true, minefieldId: minefield.id, remainingMines: mines.quantity, cleared };
+}
+
 module.exports = {
   d6,
   getWeaponQuantity,
@@ -160,4 +200,6 @@ module.exports = {
   applyDamage,
   resolveInterception,
   resolveEngagement,
+  resolveMineHit,
+  resolveMineSweep,
 };

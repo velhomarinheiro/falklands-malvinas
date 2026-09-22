@@ -109,7 +109,7 @@
     "labels": {
       "ascm": "ASCM", "mss": "MSS", "torpedo": "TORPEDO", "lacm": "LACM", "asbm": "ASBM",
       "navalGun": "CANHÃO", "airDefense": "DEFA", "bmd": "BMD", "asw": "ASW",
-      "airAttack": "AT.AÉR", "raid": "OP.ESP."
+      "airAttack": "AT.AÉR", "raid": "OP.ESP.", "aam": "AAM", "mines": "MINAS"
     },
     "glossary": {
       "ascm": "Míssil de Cruzeiro Antinavio — longo alcance contra navios de superfície",
@@ -122,7 +122,9 @@
       "bmd": "Defesa Antimísseis Balísticos — única defesa contra ASBM",
       "asw": "Guerra Antissubmarino — detecção e ataque a submarinos",
       "airAttack": "Ataque Aéreo — aeronaves contra navios, aeronaves ou alvos terrestres",
-      "raid": "Incursão de Operações Especiais — ataques a instalações e navios"
+      "raid": "Incursão de Operações Especiais — ataques a instalações e navios",
+      "aam": "Míssil Ar-Ar — combate entre caças, não interceptável",
+      "mines": "Campo Minado — dano passivo a quem cruza o hex; só é varrido por caça-minas"
     }
   },
   "help": {
@@ -383,6 +385,9 @@
     "WEAPONS_RESTOCKED": "🔄 {{name}} recompletou: {{weapons}}",
     "NAVAL_REFUELED": "⛽ {{name}}({{team}}) reabasteceu: {{current}}/{{max}} FP.",
     "UNIT_MOVED": "{{name}}({{team}}) → {{hex}}",
+    "MINE_HIT": "💥 {{name}}({{team}}) entrou em campo minado em {{hex}}: {{damage}} de dano.",
+    "MINEFIELD_SWEPT": "🧹 {{name}}({{team}}) varreu uma mina de {{target}} em {{hex}}.",
+    "MINEFIELD_CLEARED": "✅ {{name}} esgotado — campo minado neutralizado.",
     "NAVAL_FUEL_EMPTY": "⛽ {{name}}({{team}}) sem combustível: não pode mover, atacar ou se defender.",
     "AIR_LOST_FUEL": "✈ {{name}}({{team}}) perdida por falta de combustível.",
     "COMBAT_PHASE_STARTED": "Fase de Combate iniciada. Declare seus ataques.",

@@ -43,6 +43,14 @@ const COMBAT_CONFIG = {
       damageProfile: 'asbmSurface',
       label: 'ASBM',
     },
+    aam: {
+      expendable: true,
+      defaultRange: 1,
+      targets: ['air'],
+      interceptableBy: [],
+      damageProfile: 'aam',
+      label: 'AAM',
+    },
     navalGun: {
       expendable: false,
       defaultRange: 1,
@@ -112,6 +120,9 @@ const COMBAT_CONFIG = {
       asbmSurface: {
         surface:    { '1':0, '2':0, '3':0, '4':'1d6', '5':'1d6', '6':'1d6' },
       },
+      aam: {
+        air:        { '1':0, '2':0, '3':1, '4':1, '5':1, '6':'1d6' },
+      },
       navalGun: {
         surface:    { '1':0, '2':0, '3':1, '4':1, '5':1, '6':1 },
         land:       { '1':0, '2':0, '3':0, '4':1, '5':1, '6':1 },
@@ -135,6 +146,13 @@ const COMBAT_CONFIG = {
       raid: {
         land:       { '1':0, '2':1, '3':1, '4':1, '5':'1d6', '6':'1d6' },
         surface:    { '1':0, '2':0, '3':1, '4':1, '5':'1d6', '6':'1d6' },
+      },
+      // Campo minado — não é um "weaponProfile" disparável por uma unidade;
+      // acionado passivamente pelo movimento (ver combat_engine.resolveMineHit),
+      // então só precisa de uma damageTable, sem entrada em weaponProfiles.
+      mines: {
+        surface:    { '1':0, '2':0, '3':1, '4':1, '5':'1d6', '6':'1d6' },
+        submarine:  { '1':0, '2':0, '3':1, '4':1, '5':'1d6', '6':'1d6' },
       },
     },
 
@@ -155,6 +173,9 @@ const COMBAT_CONFIG = {
       asbmSurface: {
         surface:    { '1':0, '2':0, '3':0, '4':'1d6', '5':'1d6', '6':'1d6' },
       },
+      aam: {
+        air:        { '1':0, '2':0, '3':1, '4':1, '5':1, '6':'1d6' },
+      },
       navalGun: {
         surface:    { '1':0, '2':0, '3':1, '4':1, '5':1, '6':1 },
         land:       { '1':0, '2':0, '3':0, '4':1, '5':1, '6':1 },
@@ -178,6 +199,10 @@ const COMBAT_CONFIG = {
       raid: {
         land:       { '1':0, '2':1, '3':1, '4':1, '5':'1d6', '6':'1d6' },
         surface:    { '1':0, '2':0, '3':1, '4':1, '5':'1d6', '6':'1d6' },
+      },
+      mines: {
+        surface:    { '1':0, '2':0, '3':1, '4':1, '5':'1d6', '6':'1d6' },
+        submarine:  { '1':0, '2':0, '3':1, '4':1, '5':'1d6', '6':'1d6' },
       },
     },
   },

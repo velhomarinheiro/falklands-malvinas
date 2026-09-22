@@ -8,7 +8,7 @@ const fs       = require('fs');
 const archiver = require('archiver');
 const { ORDER_OF_BATTLE }  = require('./shared/order_of_battle');
 const { COMBAT_CONFIG }    = require('./shared/combat_config');
-const { resolveEngagement, getWeaponQuantity, getWeaponRange } = require('./shared/combat_engine');
+const { resolveEngagement, getWeaponQuantity, getWeaponRange, resolveMineHit, resolveMineSweep } = require('./shared/combat_engine');
 const {
   initializeFuel, isFuelDisabled,
   canMove, canAttack, canDefend,
@@ -136,6 +136,75 @@ function isAirRefuelLocation(unit, state) {
   );
 }
 
+// ─── Movement application (mines-aware) ───────────────────────────────────────
+// Walks `unit` along `path` (array of {col,row}, path[0] = current position),
+// mutating `state` in place: applies the destination, logs UNIT_MOVED, and
+// charges movement fuel. An enemy minefield on an intermediate or final hex
+// either gets swept by a minesweeper (movement continues) or detonates,
+// halting the unit there ("detém o movimento de quem o cruza") — mirrors the
+// server-authoritative combat resolution pattern used elsewhere in this file.
+// Exported standalone (not inlined in the commit_moves handler) so the mine
+// interaction can be unit-tested without a socket.
+function applyUnitMovement(unit, path, team, state) {
+  let haltedAt = null;
+  for (let i = 1; i < path.length; i++) {
+    const {col, row} = path[i];
+    const minefield = state.units.find(m =>
+      (m.hp ?? 0) > 0 && m.team !== team &&
+      (m.weapons?.mines?.quantity ?? 0) > 0 &&
+      m.col === col && m.row === row);
+    if (!minefield) continue;
+
+    const hex = `${String.fromCharCode(65+col)}${row+1}`;
+    if (MINESWEEPER_IDS.includes(unit.id)) {
+      const sweep = resolveMineSweep(minefield);
+      if (sweep.ok) {
+        state.log.unshift(logEntry('MINEFIELD_SWEPT', { name: unit.name, team, target: minefield.name, hex }));
+        if (sweep.cleared) state.log.unshift(logEntry('MINEFIELD_CLEARED', { name: minefield.name }));
+      }
+      continue; // caça-minas segue viagem
+    }
+
+    if (!['surface', 'submarine'].includes(unit.category)) continue; // minas só afetam navios/subs
+
+    const hit = resolveMineHit(minefield, unit);
+    if (hit.ok) {
+      state.log.unshift(logEntry('MINE_HIT', { name: unit.name, team, damage: hit.damage, hex }));
+      if (hit.minefieldSpent) state.log.unshift(logEntry('MINEFIELD_CLEARED', { name: minefield.name }));
+      if (hit.destroyed) {
+        state.log.unshift(logEntry('UNIT_DESTROYED', { def: unit.name, att: minefield.name, weapon: 'MINA' }));
+        for (const u of state.units) {
+          if ((u.hp ?? 0) <= 0) continue;
+          if (u.baseUnitId === unit.id || u.hostId === unit.id) {
+            u.hp = 0;
+            state.log.unshift(logEntry('UNIT_LOST_WITH', { u: u.name, def: unit.name }));
+          }
+        }
+      }
+    }
+    haltedAt = i;
+    break;
+  }
+
+  const dest = haltedAt !== null ? path[haltedAt] : path[path.length - 1];
+  unit.col=dest.col; unit.row=dest.row; unit.moved=true;
+  if (unit.hp <= 0) return; // destruída no caminho (ex.: campo minado) — sem gasto de combustível
+  state.log.unshift(logEntry('UNIT_MOVED', { name: unit.name, team, hex: `${String.fromCharCode(65+dest.col)}${dest.row+1}` }));
+  const dist = haltedAt !== null ? haltedAt : path.length - 1;
+  if (unit.category !== 'air') {
+    spendNavalFuel(unit, navalMoveCost(dist));
+  } else {
+    // Aircraft that moved: become airborne, spend distance FP
+    unit.airStatus = 'airborne';
+    spendAirFuel(unit, dist);
+    // If they flew to a base, mark for refuel and update home base
+    if (isAirRefuelLocation(unit, state)) {
+      unit.fuel.wasAtRefuelLocation = true;
+      unit.baseHex = { col: dest.col, row: dest.row };
+    }
+  }
+}
+
 // ─── Fog of war ──────────────────────────────────────────────────────────────
 function saveMovementSnapshot(state) {
   state.movementSnapshot = {};
@@ -202,9 +271,13 @@ function stateFor(state, team) {
 const WEAPON_PRIORITY = {
   surface:   ['ascm', 'asbm', 'mss', 'torpedo', 'airAttack', 'navalGun', 'raid'],
   submarine: ['asw', 'torpedo'],
-  air:       ['airDefense', 'airAttack'],
+  air:       ['aam', 'airDefense', 'airAttack'],
   land:      ['lacm', 'airAttack', 'navalGun', 'raid'],
 };
+
+// Unidades de caça-minas — únicas que podem varrer (em vez de detonar) um
+// campo minado ao entrar no seu hex.
+const MINESWEEPER_IDS = ['BLUE-MCM', 'RED-MCM'];
 
 function selectBestWeapon(attacker, target, dist) {
   const priority = WEAPON_PRIORITY[target.category] || [];
@@ -291,7 +364,7 @@ function newGame() {
 
 // ─── Battle-round system ─────────────────────────────────────────────────────
 // Default salvo sizes (conservative); client may request a specific amount
-const SALVO_SIZE = { ascm: 2, mss: 2, torpedo: 1, lacm: 1, asbm: 1 };
+const SALVO_SIZE = { ascm: 2, mss: 2, torpedo: 1, lacm: 1, asbm: 1, aam: 2 };
 
 function isSingleRoundWeapon(weaponType) {
   return ['lacm', 'asbm'].includes(weaponType);
@@ -1406,22 +1479,7 @@ io.on('connection', socket => {
       if (!Array.isArray(path)||path.length<2) continue;
       const unit=state.units.find(u=>u.id===unitId&&u.team===team&&u.hp>0);
       if (!unit) continue;
-      const dest=path[path.length-1];
-      unit.col=dest.col; unit.row=dest.row; unit.moved=true;
-      state.log.unshift(logEntry('UNIT_MOVED', { name: unit.name, team, hex: `${String.fromCharCode(65+dest.col)}${dest.row+1}` }));
-      const dist = path.length - 1;
-      if (unit.category !== 'air') {
-        spendNavalFuel(unit, navalMoveCost(dist));
-      } else {
-        // Aircraft that moved: become airborne, spend distance FP
-        unit.airStatus = 'airborne';
-        spendAirFuel(unit, dist);
-        // If they flew to a base, mark for refuel and update home base
-        if (isAirRefuelLocation(unit, state)) {
-          unit.fuel.wasAtRefuelLocation = true;
-          unit.baseHex = { col: dest.col, row: dest.row };
-        }
-      }
+      applyUnitMovement(unit, path, team, state);
     }
 
     // Fuel for stationary units of this team
@@ -1605,4 +1663,5 @@ module.exports = {
   botObjectiveWeights, botPickTarget, botNeedsRefuel, botRefuelProvider,
   botMoveToward, botMoveAway, botBattleRoundDecision,
   nextTurn, checkWinner, MAX_TURNS,
+  applyUnitMovement, MINESWEEPER_IDS,
 };

@@ -109,7 +109,7 @@
     "labels": {
       "ascm": "ASCM", "mss": "MSS", "torpedo": "TORPEDO", "lacm": "LACM", "asbm": "ASBM",
       "navalGun": "GUN", "airDefense": "AAD", "bmd": "BMD", "asw": "ASW",
-      "airAttack": "AIR ATK", "raid": "SOF"
+      "airAttack": "AIR ATK", "raid": "SOF", "aam": "AAM", "mines": "MINES"
     },
     "glossary": {
       "ascm": "Anti-Ship Cruise Missile — long range against surface ships",
@@ -122,7 +122,9 @@
       "bmd": "Ballistic Missile Defense — the only defense against ASBM",
       "asw": "Anti-Submarine Warfare — detection and attack against submarines",
       "airAttack": "Air Attack — aircraft against ships, aircraft, or land targets",
-      "raid": "Special Forces Raid — attacks on installations and ships"
+      "raid": "Special Forces Raid — attacks on installations and ships",
+      "aam": "Air-to-Air Missile — fighter vs. fighter combat, cannot be intercepted",
+      "mines": "Minefield — passive damage to whoever crosses the hex; only minesweepers can clear it"
     }
   },
   "help": {
@@ -383,6 +385,9 @@
     "WEAPONS_RESTOCKED": "🔄 {{name}} restocked: {{weapons}}",
     "NAVAL_REFUELED": "⛽ {{name}}({{team}}) refueled: {{current}}/{{max}} FP.",
     "UNIT_MOVED": "{{name}}({{team}}) → {{hex}}",
+    "MINE_HIT": "💥 {{name}}({{team}}) hit a minefield at {{hex}}: {{damage}} damage.",
+    "MINEFIELD_SWEPT": "🧹 {{name}}({{team}}) swept a mine from {{target}} at {{hex}}.",
+    "MINEFIELD_CLEARED": "✅ {{name}} exhausted — minefield neutralized.",
     "NAVAL_FUEL_EMPTY": "⛽ {{name}}({{team}}) out of fuel: cannot move, attack, or defend.",
     "AIR_LOST_FUEL": "✈ {{name}}({{team}}) lost due to fuel exhaustion.",
     "COMBAT_PHASE_STARTED": "Combat phase started. Declare your attacks.",

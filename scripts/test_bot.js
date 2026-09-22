@@ -420,7 +420,12 @@ function pathLegal(state, unitId, path) {
   check('selfplay termina sem exceção', !err, err?.message);
   check('selfplay: partidas progridem (vencedor ou limite)', progressed);
   const avg = strandedTotal / RUNS;
-  check(`selfplay: média de unidades a 0 FP aceitável (${avg.toFixed(1)} <= 8)`, avg <= 8);
+  // Limiar subiu de 8 para 14 após a ordem de batalha v2 (72 unidades, mais
+  // navios consumindo FP e vários petroleiros começando com metade do
+  // tanque — ver UNIT_FP_INITIAL em fuel_model.js): a média natural de
+  // unidades encalhadas nesse harness (3 partidas, muito mais denso em
+  // combate que o jogo real) subiu de ~3-6 para ~6-12, com variância alta.
+  check(`selfplay: média de unidades a 0 FP aceitável (${avg.toFixed(1)} <= 14)`, avg <= 14);
 }
 
 console.log(failures === 0 ? '\nALL PASS' : `\n${failures} FALHA(S)`);
