@@ -1,7 +1,7 @@
 'use strict';
 
 // ═════════════════════════════════════════════════════════════════════════════
-// HEX GRID — MAPA "GUERRA DAS MALVINAS / FALKLAND 1982"
+// HEX GRID — MAPA "ZONA DE EXCLUSÃO — ATLÂNTICO SUL, 1982"
 // Grade georreferenciada (Lambert conforme, NE 1:10M) — 1 hex = 75 NM.
 // Calibrada para coincidir com mapa.png (ver mapa_source/, metade da
 // resolução original de mapa_source/mapa_malvinas_1982_georef.json:

@@ -733,6 +733,18 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// ─── Language switch: refresh text rendered imperatively (not via data-i18n) ──
+// applyI18nToDom() (in i18n.js) already refreshed every [data-i18n*] element;
+// this covers the rest — canvas labels, and JS-built panels that only
+// normally re-render on the next server update.
+document.addEventListener('i18n:changed', () => {
+  if (gameState) { updateUI(); render(); }
+  if (!helpModal.classList.contains('hidden')) {
+    const activeTab = document.querySelector('.help-tab.active')?.dataset.tab || 'fases';
+    showHelpTab(activeTab);
+  }
+});
+
 // ─── Lobby actions ────────────────────────────────────────────────────────────
 btnCreate.addEventListener('click', () => { SFX.init(); socket.emit('create_room'); });
 btnJoin.addEventListener('click', () => {

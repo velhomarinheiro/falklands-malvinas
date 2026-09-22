@@ -49,12 +49,22 @@ body {
   flex-wrap: wrap;
 }
 .header-title {
-  font-size: 0.8rem;
-  letter-spacing: 3px;
-  color: var(--gold);
+  display: flex; align-items: center;
   margin-right: auto;
   white-space: nowrap;
 }
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.header-logo { height: 22px; width: auto; display: block; }
+/* !important: these toggle across two <img> variants sharing other display
+   rules (.header-logo, .lobby-logo-img) at equal specificity — source order
+   between the two rule sets shouldn't decide which one wins. */
+.logo-en { display: none !important; }
+html[lang="en"] .logo-en { display: block !important; }
+html[lang="en"] .logo-pt { display: none !important; }
 .my-turn-banner {
   padding: 3px 14px;
   background: var(--green);
@@ -347,8 +357,9 @@ body {
   box-shadow: 0 0 60px rgba(21,101,192,0.2);
   animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.lobby-box h1 { font-size: 1.4rem; letter-spacing: 3px; color: var(--gold); margin-bottom: 0.3rem; }
 .lobby-box p  { color: var(--dim); font-size: 0.8rem; margin-bottom: 1.5rem; }
+.lobby-logo { margin-bottom: 0.5rem; }
+.lobby-logo-img { max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto; }
 .lobby-box .lang-switch { justify-content: center; margin-bottom: 1.2rem; }
 
 .or-sep { margin: 1rem 0; color: var(--dim); font-size: 0.8rem; }

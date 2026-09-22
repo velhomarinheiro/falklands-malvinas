@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="landing.pageTitle">Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico</title>
-  <meta name="description" content="Wargame naval histórico por turnos ambientado na Guerra das Malvinas/Falkland de 1982. Comande a Argentina ou o Reino Unido em combate hexagonal, com ciclo dia/noite e névoa de guerra. Multiplayer online ou contra o bot." data-i18n-content="landing.pageDescription">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title data-i18n="landing.pageTitle">Zona de Exclusão — Atlântico Sul, 1982</title>
+  <meta name="description" content="Zona de Exclusão: wargame naval histórico por turnos ambientado na Guerra das Malvinas/Falkland de 1982. Comande a Argentina ou o Reino Unido em combate hexagonal, com ciclo dia/noite e névoa de guerra. Multiplayer online ou contra o bot." data-i18n-content="landing.pageDescription">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/brand/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/brand/favicon-180.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/img/brand/favicon-512.png">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico" data-i18n-content="landing.pageTitle">
-  <meta property="og:description" content="Wargame naval histórico por turnos — Argentina vs. Reino Unido, 1982. Combate hexagonal, ciclo dia/noite e névoa de guerra. Multiplayer online ou contra o bot." data-i18n-content="landing.ogDescription">
+  <meta property="og:title" content="Zona de Exclusão — Atlântico Sul, 1982" data-i18n-content="landing.pageTitle">
+  <meta property="og:description" content="Zona de Exclusão — Atlântico Sul, 1982. Wargame naval histórico por turnos — Argentina vs. Reino Unido. Combate hexagonal, ciclo dia/noite e névoa de guerra. Multiplayer online ou contra o bot." data-i18n-content="landing.ogDescription">
   <meta property="og:image" content="/og-image.jpg">
   <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image:height" content="675">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico" data-i18n-content="landing.pageTitle">
-  <meta name="twitter:description" content="Wargame naval histórico por turnos — Argentina vs. Reino Unido, 1982. Multiplayer online ou contra o bot." data-i18n-content="landing.twitterDescription">
+  <meta name="twitter:title" content="Zona de Exclusão — Atlântico Sul, 1982" data-i18n-content="landing.pageTitle">
+  <meta name="twitter:description" content="Zona de Exclusão — Atlântico Sul, 1982. Wargame naval histórico por turnos — Argentina vs. Reino Unido. Multiplayer online ou contra o bot." data-i18n-content="landing.twitterDescription">
   <meta name="twitter:image" content="/og-image.jpg">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/tutorial.css">
@@ -23,29 +25,17 @@
 
 <!-- ═══ HERO ═══════════════════════════════════════════════════════════════ -->
 <section class="hero">
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <div class="classification" data-i18n="landing.classification">SIMULAÇÃO HISTÓRICA NAVAL · 1982</div>
-    <h1 data-i18n-html="landing.heroTitle">GUERRA DAS<br><span>MALVINAS · FALKLAND</span></h1>
-    <p class="tagline" data-i18n="landing.tagline">Wargame Naval Histórico por Turnos · Multiplayer Online</p>
+  <div class="hero-splash">
+    <img class="hero-splash-img splash-pt" src="/img/brand/splash_pt_bg.jpg" alt="" role="presentation">
+    <img class="hero-splash-img splash-en" src="/img/brand/splash_en_bg.jpg" alt="" role="presentation">
+  </div>
+  <h1 class="sr-only" data-i18n="landing.pageTitle">Zona de Exclusão — Atlântico Sul, 1982</h1>
+  <div class="hero-controls">
     <div class="lang-switch hero-lang-switch" data-i18n-switch>
       <button type="button" data-locale="pt" class="lang-btn">PT</button>
       <button type="button" data-locale="en" class="lang-btn">EN</button>
     </div>
-    <a href="#lobby" class="btn-primary scroll-down" data-i18n="landing.startOp">▼ INICIAR OPERAÇÃO</a>
-  </div>
-  <div class="compass-rose">
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="50,5 55,45 50,55 45,45" fill="#c9a84c"/>
-      <polygon points="50,95 55,55 50,45 45,55" fill="#7a7a7a"/>
-      <polygon points="5,50 45,45 55,50 45,55" fill="#7a7a7a"/>
-      <polygon points="95,50 55,45 45,50 55,55" fill="#7a7a7a"/>
-      <circle cx="50" cy="50" r="6" fill="#c9a84c" stroke="#fff" stroke-width="1"/>
-      <text x="50" y="2"  text-anchor="middle" font-size="8" fill="#c9a84c" font-weight="bold">N</text>
-      <text x="50" y="99" text-anchor="middle" font-size="8" fill="#aaa">S</text>
-      <text x="99" y="53" text-anchor="end"    font-size="8" fill="#aaa">L</text>
-      <text x="2"  y="53" text-anchor="start"  font-size="8" fill="#aaa">O</text>
-    </svg>
+    <a href="#lobby" class="btn-primary hero-cta scroll-down" data-i18n="landing.startOp">▶ INICIAR OPERAÇÃO</a>
   </div>
 </section>
 
@@ -260,7 +250,7 @@
 </section>
 
 <footer>
-  <p><span data-i18n="landing.footer">GUERRA DAS MALVINAS / FALKLAND 1982 · Wargame Naval Histórico © 2026 ·</span> <a href="game.html" data-i18n="landing.footerLink">Entrar no Teatro de Operações</a></p>
+  <p><span data-i18n="landing.footer">ZONA DE EXCLUSÃO — ATLÂNTICO SUL, 1982 · Wargame Naval Histórico © 2026 ·</span> <a href="game.html" data-i18n="landing.footerLink">Entrar no Teatro de Operações</a></p>
 </footer>
 
 <!-- ── TUTORIAL OVERLAY ───────────────────────────────────────────────────── -->
@@ -295,7 +285,7 @@
           </div>
         </div>
       </div>
-      <div class="tut-title" data-i18n="landing.tut0Title">GUERRA DAS MALVINAS / FALKLAND — 1982</div>
+      <div class="tut-title" data-i18n="landing.tut0Title">ZONA DE EXCLUSÃO — ATLÂNTICO SUL, 1982</div>
       <div class="tut-text" data-i18n-html="landing.tut0Body">
         Wargame naval histórico operacional para 2 jogadores.<br>
         Comande frotas de navios e aeronaves no conflito real de 1982 no Atlântico Sul.<br>

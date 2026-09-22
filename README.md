@@ -1,4 +1,6 @@
-# Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico
+![Zona de Exclusão — Atlântico Sul, 1982](public/img/brand/logo_horizontal_pt_bg.png)
+
+# Zona de Exclusão — Atlântico Sul, 1982
 
 Wargame naval histórico por turnos, multiplayer online, ambientado no
 Atlântico Sul de 1982: a Força Azul (**Argentina**) defende as Ilhas
@@ -67,6 +69,7 @@ só em português.
 | `shared/` | Ordem de batalha, configuração e motor de combate (usados por servidor e cliente) |
 | `public/` | Cliente web (landing, jogo em canvas, CSS, ícones, cards) |
 | `public/locales/` | Dicionários de idioma (`pt.json`, `en.json`) usados por `public/js/i18n.js` |
+| `public/img/brand/` | Identidade visual (emblema, logotipos, telas de abertura) nos dois idiomas |
 | `mapa_source/` | Fonte da carta náutica georreferenciada (`public/mapa.png`): gerador Python, GeoJSON com lon/lat e terreno por hexágono, imagem em resolução plena |
 | `scripts/gen_unit_cards.js` | Gera as cartas ilustradas de cada unidade (`public/cards/`) |
 | `data/game-logs/` | Logs de partidas reais (dataset para treinar o bot) |
