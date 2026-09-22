@@ -15,7 +15,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":1,"submarine":1,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1,"asw":2},
-        "position":{"col":4,"row":1},
+        "position":{"col":5,"row":1},
         "notes":"ARA Veinticinco de Mayo (ex-HMS Venerable). Porta-aviões leve a vapor. Base da 1ª Esquadrilha de A-4Q."
       },
       {
@@ -26,7 +26,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":0,"submarine":0,"land":2},
         "weapons":{"mss":{"quantity":6,"range":2}},
         "capabilities":{"airAttack":6},
-        "position":{"col":4,"row":1},
+        "position":{"col":5,"row":1},
         "embarked":"BLUE-VM",
         "notes":"8× A-4Q Skyhawk embarcados. Único esquadrão naval a operar de porta-aviões no conflito."
       },
@@ -38,7 +38,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"ascm":{"quantity":8,"range":6},"mss":{"quantity":6,"range":3}},
         "capabilities":{"navalGun":2,"airDefense":5,"asw":2},
-        "position":{"col":5,"row":1},
+        "position":{"col":6,"row":1},
         "notes":"ARA Hércules + ARA Santísima Trinidad (Type 42, Sea Dart/Exocet). Escolta principal do GT porta-aviões."
       },
       {
@@ -49,7 +49,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":0},
         "weapons":{"ascm":{"quantity":9,"range":6}},
         "capabilities":{"navalGun":3,"airDefense":3,"asw":2},
-        "position":{"col":5,"row":2},
+        "position":{"col":6,"row":2},
         "notes":"ARA Drummond, Guerrico e Granville (classe A69). Guerrico avariada em Grytviken, 3 abr 1982."
       },
       {
@@ -60,7 +60,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":0,"land":2},
         "weapons":{},
         "capabilities":{"navalGun":8,"airDefense":2},
-        "position":{"col":3,"row":7},
+        "position":{"col":5,"row":7},
         "notes":"ARA General Belgrano (ex-USS Phoenix). Forte artilharia de 6\". Afundado por torpedos em 2 mai 1982 — 323 mortos."
       },
       {
@@ -71,7 +71,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"ascm":{"quantity":6,"range":6}},
         "capabilities":{"navalGun":5,"airDefense":3,"asw":2},
-        "position":{"col":3,"row":7},
+        "position":{"col":5,"row":7},
         "notes":"ARA Hipólito Bouchard + ARA Piedrabuena (ex-Fletcher/Sumner). Escolta do Belgrano."
       },
       {
@@ -81,7 +81,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":1,"submarine":0,"land":0},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":4,"row":0},
+        "position":{"col":4,"row":1},
         "notes":"ARA Punta Médanos. Petroleiro de esquadra do GT porta-aviões."
       },
       {
@@ -91,7 +91,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":1,"submarine":0,"land":0},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":2,"row":7},
+        "position":{"col":4,"row":7},
         "notes":"ARA Punta Delgada + petroleiro de serviço geral. Abastece o GT Belgrano e a retaguarda continental."
       },
       {
@@ -102,7 +102,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":0,"submarine":1,"land":0},
         "weapons":{"torpedo":{"quantity":4,"range":2}},
         "capabilities":{},
-        "position":{"col":17,"row":5},
+        "position":{"col":17,"row":7},
         "notes":"ARA Santa Fe (ex-USS Catfish, classe Guppy). Avariada e encalhada em Grytviken, 25 abr 1982."
       },
       {
@@ -113,7 +113,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":0,"submarine":1,"land":0},
         "weapons":{"torpedo":{"quantity":4,"range":2}},
         "capabilities":{},
-        "position":{"col":10,"row":3},
+        "position":{"col":8,"row":4},
         "notes":"ARA San Luis (Type 209). Realizou vários ataques frustrados contra a Força-Tarefa britânica."
       },
       {
@@ -124,7 +124,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":1,"submarine":0,"land":0},
         "weapons":{"mss":{"quantity":4,"range":1}},
         "capabilities":{"airDefense":2},
-        "position":{"col":12,"row":2},
+        "position":{"col":7,"row":5},
         "notes":"Lanchas Z-28 (Islas Malvinas, Río Iguazú) + patrulheiros Dabur. Vigilância costeira das ilhas."
       },
       {
@@ -134,7 +134,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":0,"submarine":0,"land":1},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":12,"row":3},
+        "position":{"col":6,"row":5},
         "notes":"Grupos M1/M2. Lança e localiza campos minados no Estreito de San Carlos."
       },
       {
@@ -144,7 +144,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":3,"air":1,"submarine":0,"land":1},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":8,"row":4},
+        "position":{"col":9,"row":3},
         "notes":"Traineiras e mercantes civis reconvertidos em piquetes de vigilância (Narwal, Alejandra, Costanza e outros)."
       },
       {
@@ -155,7 +155,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":1},
         "weapons":{},
         "capabilities":{"navalGun":1,"airDefense":1},
-        "position":{"col":12,"row":3},
+        "position":{"col":6,"row":5},
         "notes":"2× LST + 1 rebocador de alto-mar. Liga o continente a Porto Argentino com reforços e suprimentos."
       },
       {
@@ -165,7 +165,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":1,"submarine":0,"land":0},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":2,"row":2},
+        "position":{"col":2,"row":5},
         "notes":"Formosa/Río Carcarañá, Río Cincel/Mar del Norte, Lago Argentino/Puerto Rosales. Mantêm a guarnição de Porto Argentino suprida."
       },
       {
@@ -176,7 +176,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":2},
         "weapons":{"raid":{"quantity":3,"range":2}},
         "capabilities":{},
-        "position":{"col":10,"row":3},
+        "position":{"col":8,"row":4},
         "hostId":"BLUE-SUB-2",
         "stealthy":true,
         "notes":"Comandos Anfíbios / Buzos Tácticos. Embarcados no ARA San Luis."
@@ -189,7 +189,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":2,"submarine":0,"land":1},
         "weapons":{},
         "capabilities":{"airDefense":8,"airAttack":4},
-        "position":{"col":1,"row":1},
+        "position":{"col":1,"row":5},
         "notes":"Mirage IIIEA (Grupo 8) + Dagger (Grupo 6). Alcance limitado sobre as ilhas — poucos minutos de permanência."
       },
       {
@@ -200,7 +200,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":0,"submarine":0,"land":2},
         "weapons":{"mss":{"quantity":10,"range":2}},
         "capabilities":{"airAttack":9},
-        "position":{"col":1,"row":2},
+        "position":{"col":1,"row":5},
         "notes":"A-4B (Grupo 5) + A-4C (Grupo 4). Principal força de ataque continental contra a Força-Tarefa."
       },
       {
@@ -211,7 +211,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":0,"land":0},
         "weapons":{"ascm":{"quantity":5,"range":6}},
         "capabilities":{"airAttack":2},
-        "position":{"col":0,"row":4},
+        "position":{"col":2,"row":7},
         "notes":"2ª Esquadrilha Aeronaval de Caça e Ataque. Apenas 5 mísseis AM39 Exocet ar-superfície disponíveis em toda a guerra."
       },
       {
@@ -222,7 +222,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":0,"submarine":0,"land":2},
         "weapons":{"lacm":{"quantity":4,"range":8}},
         "capabilities":{"airAttack":3},
-        "position":{"col":1,"row":0},
+        "position":{"col":0,"row":1},
         "notes":"Grupo 2 de Bombardeo. Bombardeiro de longo alcance, baixa sobrevivência diante de caças modernos."
       },
       {
@@ -232,7 +232,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":4,"air":1,"submarine":1,"land":1},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":1,"row":1},
+        "position":{"col":1,"row":3},
         "notes":"Lear Jet 35A (Esc. Fénix) + SP-2H Neptune. ISR de longo alcance, sem armamento."
       },
       {
@@ -243,7 +243,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":2},
         "weapons":{},
         "capabilities":{"airAttack":5},
-        "position":{"col":13,"row":4},
+        "position":{"col":6,"row":5},
         "notes":"IA-58 Pucará — esquadrilhas de Porto Argentino/Ganso Verde/Ilha Pebble, já incluindo reforços dos turnos 3 e 4. Ataque ao solo, baixa velocidade."
       },
       {
@@ -254,7 +254,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":0,"submarine":0,"land":3},
         "weapons":{},
         "capabilities":{"navalGun":4,"airDefense":6},
-        "position":{"col":13,"row":3},
+        "position":{"col":7,"row":4},
         "notes":"10ª Brigada de Infantería (3º, 6º, 7º, 25º RI) + 5º Batalhão de Infantaria de Marinha. ~5.000 efetivos. Artilharia 105mm + baterias Tigercat/Roland/35mm."
       },
       {
@@ -265,7 +265,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":0,"land":0},
         "weapons":{"ascm":{"quantity":2,"range":3}},
         "capabilities":{},
-        "position":{"col":13,"row":3},
+        "position":{"col":7,"row":4},
         "notes":"2× lançadores MM38 Exocet improvisados por técnicos navais. Atingiu o HMS Glamorgan em 12 jun 1982 — sem reabastecimento possível."
       },
       {
@@ -276,7 +276,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":2},
         "weapons":{},
         "capabilities":{"navalGun":1,"airDefense":2},
-        "position":{"col":13,"row":4},
+        "position":{"col":6,"row":5},
         "notes":"12º Regimiento de Infantería (Cia A + B). Defende Ganso Verde/Prado do Ganso."
       },
       {
@@ -287,7 +287,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":1},
         "weapons":{},
         "capabilities":{"airDefense":1},
-        "position":{"col":11,"row":3},
+        "position":{"col":5,"row":5},
         "notes":"Forças de Segurança de Port Howard e Fox Bay, Falkland Ocidental."
       },
       {
@@ -297,7 +297,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":0,"submarine":0,"land":1},
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":1},
         "weapons":{},"capabilities":{},
-        "position":{"col":19,"row":5},
+        "position":{"col":19,"row":7},
         "notes":"Pequeno destacamento em Grytviken/Leith. Capturado em 25 abr 1982 após ataque naval e aéreo britânico."
       },
       {
@@ -307,7 +307,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":2,"submarine":0,"land":1},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":1,"row":0},
+        "position":{"col":0,"row":1},
         "notes":"Bases Aéreas Militares de Comodoro Rivadavia e San Julián. Recompletamento de caças e bombardeiros Canberra."
       },
       {
@@ -317,7 +317,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":2,"submarine":0,"land":1},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":1,"row":2},
+        "position":{"col":1,"row":5},
         "notes":"Principal base continental de A-4B/C Skyhawk."
       },
       {
@@ -327,7 +327,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":0,"submarine":0,"land":1},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":2,"row":2},
+        "position":{"col":1,"row":5},
         "notes":"Hub logístico continental. Reabastece navios argentinos em operação."
       },
       {
@@ -337,7 +337,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":2,"submarine":0,"land":1},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":0,"row":4},
+        "position":{"col":2,"row":7},
         "notes":"Base dos Super Étendard e A-4Q. A mais próxima das ilhas entre as bases continentais."
       }
     ],
@@ -350,7 +350,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":1,"submarine":1,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1,"asw":3},
-        "position":{"col":17,"row":3},
+        "position":{"col":13,"row":3},
         "notes":"Nau capitânia da Força-Tarefa. Casco de 1959, grande grupo aéreo. Prime alvo de Exocet."
       },
       {
@@ -361,7 +361,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":2,"submarine":0,"land":2},
         "weapons":{"mss":{"quantity":8,"range":2}},
         "capabilities":{"airDefense":9,"airAttack":6},
-        "position":{"col":17,"row":3},
+        "position":{"col":13,"row":3},
         "embarked":"RED-HERMES",
         "notes":"12× Sea Harrier FRS.1. CAP + ataque ao solo. Nenhuma perda em combate ar-ar durante toda a guerra."
       },
@@ -373,7 +373,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":1,"submarine":1,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1,"asw":3},
-        "position":{"col":17,"row":2},
+        "position":{"col":13,"row":2},
         "notes":"Porta-aviões leve (\"through-deck cruiser\"), mais moderno e resistente que o Hermes, grupo aéreo menor."
       },
       {
@@ -384,7 +384,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":2,"submarine":0,"land":2},
         "weapons":{"mss":{"quantity":6,"range":2}},
         "capabilities":{"airDefense":7,"airAttack":5},
-        "position":{"col":17,"row":2},
+        "position":{"col":13,"row":2},
         "embarked":"RED-INVINCIBLE",
         "notes":"9× Sea Harrier FRS.1, reforçado em voo por Harriers ferry do Atlantic Conveyor em maio."
       },
@@ -396,7 +396,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"mss":{"quantity":12,"range":3}},
         "capabilities":{"navalGun":2,"airDefense":8,"asw":2},
-        "position":{"col":17,"row":3},
+        "position":{"col":13,"row":3},
         "notes":"HMS Glasgow + HMS Sheffield (Type 42, Sea Dart). Sheffield afundado por Exocet em 4 mai 1982 — 20 mortos."
       },
       {
@@ -407,7 +407,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"mss":{"quantity":6,"range":3}},
         "capabilities":{"navalGun":2,"airDefense":5,"asw":2},
-        "position":{"col":17,"row":4},
+        "position":{"col":13,"row":4},
         "notes":"HMS Coventry (Type 42) + HMS Arrow (Type 21). Coventry afundado em 25 mai após 3 ataques aéreos, abatendo 2 aeronaves antes."
       },
       {
@@ -418,7 +418,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":2},
         "weapons":{"ascm":{"quantity":4,"range":6}},
         "capabilities":{"navalGun":3,"airDefense":2,"asw":2},
-        "position":{"col":16,"row":3},
+        "position":{"col":12,"row":3},
         "notes":"HMS Glamorgan (County) + HMS Broadsword (Type 22). Glamorgan sobreviveu a um Exocet lançado de terra em 12 jun — 13 mortos."
       },
       {
@@ -429,7 +429,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":1,"land":1},
         "weapons":{},
         "capabilities":{"navalGun":3,"airDefense":1,"asw":2},
-        "position":{"col":16,"row":4},
+        "position":{"col":12,"row":4},
         "notes":"HMS Yarmouth + HMS Alacrity (Leander/Type 21). Sem míssil dual-role — mais vulnerável ao ataque aéreo."
       },
       {
@@ -440,7 +440,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"ascm":{"quantity":4,"range":6}},
         "capabilities":{"navalGun":2,"airDefense":2,"asw":2},
-        "position":{"col":15,"row":3},
+        "position":{"col":10,"row":4},
         "notes":"HMS Ardent + HMS Argonaut. Ardent afundado em 22 mai após apoiar o raid do SAS em Ganso Verde — 22 mortos."
       },
       {
@@ -451,7 +451,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":1,"land":1},
         "weapons":{},
         "capabilities":{"navalGun":2,"airDefense":1,"asw":1},
-        "position":{"col":15,"row":4},
+        "position":{"col":10,"row":5},
         "notes":"HMS Antelope + HMS Ambuscade. Antelope afundado em 24 mai ao tentar desarmar uma bomba não detonada."
       },
       {
@@ -472,7 +472,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":1,"submarine":0,"land":1},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":18,"row":5},
+        "position":{"col":18,"row":6},
         "notes":"Navio de vigilância do Antártico. Sua retirada planejada em 1981 é citada como sinal que motivou a invasão argentina."
       },
       {
@@ -483,7 +483,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":2},
         "weapons":{"raid":{"quantity":4,"range":2}},
         "capabilities":{},
-        "position":{"col":18,"row":5},
+        "position":{"col":18,"row":6},
         "hostId":"RED-SG-ICE",
         "stealthy":true,
         "notes":"Equipes do 22 SAS e do Special Boat Squadron. Reconhecimento e ação direta — Ganso Verde, Monte Kent, Ilha Pebble."
@@ -496,7 +496,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":2,"land":0},
         "weapons":{"torpedo":{"quantity":12,"range":2}},
         "capabilities":{},
-        "position":{"col":9,"row":6},
+        "position":{"col":5,"row":8},
         "notes":"SSN classe Churchill. Afundou o ARA General Belgrano em 2 mai 1982 — primeiro ataque de submarino nuclear da história."
       },
       {
@@ -507,7 +507,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":2,"land":0},
         "weapons":{"torpedo":{"quantity":12,"range":2}},
         "capabilities":{},
-        "position":{"col":15,"row":2},
+        "position":{"col":8,"row":5},
         "notes":"SSN classe Swiftsure. Um dos primeiros submarinos a chegar à zona de exclusão, em 12 abr 1982."
       },
       {
@@ -518,7 +518,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":2,"land":0},
         "weapons":{"torpedo":{"quantity":12,"range":2}},
         "capabilities":{},
-        "position":{"col":15,"row":6},
+        "position":{"col":8,"row":6},
         "notes":"SSN classe Swiftsure. Patrulhou a costa continental argentina em busca do porta-aviões 25 de Mayo."
       },
       {
@@ -529,7 +529,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":1},
         "weapons":{},
         "capabilities":{"navalGun":1,"airDefense":2},
-        "position":{"col":16,"row":3},
+        "position":{"col":11,"row":4},
         "notes":"HMS Fearless + HMS Intrepid (LPD). Únicos meios de desembarcar tropas e viaturas em San Carlos. Vulnerabilidade crítica."
       },
       {
@@ -540,7 +540,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1},
-        "position":{"col":17,"row":3},
+        "position":{"col":12,"row":3},
         "notes":"SS Canberra + SS Queen Elizabeth II + SS Atlantic Conveyor. Transportam a 3ª Bda Comando e a 5ª Bda de Infantaria. Conveyor afundado por Exocet em 25 mai — 12 mortos, perda de helicópteros Chinook."
       },
       {
@@ -550,7 +550,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":1,"submarine":0,"land":0},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":18,"row":2},
+        "position":{"col":14,"row":2},
         "notes":"RFA Olmeda. Reabastece o grupo porta-aviões."
       },
       {
@@ -560,7 +560,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":1,"submarine":0,"land":0},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":18,"row":3},
+        "position":{"col":14,"row":3},
         "notes":"RFA Appleleaf + RFA Plumleaf. Reabastece as escoltas."
       },
       {
@@ -570,7 +570,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":1,"submarine":0,"land":0},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":18,"row":4},
+        "position":{"col":14,"row":4},
         "notes":"RFA Tidespring + RFA Bayleaf. Reabastece o grupo de desembarque e a força da Geórgia do Sul."
       },
       {
@@ -580,7 +580,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":1,"submarine":0,"land":0},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":19,"row":3},
+        "position":{"col":16,"row":3},
         "notes":"RFA British Tay + British Tamar + British Esk. Ponte logística com Ascensão — só reabastecem outros petroleiros."
       },
       {
@@ -590,7 +590,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":0,"submarine":0,"land":1},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":14,"row":3},
+        "position":{"col":9,"row":4},
         "notes":"HMS Junella, Cordella, Farnella, Northella — traineiras convertidas em caça-minas. Abrem caminho para o Estreito de San Carlos."
       },
       {
@@ -600,7 +600,7 @@ const ORDER_OF_BATTLE = {
         "detectionRange":{"surface":1,"air":0,"submarine":0,"land":0},
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},"capabilities":{},
-        "position":{"col":19,"row":2},
+        "position":{"col":16,"row":2},
         "notes":"SS Uganda + navios-ambulância Hecla/Hydra/Herald. Protegido pela Convenção de Genebra — sem combate."
       },
       {

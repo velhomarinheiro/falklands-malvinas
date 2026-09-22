@@ -1,26 +1,29 @@
 'use strict';
 
 // ═════════════════════════════════════════════════════════════════════════════
-// HEX GRID — MAPA "OPERAÇÃO CORPORATE / GUERRA DAS MALVINAS"
-// Grade calibrada para coincidir com mapa.png (carta estilizada gerada)
-// Flat-top hexagons (topo reto)
+// HEX GRID — MAPA "GUERRA DAS MALVINAS / FALKLAND 1982"
+// Grade georreferenciada (Lambert conforme, NE 1:10M) — 1 hex = 75 NM.
+// Calibrada para coincidir com mapa.png (ver mapa_source/, metade da
+// resolução original de mapa_source/mapa_malvinas_1982_georef.json:
+// R_PX=96, M=76 na imagem-fonte 3080×1898 → aqui, tudo em metade da escala).
+// Flat-top hexagons (topo reto), deslocamento odd-q.
 // ═════════════════════════════════════════════════════════════════════════════
 
 const GRID_W = 20; // A–T
 const GRID_H = 10; // 1–10
 
 // ─── Geometria da grade ────────────────────────────────────────────────────
-const HEX_R = 58;
+const HEX_R = 48;
 const HEX_W = HEX_R * 2;
 const HEX_H = HEX_R * Math.sqrt(3);
 
 // ─── Canvas ─────────────────────────────────────────────────────────────────
-const CVS_W = 1830;
-const CVS_H = 1150;
+const CVS_W = 1540;
+const CVS_H = 949;
 
 // ─── Origem da grade sobre o mapa ──────────────────────────────────────────
-const OX = 80;
-const OY = 90;
+const OX = 86;
+const OY = 79.569;
 
 // ═════════════════════════════════════════════════════════════════════════════
 // CONVERSÕES

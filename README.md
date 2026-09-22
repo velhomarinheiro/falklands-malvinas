@@ -25,10 +25,11 @@ O servidor sobe em `http://localhost:3000` (porta configurável via `PORT`).
 
 ## Mecânicas principais
 
-- Grade hexagonal 20×10 sobre carta náutica estilizada, cobrindo a costa
+- Grade hexagonal 20×10 (1 hex = 75 NM) sobre carta náutica georreferenciada
+  (projeção Lambert conforme, Natural Earth 1:10M), cobrindo a costa
   patagônica argentina, as Ilhas Malvinas/Falkland e a Geórgia do Sul, com
-  terrenos (terra, águas rasas/estreitos, plataforma continental, águas
-  profundas).
+  terrenos (terra, águas rasas/costa, plataforma continental, águas
+  profundas) derivados da geografia real.
 - Turnos com períodos diurno/noturno; movimentação simultânea seguida de fase
   de combate com rodadas, interceptação e contra-ataques.
 - Névoa de guerra com alcances de detecção por categoria (noite reduz detecção;
@@ -53,7 +54,7 @@ O servidor sobe em `http://localhost:3000` (porta configurável via `PORT`).
 | `game_logger.js` | Gravação de partidas em JSONL para o dataset de ML |
 | `shared/` | Ordem de batalha, configuração e motor de combate (usados por servidor e cliente) |
 | `public/` | Cliente web (landing, jogo em canvas, CSS, ícones, cards) |
-| `mapa_source.svg` | Fonte vetorial da carta náutica (`public/mapa.png`) |
+| `mapa_source/` | Fonte da carta náutica georreferenciada (`public/mapa.png`): gerador Python, GeoJSON com lon/lat e terreno por hexágono, imagem em resolução plena |
 | `scripts/gen_unit_cards.js` | Gera as cartas ilustradas de cada unidade (`public/cards/`) |
 | `data/game-logs/` | Logs de partidas reais (dataset para treinar o bot) |
 | `ml/` | Scripts de treinamento do bot por imitação |
