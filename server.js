@@ -1236,17 +1236,7 @@ function applyBotMovesToState(state, botTeam, moves) {
     if (!Array.isArray(path) || path.length < 2) continue;
     const unit = state.units.find(u => u.id === unitId && u.hp > 0);
     if (!unit) continue;
-    const dest = path[path.length - 1];
-    unit.col = dest.col; unit.row = dest.row; unit.moved = true;
-    state.log.unshift(logEntry('UNIT_MOVED', { name: unit.name, team: botTeam, hex: `${String.fromCharCode(65 + dest.col)}${dest.row + 1}` }));
-    const dist = path.length - 1;
-    if (unit.category !== 'air') {
-      spendNavalFuel(unit, navalMoveCost(dist));
-    } else {
-      unit.airStatus = 'airborne';
-      spendAirFuel(unit, dist);
-      if (isAirRefuelLocation(unit, state)) unit.fuel.wasAtRefuelLocation = true;
-    }
+    applyUnitMovement(unit, path, botTeam, state);
   }
   for (const u of state.units) {
     if (u.hp <= 0 || u.team !== botTeam || u.moved) continue;
