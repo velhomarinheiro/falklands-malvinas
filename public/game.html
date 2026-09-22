@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guerra das Malvinas / Falkland 1982 — Teatro de Operações</title>
-  <meta name="description" content="Teatro de operações do wargame naval histórico Guerra das Malvinas/Falkland 1982.">
+  <title data-i18n="game.pageTitle">Guerra das Malvinas / Falkland 1982 — Teatro de Operações</title>
+  <meta name="description" content="Teatro de operações do wargame naval histórico Guerra das Malvinas/Falkland 1982." data-i18n-content="game.pageDescription">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="css/game.css">
   <link rel="stylesheet" href="css/tutorial.css">
@@ -16,16 +16,20 @@
 
   <!-- Header bar -->
   <header class="game-header">
-    <div class="header-title">MALVINAS / FALKLAND 1982</div>
-    <div id="my-turn-banner" class="my-turn-banner">▶ SUA VEZ</div>
+    <div class="header-title" data-i18n="game.headerTitle">MALVINAS / FALKLAND 1982</div>
+    <div id="my-turn-banner" class="my-turn-banner" data-i18n="game.yourTurn">▶ SUA VEZ</div>
     <div class="header-meta">
       <span id="team-badge"   class="team-badge"></span>
       <span id="turn-label"   class="meta-item">Turno 1</span>
-      <span id="period-label" class="meta-item">☀ Diurno</span>
-      <span id="phase-label"  class="meta-item phase">Movimentação</span>
-      <button id="sfx-toggle" class="sfx-toggle" title="Som (S)">🔊</button>
-      <button id="help-toggle" class="sfx-toggle" title="Ajuda (H)" aria-label="Abrir ajuda">?</button>
-      <button id="sidebar-toggle" class="sidebar-toggle-btn" title="Abrir painel lateral" aria-label="Abrir painel lateral"
+      <span id="period-label" class="meta-item" data-i18n="period.day">☀ Diurno</span>
+      <span id="phase-label"  class="meta-item phase" data-i18n="ui.movementPhase">Movimentação</span>
+      <div class="lang-switch" data-i18n-switch>
+        <button type="button" data-locale="pt" class="lang-btn">PT</button>
+        <button type="button" data-locale="en" class="lang-btn">EN</button>
+      </div>
+      <button id="sfx-toggle" class="sfx-toggle" data-i18n-title="game.sfxTitle" title="Som (S)">🔊</button>
+      <button id="help-toggle" class="sfx-toggle" data-i18n-title="game.helpTitle" data-i18n-aria-label="game.helpAria" title="Ajuda (H)" aria-label="Abrir ajuda">?</button>
+      <button id="sidebar-toggle" class="sidebar-toggle-btn" data-i18n-title="game.sidebarOpenTitle" data-i18n-aria-label="game.sidebarOpenTitle" title="Abrir painel lateral" aria-label="Abrir painel lateral"
         onclick="document.querySelector('.game-body').classList.toggle('sidebar-open')">☰</button>
     </div>
   </header>
@@ -35,66 +39,66 @@
 
     <!-- Canvas -->
     <div class="canvas-wrap">
-      <canvas id="game-canvas" aria-label="Tabuleiro hexagonal do teatro de operações"></canvas>
+      <canvas id="game-canvas" data-i18n-aria-label="game.boardAria" aria-label="Tabuleiro hexagonal do teatro de operações"></canvas>
       <div class="zoom-controls">
-        <button id="zoom-in"    class="zoom-btn" title="Zoom in (+)">+</button>
-        <button id="zoom-reset" class="zoom-btn" title="Resetar zoom">⊙</button>
-        <button id="zoom-out"   class="zoom-btn" title="Zoom out (−)">−</button>
+        <button id="zoom-in"    class="zoom-btn" data-i18n-title="game.zoomIn" title="Zoom in (+)">+</button>
+        <button id="zoom-reset" class="zoom-btn" data-i18n-title="game.zoomReset" title="Resetar zoom">⊙</button>
+        <button id="zoom-out"   class="zoom-btn" data-i18n-title="game.zoomOut" title="Zoom out (−)">−</button>
       </div>
       <div id="terrain-tip" class="terrain-tip"></div>
       <div id="error-flash" class="error-flash hidden" role="alert"></div>
       <div id="reconnect-banner" class="reconnect-banner hidden" role="status"></div>
       <div id="stack-picker" class="stack-picker hidden">
-        <div class="sp-title">UNIDADES EMPILHADAS</div>
+        <div class="sp-title" data-i18n="game.stackedUnits">UNIDADES EMPILHADAS</div>
         <div id="sp-list"></div>
-        <button id="sp-group-btn" class="act-btn blue sp-group">▶ Grupo (juntos)</button>
+        <button id="sp-group-btn" class="act-btn blue sp-group" data-i18n="game.groupTogether">▶ Grupo (juntos)</button>
       </div>
     </div>
 
     <!-- Sidebar -->
     <div class="sidebar-backdrop"
       onclick="document.querySelector('.game-body').classList.remove('sidebar-open')"></div>
-    <aside class="sidebar" aria-label="Painel de controle">
-      <button class="sidebar-close-btn" title="Fechar painel" aria-label="Fechar painel lateral"
+    <aside class="sidebar" data-i18n-aria-label="game.sidebarAria" aria-label="Painel de controle">
+      <button class="sidebar-close-btn" data-i18n-title="game.sidebarClose" data-i18n-aria-label="game.sidebarCloseAria" title="Fechar painel" aria-label="Fechar painel lateral"
         onclick="document.querySelector('.game-body').classList.remove('sidebar-open')">✕</button>
 
       <div class="panel fleet-panel">
-        <div class="panel-title">FROTAS</div>
+        <div class="panel-title" data-i18n="game.fleets">FROTAS</div>
         <div class="fleet-row blue"><span id="fleet-blue">Azul: 9</span></div>
         <div class="fleet-row red" ><span id="fleet-red" >Verm: 9</span></div>
       </div>
 
       <div class="panel unit-info-panel">
-        <div class="panel-title">UNIDADE SELECIONADA</div>
-        <div id="unit-panel"><p class="no-sel">Clique em uma unidade sua</p></div>
+        <div class="panel-title" data-i18n="game.selectedUnit">UNIDADE SELECIONADA</div>
+        <div id="unit-panel"><p class="no-sel" data-i18n="ui.clickYourUnit">Clique em uma unidade sua</p></div>
       </div>
 
       <div class="panel actions-panel">
-        <div class="panel-title">AÇÕES</div>
-        <button id="end-phase-btn"  class="act-btn yellow hidden">Encerrar Movimentação</button>
-        <button id="combat-btn"     class="act-btn orange hidden">Confirmar Ataques (0)</button>
-        <button id="undo-step-btn"  class="act-btn gray   hidden">↩ Desfazer Passo</button>
-        <button id="cancel-btn"     class="act-btn gray   hidden">Cancelar Seleção</button>
+        <div class="panel-title" data-i18n="game.actions">AÇÕES</div>
+        <button id="end-phase-btn"  class="act-btn yellow hidden" data-i18n="ui.endMovement">Encerrar Movimentação</button>
+        <button id="combat-btn"     class="act-btn orange hidden" data-i18n="game.confirmAttacksZero">Confirmar Ataques (0)</button>
+        <button id="undo-step-btn"  class="act-btn gray   hidden" data-i18n="game.undoStep">↩ Desfazer Passo</button>
+        <button id="cancel-btn"     class="act-btn gray   hidden" data-i18n="game.cancelSelection">Cancelar Seleção</button>
         <div class="phase-legend">
-          <div class="leg-row"><span class="leg-swatch green"></span>Hexágonos de movimento</div>
-          <div class="leg-row"><span class="leg-swatch red"  ></span>Alvos no alcance</div>
+          <div class="leg-row"><span class="leg-swatch green"></span><span data-i18n="game.legendMovement">Hexágonos de movimento</span></div>
+          <div class="leg-row"><span class="leg-swatch red"  ></span><span data-i18n="game.legendTargets">Alvos no alcance</span></div>
         </div>
         <div class="action-divider"></div>
-        <button id="export-log-btn" class="act-btn gray hidden">📋 Exportar Log</button>
-        <button id="export-full-log-btn" class="act-btn gray hidden">📦 Exportar Log Completo</button>
-        <button id="abandon-btn"    class="act-btn red-dim hidden">🏳 Abandonar Jogo</button>
+        <button id="export-log-btn" class="act-btn gray hidden" data-i18n="game.exportLog">📋 Exportar Log</button>
+        <button id="export-full-log-btn" class="act-btn gray hidden" data-i18n="game.exportFullLog">📦 Exportar Log Completo</button>
+        <button id="abandon-btn"    class="act-btn red-dim hidden" data-i18n="game.abandonGame">🏳 Abandonar Jogo</button>
       </div>
 
       <!-- Objectives panel -->
       <div class="panel objectives-panel">
-        <div class="panel-title">OBJETIVOS DE VITÓRIA</div>
+        <div class="panel-title" data-i18n="game.victoryObjectives">OBJETIVOS DE VITÓRIA</div>
         <div id="objectives-content">
-          <p class="no-sel">Aguardando início...</p>
+          <p class="no-sel" data-i18n="ui.awaitingStart">Aguardando início...</p>
         </div>
       </div>
 
       <div class="panel log-panel">
-        <div class="panel-title">RELATÓRIO DE BATALHA</div>
+        <div class="panel-title" data-i18n="game.battleReport">RELATÓRIO DE BATALHA</div>
         <div id="battle-log" class="battle-log"></div>
       </div>
 
@@ -105,25 +109,29 @@
 <!-- ── LOBBY SCREEN ─────────────────────────────────────────────────────── -->
 <div id="lobby-screen">
   <div class="lobby-box">
-    <h1>⚓ GUERRA DAS MALVINAS / FALKLAND</h1>
-    <p>Wargame Naval Histórico · 2 jogadores</p>
+    <h1 data-i18n="game.lobbyTitle">⚓ GUERRA DAS MALVINAS / FALKLAND</h1>
+    <p data-i18n="game.lobbySubtitle">Wargame Naval Histórico · 2 jogadores</p>
+    <div class="lang-switch" data-i18n-switch>
+      <button type="button" data-locale="pt" class="lang-btn">PT</button>
+      <button type="button" data-locale="en" class="lang-btn">EN</button>
+    </div>
     <div id="lobby-menu">
-      <button id="btn-create" class="act-btn blue">Criar Nova Sala</button>
-      <div class="or-sep">— ou —</div>
+      <button id="btn-create" class="act-btn blue" data-i18n="game.createRoom">Criar Nova Sala</button>
+      <div class="or-sep" data-i18n="game.orSep">— ou —</div>
       <div class="join-row">
-        <input id="room-input" type="text" maxlength="6" placeholder="CÓDIGO DA SALA" autocomplete="off">
-        <button id="btn-join" class="act-btn red">Entrar</button>
+        <input id="room-input" type="text" maxlength="6" data-i18n-placeholder="game.roomCodePlaceholder" placeholder="CÓDIGO DA SALA" autocomplete="off">
+        <button id="btn-join" class="act-btn red" data-i18n="game.enter">Entrar</button>
       </div>
       <p id="lobby-err" class="lobby-err hidden"></p>
     </div>
     <div id="lobby-waiting" class="hidden">
-      <p>Sala criada! Compartilhe o código:</p>
+      <p data-i18n="game.roomCreated">Sala criada! Compartilhe o código:</p>
       <div id="room-display" class="room-code">——</div>
-      <button type="button" class="btn-copy"
-        onclick="const c=document.getElementById('room-display').textContent.trim(); if(navigator.clipboard){navigator.clipboard.writeText(c);} const t=this.textContent; this.textContent='✓ Copiado'; this.classList.add('copied'); setTimeout(()=>{this.textContent=t; this.classList.remove('copied');},1500);">
+      <button type="button" class="btn-copy" data-i18n="game.copyCode"
+        onclick="const c=document.getElementById('room-display').textContent.trim(); if(navigator.clipboard){navigator.clipboard.writeText(c);} const prev=this.textContent; this.textContent=window.t('game.copied'); this.classList.add('copied'); setTimeout(()=>{this.textContent=prev; this.classList.remove('copied');},1500);">
         ⧉ Copiar código
       </button>
-      <p class="spinner">Aguardando oponente...</p>
+      <p class="spinner" data-i18n="game.awaitingOpponent">Aguardando oponente...</p>
     </div>
   </div>
 
@@ -133,18 +141,18 @@
 <!-- ── BATTLE ROUND PANEL ─────────────────────────────────────────────────── -->
 <div id="br-panel" class="overlay hidden">
   <div class="br-box">
-    <div id="br-panel-header" class="br-header">── Engajamento ──</div>
+    <div id="br-panel-header" class="br-header" data-i18n="game.engagement">── Engajamento ──</div>
     <div id="br-panel-body"   class="br-log"></div>
     <div id="br-decision"     class="br-decision hidden">
-      <div class="br-question">Continuar o combate neste engajamento?</div>
+      <div class="br-question" data-i18n="game.continueQuestion">Continuar o combate neste engajamento?</div>
       <div class="br-btns">
-        <button id="br-btn-continue" class="act-btn green">▶ CONTINUAR</button>
-        <button id="br-btn-stop"     class="act-btn red">■ PARAR</button>
+        <button id="br-btn-continue" class="act-btn green" data-i18n="game.continueBtn">▶ CONTINUAR</button>
+        <button id="br-btn-stop"     class="act-btn red" data-i18n="game.stopBtn">■ PARAR</button>
       </div>
     </div>
-    <div id="br-waiting" class="br-waiting hidden">⌛ Aguardando decisão do adversário...</div>
+    <div id="br-waiting" class="br-waiting hidden" data-i18n="game.awaitingOpponentDecision">⌛ Aguardando decisão do adversário...</div>
     <div id="br-ok-area" class="br-ok-area hidden">
-      <button id="br-btn-ok" class="act-btn blue">OK — Próximo ▶</button>
+      <button id="br-btn-ok" class="act-btn blue" data-i18n="game.okNext">OK — Próximo ▶</button>
     </div>
   </div>
 </div>
@@ -152,14 +160,14 @@
 <!-- ── GAME OVER ─────────────────────────────────────────────────────────── -->
 <div id="game-over" class="overlay hidden">
   <div class="over-box over-box-wide">
-    <div id="winner-msg"   class="victory">VITÓRIA!</div>
+    <div id="winner-msg"   class="victory" data-i18n="game.victoryPlaceholder">VITÓRIA!</div>
     <div id="winner-sub"   class="over-sub"></div>
     <div id="over-objectives" class="over-objectives"></div>
     <div class="over-actions">
-      <button id="btn-export-over" class="act-btn yellow">📋 Exportar Log</button>
-      <button id="btn-export-full-over" class="act-btn yellow">📦 Exportar Log Completo</button>
-      <button id="btn-restart"     class="act-btn blue">Jogar Novamente</button>
-      <button id="btn-back"        class="act-btn gray">Voltar ao Lobby</button>
+      <button id="btn-export-over" class="act-btn yellow" data-i18n="game.exportLog">📋 Exportar Log</button>
+      <button id="btn-export-full-over" class="act-btn yellow" data-i18n="game.exportFullLog">📦 Exportar Log Completo</button>
+      <button id="btn-restart"     class="act-btn blue" data-i18n="game.playAgain">Jogar Novamente</button>
+      <button id="btn-back"        class="act-btn gray" data-i18n="game.backToLobby">Voltar ao Lobby</button>
     </div>
   </div>
 </div>
@@ -167,39 +175,39 @@
 <!-- ── DISCONNECTED ──────────────────────────────────────────────────────── -->
 <div id="disconnected" class="overlay hidden">
   <div class="over-box">
-    <div class="disconnect-msg" id="disconnect-msg">Oponente desconectou.</div>
-    <button onclick="location.href='/'" class="act-btn gray">Voltar ao Lobby</button>
+    <div class="disconnect-msg" id="disconnect-msg" data-i18n="ui.opponentDisconnected">Oponente desconectou.</div>
+    <button onclick="location.href='/'" class="act-btn gray" data-i18n="game.backToLobby">Voltar ao Lobby</button>
   </div>
 </div>
 
 <!-- ── TARGET PICKER (stacked enemy units) ──────────────────────────────── -->
 <div id="target-picker" class="stack-picker hidden">
-  <div class="sp-title">SELECIONAR ALVO</div>
+  <div class="sp-title" data-i18n="game.selectTarget">SELECIONAR ALVO</div>
   <div id="tp-list"></div>
 </div>
 
 <!-- ── WEAPON PICKER ──────────────────────────────────────────────────────── -->
 <div id="weapon-picker" class="weapon-picker hidden">
-  <div class="wp-title">SELECIONAR ARMAMENTO</div>
+  <div class="wp-title" data-i18n="game.selectWeapon">SELECIONAR ARMAMENTO</div>
   <div class="wp-subtitle" id="wp-target-name"></div>
   <div id="wp-body" class="wp-list"></div>
   <div class="wp-footer">
-    <button id="wp-cancel"  class="act-btn gray">Cancelar</button>
-    <button id="wp-confirm" class="act-btn green">Confirmar ▶</button>
+    <button id="wp-cancel"  class="act-btn gray" data-i18n="game.cancel">Cancelar</button>
+    <button id="wp-confirm" class="act-btn green" data-i18n="game.confirm">Confirmar ▶</button>
   </div>
 </div>
 
 <!-- ── HELP MODAL ─────────────────────────────────────────────────────────── -->
 <div id="help-modal" class="overlay hidden">
   <div class="help-box">
-    <button id="help-close" class="card-modal-close" title="Fechar (ESC)">✕</button>
-    <div class="help-title">MANUAL RÁPIDO</div>
+    <button id="help-close" class="card-modal-close" data-i18n-title="game.close" title="Fechar (ESC)">✕</button>
+    <div class="help-title" data-i18n="game.quickManual">MANUAL RÁPIDO</div>
     <div class="help-tabs" id="help-tabs" role="tablist">
-      <button class="help-tab active" data-tab="fases"     role="tab">Fases</button>
-      <button class="help-tab" data-tab="combate"   role="tab">Combate</button>
-      <button class="help-tab" data-tab="logistica" role="tab">Logística</button>
-      <button class="help-tab" data-tab="vitoria"   role="tab">Vitória</button>
-      <button class="help-tab" data-tab="glossario" role="tab">Glossário</button>
+      <button class="help-tab active" data-tab="fases"     role="tab" data-i18n="game.tabFases">Fases</button>
+      <button class="help-tab" data-tab="combate"   role="tab" data-i18n="game.tabCombate">Combate</button>
+      <button class="help-tab" data-tab="logistica" role="tab" data-i18n="game.tabLogistica">Logística</button>
+      <button class="help-tab" data-tab="vitoria"   role="tab" data-i18n="game.tabVitoria">Vitória</button>
+      <button class="help-tab" data-tab="glossario" role="tab" data-i18n="game.tabGlossario">Glossário</button>
     </div>
     <div class="help-content" id="help-content"></div>
   </div>
@@ -211,13 +219,14 @@
 <!-- ── CARD MODAL (tier 3: right-click / thumbnail click) ────────────────── -->
 <div id="card-modal" class="overlay hidden">
   <div class="card-modal-box">
-    <button id="card-modal-close" class="card-modal-close" title="Fechar (ESC)">✕</button>
-    <img id="card-modal-img" class="card-modal-img" src="" alt="Card da unidade">
+    <button id="card-modal-close" class="card-modal-close" data-i18n-title="game.close" title="Fechar (ESC)">✕</button>
+    <img id="card-modal-img" class="card-modal-img" src="" alt="Card da unidade" data-i18n-alt="game.cardAlt">
   </div>
 </div>
 
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/hex.js"></script>
 <script src="js/terrain.js"></script>
 <script src="js/units.js"></script>

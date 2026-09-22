@@ -36,27 +36,42 @@ const T_BORDER = {
 };
 
 // ─── Terrain names ────────────────────────────────────────────────────────────
+// Keys into locales/{pt,en}.json under "terrain.*"; use terrainName(t) to resolve
+// in the active language (falls back to Portuguese if i18n hasn't loaded yet).
+const T_NAME_KEY = {
+  [T_LAND]:    'terrain.land',
+  [T_SHALLOW]: 'terrain.shallow',
+  [T_SHELF]:   'terrain.shelf',
+  [T_DEEP]:    'terrain.deep',
+};
 const T_NAME = {
   [T_LAND]:    'Área Terrestre',
   [T_SHALLOW]: 'Águas Rasas / Costa',
   [T_SHELF]:   'Plataforma Continental',
   [T_DEEP]:    'Águas Profundas',
 };
+function terrainName(terrain) {
+  return (typeof t === 'function') ? t(T_NAME_KEY[terrain]) : T_NAME[terrain];
+}
 
 // ─── Infrastructure markers (posições visuais no mapa) ───────────────────────
 // Coordenadas resolvidas a partir de mapa_source/mapa_malvinas_1982_georef.json
-// (hexágono mais próximo da lon/lat real de cada localidade).
+// (hexágono mais próximo da lon/lat real de cada localidade). `nameKey` resolves
+// the displayed label via i18n; `name` stays as a Portuguese fallback.
 const INFRA = [
-  { col: 0,  row: 1, type: 'aero', label: '✈', name: 'BAM Comodoro Rivadavia'    },
-  { col: 1,  row: 3, type: 'aero', label: '✈', name: 'BAM San Julián'            },
-  { col: 1,  row: 5, type: 'aero', label: '✈', name: 'BAM Río Gallegos'          },
-  { col: 1,  row: 5, type: 'port', label: '⚓', name: 'Porto Río Gallegos'        },
-  { col: 2,  row: 7, type: 'aero', label: '✈', name: 'BAM Río Grande'            },
-  { col: 5,  row: 5, type: 'land', label: '⚑', name: 'Falkland Ocidental'        },
-  { col: 6,  row: 5, type: 'aero', label: '✈', name: 'Ganso Verde / Goose Green' },
-  { col: 7,  row: 4, type: 'capital', label: '★', name: 'Puerto Argentino / Stanley' },
-  { col: 19, row: 7, type: 'land', label: '⚑', name: 'Geórgia do Sul'            },
+  { col: 0,  row: 1, type: 'aero', label: '✈', name: 'BAM Comodoro Rivadavia', nameKey: 'infra.comodoro_rivadavia' },
+  { col: 1,  row: 3, type: 'aero', label: '✈', name: 'BAM San Julián', nameKey: 'infra.san_julian' },
+  { col: 1,  row: 5, type: 'aero', label: '✈', name: 'BAM Río Gallegos', nameKey: 'infra.rio_gallegos_aero' },
+  { col: 1,  row: 5, type: 'port', label: '⚓', name: 'Porto Río Gallegos', nameKey: 'infra.rio_gallegos_port' },
+  { col: 2,  row: 7, type: 'aero', label: '✈', name: 'BAM Río Grande', nameKey: 'infra.rio_grande' },
+  { col: 5,  row: 5, type: 'land', label: '⚑', name: 'Falkland Ocidental', nameKey: 'infra.west_falkland' },
+  { col: 6,  row: 5, type: 'aero', label: '✈', name: 'Ganso Verde / Goose Green', nameKey: 'infra.goose_green' },
+  { col: 7,  row: 4, type: 'capital', label: '★', name: 'Puerto Argentino / Stanley', nameKey: 'infra.stanley' },
+  { col: 19, row: 7, type: 'land', label: '⚑', name: 'Geórgia do Sul', nameKey: 'infra.south_georgia' },
 ];
+function infraName(inf) {
+  return (typeof t === 'function') ? t(inf.nameKey) : inf.name;
+}
 
 // ─── Movement rules ───────────────────────────────────────────────────────────
 function canEnterTerrain(unitTypeOrCategory, terrain) {

@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico</title>
-  <meta name="description" content="Wargame naval histórico por turnos ambientado na Guerra das Malvinas/Falkland de 1982. Comande a Argentina ou o Reino Unido em combate hexagonal, com ciclo dia/noite e névoa de guerra. Multiplayer online ou contra o bot.">
+  <title data-i18n="landing.pageTitle">Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico</title>
+  <meta name="description" content="Wargame naval histórico por turnos ambientado na Guerra das Malvinas/Falkland de 1982. Comande a Argentina ou o Reino Unido em combate hexagonal, com ciclo dia/noite e névoa de guerra. Multiplayer online ou contra o bot." data-i18n-content="landing.pageDescription">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico">
-  <meta property="og:description" content="Wargame naval histórico por turnos — Argentina vs. Reino Unido, 1982. Combate hexagonal, ciclo dia/noite e névoa de guerra. Multiplayer online ou contra o bot.">
+  <meta property="og:title" content="Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico" data-i18n-content="landing.pageTitle">
+  <meta property="og:description" content="Wargame naval histórico por turnos — Argentina vs. Reino Unido, 1982. Combate hexagonal, ciclo dia/noite e névoa de guerra. Multiplayer online ou contra o bot." data-i18n-content="landing.ogDescription">
   <meta property="og:image" content="/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico">
-  <meta name="twitter:description" content="Wargame naval histórico por turnos — Argentina vs. Reino Unido, 1982. Multiplayer online ou contra o bot.">
+  <meta name="twitter:title" content="Guerra das Malvinas / Falkland 1982 — Wargame Naval Histórico" data-i18n-content="landing.pageTitle">
+  <meta name="twitter:description" content="Wargame naval histórico por turnos — Argentina vs. Reino Unido, 1982. Multiplayer online ou contra o bot." data-i18n-content="landing.twitterDescription">
   <meta name="twitter:image" content="/og-image.jpg">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/tutorial.css">
@@ -25,10 +25,14 @@
 <section class="hero">
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <div class="classification">SIMULAÇÃO HISTÓRICA NAVAL · 1982</div>
-    <h1>GUERRA DAS<br><span>MALVINAS · FALKLAND</span></h1>
-    <p class="tagline">Wargame Naval Histórico por Turnos · Multiplayer Online</p>
-    <a href="#lobby" class="btn-primary scroll-down">▼ INICIAR OPERAÇÃO</a>
+    <div class="classification" data-i18n="landing.classification">SIMULAÇÃO HISTÓRICA NAVAL · 1982</div>
+    <h1 data-i18n-html="landing.heroTitle">GUERRA DAS<br><span>MALVINAS · FALKLAND</span></h1>
+    <p class="tagline" data-i18n="landing.tagline">Wargame Naval Histórico por Turnos · Multiplayer Online</p>
+    <div class="lang-switch hero-lang-switch" data-i18n-switch>
+      <button type="button" data-locale="pt" class="lang-btn">PT</button>
+      <button type="button" data-locale="en" class="lang-btn">EN</button>
+    </div>
+    <a href="#lobby" class="btn-primary scroll-down" data-i18n="landing.startOp">▼ INICIAR OPERAÇÃO</a>
   </div>
   <div class="compass-rose">
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -48,8 +52,8 @@
 <!-- ═══ CONCEPT ════════════════════════════════════════════════════════════ -->
 <section class="concept">
   <div class="container">
-    <h2>TEATRO DE OPERAÇÕES</h2>
-    <p>Um wargame naval histórico ambientado no Atlântico Sul de 1982, cobrindo a costa patagônica
+    <h2 data-i18n="landing.conceptTitle">TEATRO DE OPERAÇÕES</h2>
+    <p data-i18n-html="landing.conceptBody">Um wargame naval histórico ambientado no Atlântico Sul de 1982, cobrindo a costa patagônica
        argentina, as Ilhas Malvinas/Falkland e a Geórgia do Sul. Dois comandantes — <strong>Argentina</strong>
        (Força Azul, defendendo as ilhas) e <strong>Reino Unido</strong> (Força Vermelha, a força-tarefa
        expedicionária vinda de Ascensão) — disputam o teatro marítimo em turnos que representam
@@ -58,23 +62,23 @@
     <div class="feature-grid">
       <div class="feature">
         <div class="feat-icon">⬡</div>
-        <h3>Grade Hexagonal</h3>
-        <p>Carta georreferenciada real do Atlântico Sul. Cada hexágono representa 75 milhas náuticas.</p>
+        <h3 data-i18n="landing.feat1Title">Grade Hexagonal</h3>
+        <p data-i18n="landing.feat1Body">Carta georreferenciada real do Atlântico Sul. Cada hexágono representa 75 milhas náuticas.</p>
       </div>
       <div class="feature">
         <div class="feat-icon">🌙</div>
-        <h3>Ciclo Dia / Noite</h3>
-        <p>Turnos alternados entre períodos diurnos e noturnos. A noite reduz os alcances de detecção.</p>
+        <h3 data-i18n="landing.feat2Title">Ciclo Dia / Noite</h3>
+        <p data-i18n="landing.feat2Body">Turnos alternados entre períodos diurnos e noturnos. A noite reduz os alcances de detecção.</p>
       </div>
       <div class="feature">
         <div class="feat-icon">👁</div>
-        <h3>Névoa de Guerra</h3>
-        <p>Unidades inimigas só são visíveis dentro do alcance de detecção das suas forças.</p>
+        <h3 data-i18n="landing.feat3Title">Névoa de Guerra</h3>
+        <p data-i18n="landing.feat3Body">Unidades inimigas só são visíveis dentro do alcance de detecção das suas forças.</p>
       </div>
       <div class="feature">
         <div class="feat-icon">⚡</div>
-        <h3>Combate Simultâneo</h3>
-        <p>Ambos os lados declaram ataques ao mesmo tempo. A resolução é simultânea e realista.</p>
+        <h3 data-i18n="landing.feat4Title">Combate Simultâneo</h3>
+        <p data-i18n="landing.feat4Body">Ambos os lados declaram ataques ao mesmo tempo. A resolução é simultânea e realista.</p>
       </div>
     </div>
   </div>
@@ -83,85 +87,85 @@
 <!-- ═══ UNITS ═══════════════════════════════════════════════════════════════ -->
 <section class="oob-section">
   <div class="container">
-    <h2>ORDEM DE BATALHA</h2>
-    <p class="oob-intro">Cada equipe controla um conjunto de grupos de força que representam plataformas reais.
+    <h2 data-i18n="landing.oobTitle">ORDEM DE BATALHA</h2>
+    <p class="oob-intro" data-i18n="landing.oobIntro">Cada equipe controla um conjunto de grupos de força que representam plataformas reais.
     Os ícones dos contadores no tabuleiro refletem o tipo principal de cada grupo.</p>
 
     <div class="oob-forces">
 
       <!-- BLUE FORCE -->
       <div class="oob-side">
-        <div class="oob-side-title blue-title">&#127462;&#127479; FORÇA AZUL · ARGENTINA</div>
+        <div class="oob-side-title blue-title">&#127462;&#127479; <span data-i18n="landing.blueTitle">FORÇA AZUL · ARGENTINA</span></div>
         <table class="oob-table">
-          <thead><tr><th>Tipo</th><th>Qtd</th><th>Plataformas</th><th>Cat.</th></tr></thead>
+          <thead><tr><th data-i18n="landing.thType">Tipo</th><th data-i18n="landing.thQty">Qtd</th><th data-i18n="landing.thPlatforms">Plataformas</th><th data-i18n="landing.thCat">Cat.</th></tr></thead>
           <tbody>
-            <tr><td><span class="oc blue-oc">CV</span></td><td class="opl">1</td><td>ARA Veinticinco de Mayo + A-4Q embarcados</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc blue-oc">DD</span></td><td class="opl">4</td><td>Type 42 + ex-Fletcher/Sumner (Hércules, Sta. Trinidad, Bouchard, Piedrabuena)</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc blue-oc">CO</span></td><td class="opl">3</td><td>Corvetas A69 (Drummond, Guerrico, Granville)</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc blue-oc">CG</span></td><td class="opl">1</td><td>ARA General Belgrano</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc blue-oc">NT</span></td><td class="opl">5</td><td>Petroleiros de esquadra e gerais</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc blue-oc">PC</span></td><td class="opl">13</td><td>Patrulha costeira, caça-minas e piquete de vigilância</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc blue-oc">AN</span></td><td class="opl">3</td><td>Grupo de Desembarque (LST + rebocador)</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc blue-oc">LG</span></td><td class="opl">3</td><td>Cargueiros de suprimento (Porto Argentino)</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc blue-oc">SS</span></td><td class="opl">2</td><td>ARA Santa Fe + ARA San Luis</td><td class="ocat">Submarino</td></tr>
-            <tr><td><span class="oc blue-oc">F</span></td><td class="opl">15</td><td>Mirage III + Dagger</td><td class="ocat">Aéreo</td></tr>
-            <tr><td><span class="oc blue-oc">A</span></td><td class="opl">66</td><td>A-4Q/B/C Skyhawk, Super Étendard, Canberra, Pucará</td><td class="ocat">Aéreo</td></tr>
-            <tr><td><span class="oc blue-oc">MP</span></td><td class="opl">6</td><td>Lear Jet + SP-2 Neptune (ISR)</td><td class="ocat">Aéreo</td></tr>
-            <tr><td><span class="oc blue-oc">OE</span></td><td class="opl">1</td><td>Comandos Anfíbios / Buzos Tácticos</td><td class="ocat">Especial</td></tr>
-            <tr><td><span class="oc blue-oc">IN</span></td><td class="opl">10</td><td>Guarnições de Porto Argentino, Ganso Verde, Falkland Oc. e Geórgia do Sul</td><td class="ocat">Terrestre</td></tr>
-            <tr><td><span class="oc blue-oc">AD</span></td><td class="opl">7</td><td>Baterias ADA + Bateria Exocet MM38 (Porto Argentino)</td><td class="ocat">Terrestre</td></tr>
-            <tr><td><span class="oc blue-oc">BA</span></td><td class="opl">5</td><td>Bases aéreas continentais (Rivadavia, San Julián, Gallegos, Grande) + porto</td><td class="ocat">Infraest.</td></tr>
+            <tr><td><span class="oc blue-oc">CV</span></td><td class="opl">1</td><td data-i18n="landing.blueP01">ARA Veinticinco de Mayo + A-4Q embarcados</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc blue-oc">DD</span></td><td class="opl">4</td><td data-i18n="landing.blueP02">Type 42 + ex-Fletcher/Sumner (Hércules, Sta. Trinidad, Bouchard, Piedrabuena)</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc blue-oc">CO</span></td><td class="opl">3</td><td data-i18n="landing.blueP03">Corvetas A69 (Drummond, Guerrico, Granville)</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc blue-oc">CG</span></td><td class="opl">1</td><td data-i18n="landing.blueP04">ARA General Belgrano</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc blue-oc">NT</span></td><td class="opl">5</td><td data-i18n="landing.blueP05">Petroleiros de esquadra e gerais</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc blue-oc">PC</span></td><td class="opl">13</td><td data-i18n="landing.blueP06">Patrulha costeira, caça-minas e piquete de vigilância</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc blue-oc">AN</span></td><td class="opl">3</td><td data-i18n="landing.blueP07">Grupo de Desembarque (LST + rebocador)</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc blue-oc">LG</span></td><td class="opl">3</td><td data-i18n="landing.blueP08">Cargueiros de suprimento (Porto Argentino)</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc blue-oc">SS</span></td><td class="opl">2</td><td data-i18n="landing.blueP09">ARA Santa Fe + ARA San Luis</td><td class="ocat" data-i18n="landing.catSub">Submarino</td></tr>
+            <tr><td><span class="oc blue-oc">F</span></td><td class="opl">15</td><td data-i18n="landing.blueP10">Mirage III + Dagger</td><td class="ocat" data-i18n="landing.catAir">Aéreo</td></tr>
+            <tr><td><span class="oc blue-oc">A</span></td><td class="opl">66</td><td data-i18n="landing.blueP11">A-4Q/B/C Skyhawk, Super Étendard, Canberra, Pucará</td><td class="ocat" data-i18n="landing.catAir">Aéreo</td></tr>
+            <tr><td><span class="oc blue-oc">MP</span></td><td class="opl">6</td><td data-i18n="landing.blueP12">Lear Jet + SP-2 Neptune (ISR)</td><td class="ocat" data-i18n="landing.catAir">Aéreo</td></tr>
+            <tr><td><span class="oc blue-oc">OE</span></td><td class="opl">1</td><td data-i18n="landing.blueP13">Comandos Anfíbios / Buzos Tácticos</td><td class="ocat" data-i18n="landing.catSpecial">Especial</td></tr>
+            <tr><td><span class="oc blue-oc">IN</span></td><td class="opl">10</td><td data-i18n="landing.blueP14">Guarnições de Porto Argentino, Ganso Verde, Falkland Oc. e Geórgia do Sul</td><td class="ocat" data-i18n="landing.catLand">Terrestre</td></tr>
+            <tr><td><span class="oc blue-oc">AD</span></td><td class="opl">7</td><td data-i18n="landing.blueP15">Baterias ADA + Bateria Exocet MM38 (Porto Argentino)</td><td class="ocat" data-i18n="landing.catLand">Terrestre</td></tr>
+            <tr><td><span class="oc blue-oc">BA</span></td><td class="opl">5</td><td data-i18n="landing.blueP16">Bases aéreas continentais (Rivadavia, San Julián, Gallegos, Grande) + porto</td><td class="ocat" data-i18n="landing.catInfra">Infraest.</td></tr>
           </tbody>
         </table>
-        <div class="oob-note">31 grupos de força no tabuleiro · defende as ilhas já ocupadas</div>
+        <div class="oob-note" data-i18n="landing.blueNote">31 grupos de força no tabuleiro · defende as ilhas já ocupadas</div>
       </div>
 
       <!-- RED FORCE -->
       <div class="oob-side">
-        <div class="oob-side-title red-title">&#127468;&#127463; FORÇA VERMELHA · REINO UNIDO</div>
+        <div class="oob-side-title red-title">&#127468;&#127463; <span data-i18n="landing.redTitle">FORÇA VERMELHA · REINO UNIDO</span></div>
         <table class="oob-table">
-          <thead><tr><th>Tipo</th><th>Qtd</th><th>Plataformas</th><th>Cat.</th></tr></thead>
+          <thead><tr><th data-i18n="landing.thType">Tipo</th><th data-i18n="landing.thQty">Qtd</th><th data-i18n="landing.thPlatforms">Plataformas</th><th data-i18n="landing.thCat">Cat.</th></tr></thead>
           <tbody>
-            <tr><td><span class="oc red-oc">CV</span></td><td class="opl">2</td><td>HMS Hermes + HMS Invincible</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc red-oc">DD</span></td><td class="opl">5</td><td>Type 42/County (Glasgow, Sheffield, Coventry, Glamorgan, Antrim)</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc red-oc">FF</span></td><td class="opl">10</td><td>Type 21/22/Leander (Arrow, Broadsword, Yarmouth, Alacrity, Ardent...)</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc red-oc">AN</span></td><td class="opl">2</td><td>HMS Fearless + HMS Intrepid (LPD)</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc red-oc">LG</span></td><td class="opl">3</td><td>Canberra, QE2, Atlantic Conveyor</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc red-oc">NT</span></td><td class="opl">8</td><td>Petroleiros e lançadeiras RFA</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc red-oc">PC</span></td><td class="opl">9</td><td>Caça-minas, HMS Endurance, Navio-Hospital</td><td class="ocat">Superfície</td></tr>
-            <tr><td><span class="oc red-oc">SN</span></td><td class="opl">3</td><td>HMS Conqueror, Spartan, Splendid</td><td class="ocat">Submarino</td></tr>
-            <tr><td><span class="oc red-oc">F</span></td><td class="opl">21</td><td>Sea Harrier FRS.1 (800/801 NAS)</td><td class="ocat">Aéreo</td></tr>
-            <tr><td><span class="oc red-oc">A</span></td><td class="opl">2</td><td>Avro Vulcan (Op. Black Buck)</td><td class="ocat">Aéreo</td></tr>
-            <tr><td><span class="oc red-oc">MP</span></td><td class="opl">12</td><td>Nimrod + Victor K.2 (via Ascensão)</td><td class="ocat">Aéreo</td></tr>
-            <tr><td><span class="oc red-oc">OE</span></td><td class="opl">2</td><td>SAS / SBS</td><td class="ocat">Especial</td></tr>
+            <tr><td><span class="oc red-oc">CV</span></td><td class="opl">2</td><td data-i18n="landing.redP01">HMS Hermes + HMS Invincible</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc red-oc">DD</span></td><td class="opl">5</td><td data-i18n="landing.redP02">Type 42/County (Glasgow, Sheffield, Coventry, Glamorgan, Antrim)</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc red-oc">FF</span></td><td class="opl">10</td><td data-i18n="landing.redP03">Type 21/22/Leander (Arrow, Broadsword, Yarmouth, Alacrity, Ardent...)</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc red-oc">AN</span></td><td class="opl">2</td><td data-i18n="landing.redP04">HMS Fearless + HMS Intrepid (LPD)</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc red-oc">LG</span></td><td class="opl">3</td><td data-i18n="landing.redP05">Canberra, QE2, Atlantic Conveyor</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc red-oc">NT</span></td><td class="opl">8</td><td data-i18n="landing.redP06">Petroleiros e lançadeiras RFA</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc red-oc">PC</span></td><td class="opl">9</td><td data-i18n="landing.redP07">Caça-minas, HMS Endurance, Navio-Hospital</td><td class="ocat" data-i18n="landing.catSurface">Superfície</td></tr>
+            <tr><td><span class="oc red-oc">SN</span></td><td class="opl">3</td><td data-i18n="landing.redP08">HMS Conqueror, Spartan, Splendid</td><td class="ocat" data-i18n="landing.catSub">Submarino</td></tr>
+            <tr><td><span class="oc red-oc">F</span></td><td class="opl">21</td><td data-i18n="landing.redP09">Sea Harrier FRS.1 (800/801 NAS)</td><td class="ocat" data-i18n="landing.catAir">Aéreo</td></tr>
+            <tr><td><span class="oc red-oc">A</span></td><td class="opl">2</td><td data-i18n="landing.redP10">Avro Vulcan (Op. Black Buck)</td><td class="ocat" data-i18n="landing.catAir">Aéreo</td></tr>
+            <tr><td><span class="oc red-oc">MP</span></td><td class="opl">12</td><td data-i18n="landing.redP11">Nimrod + Victor K.2 (via Ascensão)</td><td class="ocat" data-i18n="landing.catAir">Aéreo</td></tr>
+            <tr><td><span class="oc red-oc">OE</span></td><td class="opl">2</td><td data-i18n="landing.redP12">SAS / SBS</td><td class="ocat" data-i18n="landing.catSpecial">Especial</td></tr>
           </tbody>
         </table>
-        <div class="oob-note">27 grupos de força no tabuleiro · força-tarefa expedicionária vinda de Ascensão</div>
+        <div class="oob-note" data-i18n="landing.redNote">27 grupos de força no tabuleiro · força-tarefa expedicionária vinda de Ascensão</div>
       </div>
 
     </div><!-- oob-forces -->
 
     <div class="oob-legend">
-      <div class="leg-group-title">LEGENDA DE ÍCONES</div>
+      <div class="leg-group-title" data-i18n="landing.legendTitle">LEGENDA DE ÍCONES</div>
       <div class="leg-items">
-        <span class="leg-item"><span class="oc blue-oc">CV</span> Porta-Aviões</span>
-        <span class="leg-item"><span class="oc blue-oc">CG</span> Cruzador</span>
-        <span class="leg-item"><span class="oc blue-oc">DD</span> Destroyer</span>
-        <span class="leg-item"><span class="oc blue-oc">FF</span> Fragata</span>
-        <span class="leg-item"><span class="oc blue-oc">CO</span> Corveta</span>
-        <span class="leg-item"><span class="oc blue-oc">AN</span> Anfíbio</span>
-        <span class="leg-item"><span class="oc blue-oc">LG</span> Logístico</span>
-        <span class="leg-item"><span class="oc blue-oc">NT</span> Tanque</span>
-        <span class="leg-item"><span class="oc blue-oc">PC</span> Patrulha/Caça-Minas</span>
-        <span class="leg-item"><span class="oc blue-oc">SN</span> Sub. Nuclear</span>
-        <span class="leg-item"><span class="oc blue-oc">SS</span> Sub. Convencional</span>
-        <span class="leg-item"><span class="oc blue-oc">MP</span> Pat. Marítima / ISR</span>
-        <span class="leg-item"><span class="oc blue-oc">F</span> Caça</span>
-        <span class="leg-item"><span class="oc blue-oc">A</span> Ataque</span>
-        <span class="leg-item"><span class="oc blue-oc">OE</span> Operações Especiais</span>
-        <span class="leg-item"><span class="oc blue-oc">IN</span> Efetivo Terrestre</span>
-        <span class="leg-item"><span class="oc blue-oc">AD</span> Bat. AAA/SAM/Exocet</span>
-        <span class="leg-item"><span class="oc blue-oc">BA</span> Base Aérea / Porto</span>
+        <span class="leg-item"><span class="oc blue-oc">CV</span> <span data-i18n="landing.legCV">Porta-Aviões</span></span>
+        <span class="leg-item"><span class="oc blue-oc">CG</span> <span data-i18n="landing.legCG">Cruzador</span></span>
+        <span class="leg-item"><span class="oc blue-oc">DD</span> <span data-i18n="landing.legDD">Destroyer</span></span>
+        <span class="leg-item"><span class="oc blue-oc">FF</span> <span data-i18n="landing.legFF">Fragata</span></span>
+        <span class="leg-item"><span class="oc blue-oc">CO</span> <span data-i18n="landing.legCO">Corveta</span></span>
+        <span class="leg-item"><span class="oc blue-oc">AN</span> <span data-i18n="landing.legAN">Anfíbio</span></span>
+        <span class="leg-item"><span class="oc blue-oc">LG</span> <span data-i18n="landing.legLG">Logístico</span></span>
+        <span class="leg-item"><span class="oc blue-oc">NT</span> <span data-i18n="landing.legNT">Tanque</span></span>
+        <span class="leg-item"><span class="oc blue-oc">PC</span> <span data-i18n="landing.legPC">Patrulha/Caça-Minas</span></span>
+        <span class="leg-item"><span class="oc blue-oc">SN</span> <span data-i18n="landing.legSN">Sub. Nuclear</span></span>
+        <span class="leg-item"><span class="oc blue-oc">SS</span> <span data-i18n="landing.legSS">Sub. Convencional</span></span>
+        <span class="leg-item"><span class="oc blue-oc">MP</span> <span data-i18n="landing.legMP">Pat. Marítima / ISR</span></span>
+        <span class="leg-item"><span class="oc blue-oc">F</span> <span data-i18n="landing.legF">Caça</span></span>
+        <span class="leg-item"><span class="oc blue-oc">A</span> <span data-i18n="landing.legA">Ataque</span></span>
+        <span class="leg-item"><span class="oc blue-oc">OE</span> <span data-i18n="landing.legOE">Operações Especiais</span></span>
+        <span class="leg-item"><span class="oc blue-oc">IN</span> <span data-i18n="landing.legIN">Efetivo Terrestre</span></span>
+        <span class="leg-item"><span class="oc blue-oc">AD</span> <span data-i18n="landing.legAD">Bat. AAA/SAM/Exocet</span></span>
+        <span class="leg-item"><span class="oc blue-oc">BA</span> <span data-i18n="landing.legBA">Base Aérea / Porto</span></span>
       </div>
     </div>
   </div>
@@ -170,30 +174,30 @@
 <!-- ═══ HOW TO PLAY ═════════════════════════════════════════════════════════ -->
 <section class="howto">
   <div class="container">
-    <h2>COMO JOGAR</h2>
+    <h2 data-i18n="landing.howtoTitle">COMO JOGAR</h2>
     <div class="steps">
       <div class="step"><div class="step-n">1</div>
-        <h3>Crie ou entre em uma sala</h3>
-        <p>Um jogador cria a sala e compartilha o código de 6 letras com o adversário.</p>
+        <h3 data-i18n="landing.step1Title">Crie ou entre em uma sala</h3>
+        <p data-i18n="landing.step1Body">Um jogador cria a sala e compartilha o código de 6 letras com o adversário.</p>
       </div>
       <div class="step"><div class="step-n">2</div>
-        <h3>Fase de Movimentação</h3>
-        <p>Cada time move suas unidades (clique na unidade → hexágonos verdes = alcance).
+        <h3 data-i18n="landing.step2Title">Fase de Movimentação</h3>
+        <p data-i18n="landing.step2Body">Cada time move suas unidades (clique na unidade → hexágonos verdes = alcance).
            Encerre quando terminar. A outra força move em seguida.</p>
       </div>
       <div class="step"><div class="step-n">3</div>
-        <h3>Fase de Combate</h3>
-        <p>Selecione uma unidade sua e clique em inimigos detectados dentro do alcance
+        <h3 data-i18n="landing.step3Title">Fase de Combate</h3>
+        <p data-i18n="landing.step3Body">Selecione uma unidade sua e clique em inimigos detectados dentro do alcance
            (hexágonos vermelhos) para declarar ataques. Confirme quando pronto.</p>
       </div>
       <div class="step"><div class="step-n">4</div>
-        <h3>Resolução Simultânea</h3>
-        <p>Quando ambos confirmam, os ataques são resolvidos ao mesmo tempo.
+        <h3 data-i18n="landing.step4Title">Resolução Simultânea</h3>
+        <p data-i18n="landing.step4Body">Quando ambos confirmam, os ataques são resolvidos ao mesmo tempo.
            Unidades destruídas são removidas do tabuleiro.</p>
       </div>
       <div class="step"><div class="step-n">5</div>
-        <h3>Vitória</h3>
-        <p>Cada força tem objetivos próprios: a Argentina (Azul) vence ao cumprir 3 de 5 objetivos
+        <h3 data-i18n="landing.step5Title">Vitória</h3>
+        <p data-i18n="landing.step5Body">Cada força tem objetivos próprios: a Argentina (Azul) vence ao cumprir 3 de 5 objetivos
            — afundar o porta-aviões, a logística, o grupo anfíbio, o submarino nuclear ou degradar
            a esquadra britânica; o Reino Unido (Vermelha) vence ao cumprir seus 2, ambos restritos
            às ilhas — a Inglaterra operava sob regras de engajamento que proibiam ataques ao
@@ -208,55 +212,55 @@
 <!-- ═══ LOBBY ════════════════════════════════════════════════════════════════ -->
 <section class="lobby-section" id="lobby">
   <div class="container">
-    <h2>INICIAR OPERAÇÃO</h2>
+    <h2 data-i18n="landing.startOpSection">INICIAR OPERAÇÃO</h2>
 
     <div id="lobby-menu" class="lobby-box">
-      <button id="btn-tutorial" class="tut-cta-btn">📖 COMO JOGAR — Tutorial</button>
-      <div class="tut-or-direct">— ou entre direto no jogo —</div>
+      <button id="btn-tutorial" class="tut-cta-btn" data-i18n="landing.tutorialCta">📖 COMO JOGAR — Tutorial</button>
+      <div class="tut-or-direct" data-i18n="landing.orDirect">— ou entre direto no jogo —</div>
       <button id="btn-create" class="btn-action blue">
         <span class="btn-icon">⚓</span>
-        Criar Nova Sala
-        <small>Você joga como Argentina (Azul)</small>
+        <span data-i18n="landing.createRoom">Criar Nova Sala</span>
+        <small data-i18n="landing.createRoomHint">Você joga como Argentina (Azul)</small>
       </button>
 
-      <div class="lobby-or">— ou —</div>
+      <div class="lobby-or" data-i18n="landing.orSep">— ou —</div>
 
       <div class="join-form">
-        <input id="room-input" type="text" maxlength="6" placeholder="CÓDIGO DA SALA" autocomplete="off">
+        <input id="room-input" type="text" maxlength="6" data-i18n-placeholder="landing.roomInputPlaceholder" placeholder="CÓDIGO DA SALA" autocomplete="off">
         <button id="btn-join" class="btn-action red">
           <span class="btn-icon">⚔</span>
-          Entrar na Sala
-          <small>Você joga como Reino Unido (Vermelha)</small>
+          <span data-i18n="landing.joinRoom">Entrar na Sala</span>
+          <small data-i18n="landing.joinRoomHint">Você joga como Reino Unido (Vermelha)</small>
         </button>
       </div>
       <p id="lobby-err" class="lobby-err hidden"></p>
 
-      <div class="lobby-or">— ou jogue solo —</div>
+      <div class="lobby-or" data-i18n="landing.orSolo">— ou jogue solo —</div>
       <div class="lobby-solo">
         <button id="btn-solo-blue" class="btn-action solo-b">
           <span class="btn-icon">⚓</span>
-          Solo · Argentina (Azul)
-          <small>vs Computador</small>
+          <span data-i18n="landing.soloBlue">Solo · Argentina (Azul)</span>
+          <small data-i18n="landing.vsComputer">vs Computador</small>
         </button>
         <button id="btn-solo-red" class="btn-action solo-r">
           <span class="btn-icon">⚔</span>
-          Solo · Reino Unido (Vermelha)
-          <small>vs Computador</small>
+          <span data-i18n="landing.soloRed">Solo · Reino Unido (Vermelha)</span>
+          <small data-i18n="landing.vsComputer">vs Computador</small>
         </button>
       </div>
     </div>
 
     <div id="lobby-waiting" class="lobby-box waiting hidden">
-      <p>Sala criada com sucesso. Código:</p>
+      <p data-i18n="landing.roomCreatedSuccess">Sala criada com sucesso. Código:</p>
       <div id="room-display" class="room-code">——</div>
-      <p class="hint">Compartilhe este código com seu oponente</p>
-      <div class="spinner">Aguardando oponente...</div>
+      <p class="hint" data-i18n="landing.shareHint">Compartilhe este código com seu oponente</p>
+      <div class="spinner" data-i18n="landing.awaitingOpponent">Aguardando oponente...</div>
     </div>
   </div>
 </section>
 
 <footer>
-  <p>GUERRA DAS MALVINAS / FALKLAND 1982 · Wargame Naval Histórico © 2026 · <a href="game.html">Entrar no Teatro de Operações</a></p>
+  <p><span data-i18n="landing.footer">GUERRA DAS MALVINAS / FALKLAND 1982 · Wargame Naval Histórico © 2026 ·</span> <a href="game.html" data-i18n="landing.footerLink">Entrar no Teatro de Operações</a></p>
 </footer>
 
 <!-- ── TUTORIAL OVERLAY ───────────────────────────────────────────────────── -->
@@ -272,7 +276,7 @@
         <span class="tut-dot" data-s="4"></span>
         <span class="tut-dot" data-s="5"></span>
       </div>
-      <button class="tut-skip-btn">PULAR TUTORIAL</button>
+      <button class="tut-skip-btn" data-i18n="landing.skipTutorial">PULAR TUTORIAL</button>
     </div>
 
     <!-- Step 0 — O Jogo -->
@@ -281,18 +285,18 @@
         <div class="tvi-map-bg"></div>
         <div class="tvi-cards">
           <div class="tvi-team blue">
-            <img class="tvi-card-img" src="/cards/Blue_VM.jpg" alt="Força Azul — Argentina">
-            <div class="tvi-team-label">ARGENTINA · AZUL</div>
+            <img class="tvi-card-img" src="/cards/Blue_VM.jpg" alt="Força Azul — Argentina" data-i18n-alt="landing.tut0CardBlueAlt">
+            <div class="tvi-team-label" data-i18n="landing.tut0TeamBlue">ARGENTINA · AZUL</div>
           </div>
-          <div class="tvi-vs">VS</div>
+          <div class="tvi-vs" data-i18n="landing.tut0VS">VS</div>
           <div class="tvi-team red">
-            <img class="tvi-card-img" src="/cards/Red_HERMES.jpg" alt="Força Vermelha — Reino Unido">
-            <div class="tvi-team-label">REINO UNIDO · VERMELHA</div>
+            <img class="tvi-card-img" src="/cards/Red_HERMES.jpg" alt="Força Vermelha — Reino Unido" data-i18n-alt="landing.tut0CardRedAlt">
+            <div class="tvi-team-label" data-i18n="landing.tut0TeamRed">REINO UNIDO · VERMELHA</div>
           </div>
         </div>
       </div>
-      <div class="tut-title">GUERRA DAS MALVINAS / FALKLAND — 1982</div>
-      <div class="tut-text">
+      <div class="tut-title" data-i18n="landing.tut0Title">GUERRA DAS MALVINAS / FALKLAND — 1982</div>
+      <div class="tut-text" data-i18n-html="landing.tut0Body">
         Wargame naval histórico operacional para 2 jogadores.<br>
         Comande frotas de navios e aeronaves no conflito real de 1982 no Atlântico Sul.<br>
         <b>Argentina vs. Reino Unido</b> — destrua, controle e negue áreas estratégicas ao adversário.
@@ -350,11 +354,11 @@
               <text x="226" y="73" text-anchor="middle" fill="rgba(255,120,100,0.9)" font-size="14">⚓</text>
             </svg>
           </div>
-          <div class="tvm-caption">▣ verde = movimentação &nbsp;·&nbsp; ▣ vermelho = alvo no alcance</div>
+          <div class="tvm-caption" data-i18n-html="landing.tut1Caption">▣ verde = movimentação &nbsp;·&nbsp; ▣ vermelho = alvo no alcance</div>
         </div>
       </div>
-      <div class="tut-title">GRADE HEXAGONAL</div>
-      <div class="tut-text">
+      <div class="tut-title" data-i18n="landing.tut1Title">GRADE HEXAGONAL</div>
+      <div class="tut-text" data-i18n-html="landing.tut1Body">
         Selecione uma unidade sua — hexágonos verdes mostram onde pode se mover.<br>
         Na fase de combate, hexágonos vermelhos indicam alvos dentro do alcance de tiro.<br>
         Cada unidade tem <b>MOV</b> pontos de deslocamento por turno.
@@ -366,30 +370,30 @@
       <div class="tut-visual">
         <div class="tvu-wrap">
           <div class="tvu-card-panel">
-            <img src="/cards/Blue_VM.jpg" alt="Card GT Porta-Aviões">
+            <img src="/cards/Blue_VM.jpg" alt="Card GT Porta-Aviões" data-i18n-alt="landing.tut2CardAlt">
           </div>
           <div class="tvu-legend">
             <div class="tvu-row">
               <span class="tvu-key">SP</span>
-              <span class="tvu-val">Pontos de sobrevivência<br><small>Chega a zero → unidade destruída</small></span>
+              <span class="tvu-val" data-i18n-html="landing.tut2SPCombined">Pontos de sobrevivência<br><small>Chega a zero → unidade destruída</small></span>
             </div>
             <div class="tvu-row">
               <span class="tvu-key">MOV</span>
-              <span class="tvu-val">Hexágonos de movimento<br><small>Por turno, na fase de movimentação</small></span>
+              <span class="tvu-val" data-i18n-html="landing.tut2MOVCombined">Hexágonos de movimento<br><small>Por turno, na fase de movimentação</small></span>
             </div>
             <div class="tvu-row">
               <span class="tvu-key">🚀</span>
-              <span class="tvu-val">Armamentos e munição<br><small>Quantidade limitada — não regenera</small></span>
+              <span class="tvu-val" data-i18n-html="landing.tut2WeaponsCombined">Armamentos e munição<br><small>Quantidade limitada — não regenera</small></span>
             </div>
             <div class="tvu-row">
               <span class="tvu-key">Det</span>
-              <span class="tvu-val">Alcance de detecção<br><small>S = superfície · Aé = aéreo · Sb = submarino</small></span>
+              <span class="tvu-val" data-i18n-html="landing.tut2DetCombined">Alcance de detecção<br><small>S = superfície · Aé = aéreo · Sb = submarino</small></span>
             </div>
           </div>
         </div>
       </div>
-      <div class="tut-title">UNIDADES DE COMBATE</div>
-      <div class="tut-text">
+      <div class="tut-title" data-i18n="landing.tut2Title">UNIDADES DE COMBATE</div>
+      <div class="tut-text" data-i18n-html="landing.tut2Body">
         Cada unidade tem tipo, alcance e capacidades distintos — conheça sua frota.<br>
         Hover sobre uma unidade no mapa exibe estatísticas. <b>Clique direito</b> abre o card completo.<br>
         Clique em uma unidade selecionada na barra lateral para ver o card completo.
@@ -404,14 +408,14 @@
             <div class="tvph-content">
               <div class="tvph-icon-row">
                 <img class="tvph-icon" src="/icons/porta-avioes.png" alt="">
-                <span class="tvph-num">FASE 1</span>
+                <span class="tvph-num" data-i18n="landing.tut3Phase1">FASE 1</span>
               </div>
-              <div class="tvph-title">MOVIMENTAÇÃO</div>
+              <div class="tvph-title" data-i18n="landing.tut3MovTitle">MOVIMENTAÇÃO</div>
               <ul class="tvph-steps">
-                <li>Selecione uma unidade sua</li>
-                <li>Clique hexágonos <em>verdes</em></li>
-                <li>Desfaça com ↩ se quiser</li>
-                <li>Confirme: <em>Encerrar Movimentação</em></li>
+                <li data-i18n="landing.tut3MovStep1">Selecione uma unidade sua</li>
+                <li data-i18n-html="landing.tut3MovStep2">Clique hexágonos <em>verdes</em></li>
+                <li data-i18n="landing.tut3MovStep3">Desfaça com ↩ se quiser</li>
+                <li data-i18n-html="landing.tut3MovStep4">Confirme: <em>Encerrar Movimentação</em></li>
               </ul>
             </div>
           </div>
@@ -420,21 +424,21 @@
             <div class="tvph-content">
               <div class="tvph-icon-row">
                 <img class="tvph-icon" src="/icons/navio-de-guerra.png" alt="">
-                <span class="tvph-num">FASE 2</span>
+                <span class="tvph-num" data-i18n="landing.tut3Phase2">FASE 2</span>
               </div>
-              <div class="tvph-title">COMBATE</div>
+              <div class="tvph-title" data-i18n="landing.tut3AtkTitle">COMBATE</div>
               <ul class="tvph-steps">
-                <li>Selecione seu atacante</li>
-                <li>Clique alvos <em>vermelhos</em></li>
-                <li>Ajuste quantidade de armas</li>
-                <li>Confirme: <em>Confirmar Ataques</em></li>
+                <li data-i18n="landing.tut3AtkStep1">Selecione seu atacante</li>
+                <li data-i18n-html="landing.tut3AtkStep2">Clique alvos <em>vermelhos</em></li>
+                <li data-i18n="landing.tut3AtkStep3">Ajuste quantidade de armas</li>
+                <li data-i18n-html="landing.tut3AtkStep4">Confirme: <em>Confirmar Ataques</em></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
-      <div class="tut-title">FASES DO TURNO</div>
-      <div class="tut-text">
+      <div class="tut-title" data-i18n="landing.tut3Title">FASES DO TURNO</div>
+      <div class="tut-text" data-i18n-html="landing.tut3Body">
         Todo turno tem 2 fases — ambos os jogadores agem <b>simultaneamente</b>.<br>
         Movimentação primeiro: planeje as rotas e confirme. Depois, o combate resolve os ataques.<br>
         O resultado de cada engajamento é exibido com dados e danos em tempo real.
@@ -451,18 +455,18 @@
             <div class="tvw-thumb"><img src="/cards/Red_HERMES.jpg" alt=""></div>
           </div>
           <div class="tvw-objs">
-            <div class="tvw-obj-title">OBJETIVOS DE VITÓRIA</div>
-            <div class="tvw-obj-row met">✓ Destruir Porta-Aviões</div>
-            <div class="tvw-obj-row met">✓ Neutralizar 2 de 3 Logísticos</div>
-            <div class="tvw-obj-row met">✓ Neutralizar GT Anfíbio</div>
-            <div class="tvw-obj-row unmet">○ Destruir Submarino Nuclear</div>
-            <div class="tvw-obj-row warn">⚠ Adversário atingiu 1 objetivo</div>
-            <div class="tvw-prog">3 / 5 condições · precisa de 3 → 🏆 VITÓRIA</div>
+            <div class="tvw-obj-title" data-i18n="landing.tut4ObjTitle">OBJETIVOS DE VITÓRIA</div>
+            <div class="tvw-obj-row met" data-i18n="landing.tut4Obj1">✓ Destruir Porta-Aviões</div>
+            <div class="tvw-obj-row met" data-i18n="landing.tut4Obj2">✓ Neutralizar 2 de 3 Logísticos</div>
+            <div class="tvw-obj-row met" data-i18n="landing.tut4Obj3">✓ Neutralizar GT Anfíbio</div>
+            <div class="tvw-obj-row unmet" data-i18n="landing.tut4Obj4">○ Destruir Submarino Nuclear</div>
+            <div class="tvw-obj-row warn" data-i18n="landing.tut4Obj5">⚠ Adversário atingiu 1 objetivo</div>
+            <div class="tvw-prog" data-i18n="landing.tut4Prog">3 / 5 condições · precisa de 3 → 🏆 VITÓRIA</div>
           </div>
         </div>
       </div>
-      <div class="tut-title">OBJETIVOS E VITÓRIA</div>
-      <div class="tut-text">
+      <div class="tut-title" data-i18n="landing.tut4Title">OBJETIVOS E VITÓRIA</div>
+      <div class="tut-text" data-i18n-html="landing.tut4Body">
         Cumpra condições táticas: neutralize alvos, controle infraestrutura, proteja ativos.<br>
         <b>Munição e combustível são limitados</b> — gerencie com inteligência.<br>
         O painel lateral mostra seus objetivos e os do adversário em tempo real.
@@ -475,23 +479,23 @@
         <canvas id="tut-demo-canvas" width="340" height="160"></canvas>
         <!-- Weapon selection dialog — absolute overlay on the canvas -->
         <div id="tut-wd" class="tut-wd hidden">
-          <div class="tut-wd-title">⚔ ENGAJAMENTO</div>
+          <div class="tut-wd-title" data-i18n="landing.tut5Engagement">⚔ ENGAJAMENTO</div>
           <div class="tut-wd-row">
-            <span>🚀 Míssil Antinavio</span>
-            <span class="tut-wd-stock">&nbsp;×3 disp.</span>
+            <span data-i18n="landing.tut5Weapon">🚀 Míssil Antinavio</span>
+            <span class="tut-wd-stock" data-i18n-html="landing.tut5Stock">&nbsp;×3 disp.</span>
           </div>
           <div class="tut-wd-qty">
             <button id="tut-wd-minus" class="tut-wd-btn">−</button>
             <span id="tut-wd-num">1</span>
             <button id="tut-wd-plus" class="tut-wd-btn">+</button>
           </div>
-          <button id="tut-wd-confirm" class="tut-wd-confirm">CONFIRMAR ATAQUE</button>
-          <button id="tut-wd-cancel" class="tut-wd-cancel">Cancelar</button>
+          <button id="tut-wd-confirm" class="tut-wd-confirm" data-i18n="landing.tut5Confirm">CONFIRMAR ATAQUE</button>
+          <button id="tut-wd-cancel" class="tut-wd-cancel" data-i18n="landing.tut5Cancel">Cancelar</button>
         </div>
-        <div id="tut-demo-bar" class="tut-demo-bar">▣ MOVIMENTAÇÃO — clique no porta-aviões azul para selecioná-lo</div>
+        <div id="tut-demo-bar" class="tut-demo-bar" data-i18n="landing.tut5BarInitial">▣ MOVIMENTAÇÃO — clique no porta-aviões azul para selecioná-lo</div>
       </div>
-      <div class="tut-title">SIMULAÇÃO TÁTICA</div>
-      <div class="tut-text">
+      <div class="tut-title" data-i18n="landing.tut5Title">SIMULAÇÃO TÁTICA</div>
+      <div class="tut-text" data-i18n-html="landing.tut5Body">
         <b>1.</b> Clique no porta-aviões <b>Azul</b> para selecioná-lo<br>
         <b>2.</b> Clique em um hexágono vizinho verde para avançar<br>
         <b>3.</b> Clique no porta-aviões azul para declarar ataque<br>
@@ -500,14 +504,15 @@
     </div>
 
     <div class="tut-footer">
-      <button id="tut-prev" class="act-btn gray">← Anterior</button>
+      <button id="tut-prev" class="act-btn gray" data-i18n="landing.tutPrev">← Anterior</button>
       <span class="tut-counter">1 / 6</span>
-      <button id="tut-next" class="act-btn blue">Próximo →</button>
+      <button id="tut-next" class="act-btn blue" data-i18n="landing.tutNext">Próximo →</button>
     </div>
 
   </div>
 </div>
 
+<script src="js/i18n.js"></script>
 <script>
   const btnCreate = document.getElementById('btn-create');
   const btnJoin   = document.getElementById('btn-join');
@@ -521,7 +526,7 @@
 
   btnJoin.addEventListener('click', () => {
     const c = roomInput.value.trim().toUpperCase();
-    if (!c) { showErr('Digite o código da sala.'); return; }
+    if (!c) { showErr(t('landing.roomCodeRequired')); return; }
     sessionStorage.setItem('pendingAction', 'join');
     sessionStorage.setItem('pendingCode', c);
     location.href = '/game';
@@ -567,9 +572,9 @@
       el.classList.toggle('active', s === tutStep);
       el.classList.toggle('done',   s < tutStep);
     });
-    tutCounter.textContent = `${tutStep + 1} / ${TUT_STEPS}`;
+    tutCounter.textContent = t('landing.tutCounter', {n: tutStep + 1, total: TUT_STEPS});
     tutPrev.classList.toggle('hidden', tutStep === 0);
-    tutNext.textContent = tutStep === TUT_STEPS - 1 ? '✓ ENTRAR NO JOGO' : 'Próximo →';
+    tutNext.textContent = tutStep === TUT_STEPS - 1 ? t('landing.tutEnterGame') : t('landing.tutNext');
     tutNext.className   = tutStep === TUT_STEPS - 1 ? 'act-btn green' : 'act-btn blue';
     if (tutStep === 5) demoReset();
   }
@@ -586,6 +591,11 @@
   tutOverlay.querySelectorAll('.tut-skip-btn').forEach(btn =>
     btn.addEventListener('click', () => tutClose()));
   document.getElementById('btn-tutorial').addEventListener('click', () => tutShow());
+
+  // Re-render imperative (non data-i18n) text when the language switches
+  document.addEventListener('i18n:changed', () => {
+    if (!tutOverlay.classList.contains('hidden')) _tutRender();
+  });
 
   // ── Interactive demo (step 5) ────────────────────────────────────────────
   // Phases: 0=idle  1=moving  2=combat-idle  3=attacker-sel  4=weapon-dlg  5=result
@@ -613,7 +623,7 @@
   function wdShow(){
     wdAmt=1; wdNum.textContent='1'; wdPanel.classList.remove('hidden');
     demoBar.className='tut-demo-bar atk';
-    demoBar.textContent='Selecione a quantidade de armamento e confirme o ataque';
+    demoBar.textContent=t('landing.demoSelectQty');
   }
   function wdHide(){ wdPanel.classList.add('hidden'); }
 
@@ -622,14 +632,14 @@
   wdConfirm.addEventListener('click',()=>{
     wdHide(); dPhase=5;
     demoBar.className='tut-demo-bar result';
-    demoBar.textContent='\u{1F4A5} IMPACTO DIRETO — alvo neutralizado!';
+    demoBar.textContent=t('landing.demoImpact');
     demoDraw();
-    setTimeout(()=>{ demoBar.textContent='✓ Missão cumprida — você domina os fundamentos!'; },1500);
+    setTimeout(()=>{ demoBar.textContent=t('landing.demoMissionDone'); },1500);
   });
   wdCancel.addEventListener('click',()=>{
     wdHide(); dPhase=3;
     demoBar.className='tut-demo-bar atk';
-    demoBar.textContent='\u{1F3AF} COMBATE — clique no navio inimigo para declarar ataque';
+    demoBar.textContent=t('landing.demoAttackPrompt');
     demoDraw();
   });
 
@@ -761,7 +771,7 @@
     wdHide(); dAnimating=false; dPhase=0;
     dBlue={col:2,row:1}; dRed={col:5,row:1};
     demoBar.className='tut-demo-bar';
-    demoBar.textContent='▣ MOVIMENTAÇÃO — clique no porta-aviões azul para selecioná-lo';
+    demoBar.textContent=t('landing.demoMoveSelect');
     demoDraw();
   }
 
@@ -779,7 +789,7 @@
       if(hex.col===dBlue.col&&hex.row===dBlue.row){
         dPhase=1;
         demoBar.className='tut-demo-bar';
-        demoBar.textContent='⬡ MOVIMENTAÇÃO — clique em um hexágono verde para avançar';
+        demoBar.textContent=t('landing.demoMoveGo');
         demoDraw();
       }
       return;
@@ -796,10 +806,10 @@
         if(ok){
           dPhase=2;
           demoBar.className='tut-demo-bar atk';
-          demoBar.textContent='⚔ COMBATE — clique no porta-aviões azul para declarar ataque';
+          demoBar.textContent=t('landing.demoCombatSelect');
         } else {
           demoBar.className='tut-demo-bar';
-          demoBar.textContent='⬡ MOVIMENTAÇÃO — continue avançando (ainda fora do alcance)';
+          demoBar.textContent=t('landing.demoMoveContinue');
         }
         demoDraw();
       });
@@ -811,7 +821,7 @@
       if(hex.col===dBlue.col&&hex.row===dBlue.row){
         dPhase=3;
         demoBar.className='tut-demo-bar atk';
-        demoBar.textContent='\u{1F3AF} COMBATE — clique no navio inimigo para declarar ataque';
+        demoBar.textContent=t('landing.demoAttackPrompt');
         demoDraw();
       }
       return;

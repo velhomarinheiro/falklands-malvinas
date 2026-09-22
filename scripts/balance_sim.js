@@ -39,7 +39,7 @@ function playOne() {
   return {
     winner: s.winner, turn: s.turn,
     blueAchieved: obj.blue.achieved, redAchieved: obj.red.achieved,
-    garrisonPct: parseInt(String(garrisonCond?.current).match(/(\d+)%/)?.[1] ?? '0', 10),
+    garrisonPct: garrisonCond?.currentParams?.pct ?? 0,
     airsupMet: !!airsupCond?.met,
     strandedNaval,
   };

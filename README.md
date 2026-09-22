@@ -23,6 +23,18 @@ O servidor sobe em `http://localhost:3000` (porta configurável via `PORT`).
   código de 6 letras; o outro entra como Reino Unido/Vermelha.
 - **Solo vs. computador** — escolha um dos lados e jogue contra o bot.
 
+## Idiomas
+
+Interface disponível em **português (padrão) e inglês**, com seletor PT/EN no
+topo da landing page, do lobby e do HUD em jogo. A escolha fica salva no
+navegador (`localStorage`) e é aplicada imediatamente, sem recarregar a
+página. Dicionários em `public/locales/{pt,en}.json`, carregados por
+`public/js/i18n.js`; mensagens do servidor (erros, log de batalha, rótulos de
+objetivos) trafegam como `{code, params}` para cada cliente resolver no seu
+próprio idioma. Cartas ilustradas das unidades (`public/cards/`) e o texto
+histórico de cada unidade (`notes` em `shared/order_of_battle.js`) ainda são
+só em português.
+
 ## Mecânicas principais
 
 - Grade hexagonal 20×10 (1 hex = 75 NM) sobre carta náutica georreferenciada
@@ -54,6 +66,7 @@ O servidor sobe em `http://localhost:3000` (porta configurável via `PORT`).
 | `game_logger.js` | Gravação de partidas em JSONL para o dataset de ML |
 | `shared/` | Ordem de batalha, configuração e motor de combate (usados por servidor e cliente) |
 | `public/` | Cliente web (landing, jogo em canvas, CSS, ícones, cards) |
+| `public/locales/` | Dicionários de idioma (`pt.json`, `en.json`) usados por `public/js/i18n.js` |
 | `mapa_source/` | Fonte da carta náutica georreferenciada (`public/mapa.png`): gerador Python, GeoJSON com lon/lat e terreno por hexágono, imagem em resolução plena |
 | `scripts/gen_unit_cards.js` | Gera as cartas ilustradas de cada unidade (`public/cards/`) |
 | `data/game-logs/` | Logs de partidas reais (dataset para treinar o bot) |

@@ -45,6 +45,14 @@ function getTerrain(col, row) {
   if (row < 0 || row >= GRID_H || col < 0 || col >= GRID_W) return T_LAND;
   return TERRAIN_MAP[row][col];
 }
+
+// ─── i18n: battle-log entries and client-facing errors travel as {code, params}
+// so each viewer's client resolves them in their own active language (PT/EN)
+// via locales/{pt,en}.json's "log.*"/"server.*" namespaces — the server itself
+// stays language-agnostic.
+function logEntry(code, params) {
+  return { code, params: params || {} };
+}
 function canEnterTerrain(category, terrain) {
   if (category === 'air' || category === 'specops') return true;
   if (category === 'land')      return terrain === T_LAND || terrain === T_SHALLOW;
@@ -267,7 +275,7 @@ function newGame() {
     blueDone: false, redDone: false,
     blueAttacks: null, redAttacks: null,
     units: initialUnits(),
-    log: ['──── Turno 1 · Período Diurno ────', 'Fase de Movimentação iniciada.'],
+    log: [logEntry('TURN_HEADER', { turn: 1, period: 'PERIOD_DAY' }), logEntry('MOVEMENT_PHASE_STARTED')],
     winner: null,
     movementSnapshot: {},
     combatQueue: [],
@@ -359,18 +367,18 @@ function resolveBattleRound(state, engagement, initiativeBonusTeam = null) {
 
   if (!att || !def) {
     engagement.status = 'ended';
-    state.log.unshift(`[${brTag}] Unidade destruída — engajamento encerrado.`);
+    state.log.unshift(logEntry('BR_ENDED_DESTROYED', { brTag }));
     return null;
   }
 
   // Skip attack if attacker is fuel-disabled
   if (!canAttack(att)) {
-    state.log.unshift(`⛽ ${att.name} não pode atacar: sem combustível.`);
-    return { ok: false, reason: 'Atacante sem combustível' };
+    state.log.unshift(logEntry('ATTACKER_NO_FUEL', { name: att.name }));
+    return { ok: false, reasonCode: 'ATTACKER_NO_FUEL_REASON', reasonParams: {} };
   }
 
   const initLabel = initiativeBonusTeam ? ` ★${initiativeBonusTeam.toUpperCase()}` : '';
-  state.log.unshift(`──── ${brTag}${initLabel} ────`);
+  state.log.unshift(logEntry('BR_HEADER', { brTag, initLabel }));
 
   // Group defense: a stacked surface task group pools its interceptors. Only
   // units that can still defend (naval FP > 0) contribute.
@@ -379,7 +387,7 @@ function resolveBattleRound(state, engagement, initiativeBonusTeam = null) {
     ? stack.filter(canDefend)
     : (isFuelDisabled(def) ? [] : [def]);
   if (stack && interceptors.length > 1 && !engagement.id.includes('CTR')) {
-    state.log.unshift(`🛡 ${def.name} defende em grupo (${interceptors.length} unid. no mesmo hex).`);
+    state.log.unshift(logEntry('GROUP_DEFENSE', { name: def.name, count: interceptors.length }));
   }
 
   const dist = hexDist(att.col, att.row, def.col, def.row);
@@ -394,30 +402,37 @@ function resolveBattleRound(state, engagement, initiativeBonusTeam = null) {
   });
 
   if (!eng.ok) {
-    state.log.unshift(`⚠ ${att.name} → ${def.name}: ${eng.reason}`);
+    state.log.unshift(logEntry('ENGAGEMENT_FAILED', {
+      att: att.name, def: def.name, reasonCode: eng.reasonCode, reasonParams: eng.reasonParams,
+    }));
   } else {
     // Spend engagement FP for attacker
     spendEngagementFuel(att);
 
     if (eng.destroyed) {
-      state.log.unshift(`💥 ${def.name} DESTRUÍDO por ${att.name} [${eng.weaponLabel}]`);
+      state.log.unshift(logEntry('UNIT_DESTROYED', { def: def.name, att: att.name, weapon: eng.weaponLabel }));
       // Cascade: kill embarked aircraft and hosted specops
       for (const u of state.units) {
         if ((u.hp ?? 0) <= 0) continue;
         if (u.baseUnitId === def.id || u.hostId === def.id) {
           u.hp = 0;
-          state.log.unshift(`💥 ${u.name} perdido com ${def.name}`);
+          state.log.unshift(logEntry('UNIT_LOST_WITH', { u: u.name, def: def.name }));
         }
       }
     } else if (eng.totalDamage > 0) {
-      const intStr = eng.interception?.intercepted > 0 ? ` (${eng.interception.intercepted} intercept.)` : '';
-      state.log.unshift(`✓ ${att.name} → ${def.name} −${eng.totalDamage}SP [${eng.weaponLabel}${intStr}]`);
+      const n = eng.interception?.intercepted || 0;
+      state.log.unshift(logEntry(n > 0 ? 'HIT_INTERCEPTED' : 'HIT',
+        { att: att.name, def: def.name, dmg: eng.totalDamage, weapon: eng.weaponLabel, n }));
       spendDamageFuel(def);    // defender burns extra FP absorbing the hit
       const degrad = applyDegradation(def, eng.totalDamage);
-      if (degrad) { state.log.unshift(`  ↘ ${def.name}: ${degrad}`); eng.degradation = degrad; }
+      if (degrad) {
+        state.log.unshift(logEntry('DEGRADED', { def: def.name, degradeCode: degrad.code, degradeParams: degrad.params }));
+        eng.degradation = degrad;
+      }
     } else {
-      const intStr = eng.interception?.intercepted > 0 ? ` (${eng.interception.intercepted} intercept.)` : '';
-      state.log.unshift(`✗ ${att.name} → ${def.name} falhou [${eng.weaponLabel}${intStr}]`);
+      const n = eng.interception?.intercepted || 0;
+      state.log.unshift(logEntry(n > 0 ? 'MISS_INTERCEPTED' : 'MISS',
+        { att: att.name, def: def.name, weapon: eng.weaponLabel, n }));
     }
   }
 
@@ -574,7 +589,7 @@ function returnAircraftToBases(state) {
 function finishCombatPhase(room) {
   const state = room.state;
   returnAircraftToBases(state);
-  state.log.unshift('── Fase de Combate encerrada. ──');
+  state.log.unshift(logEntry('COMBAT_PHASE_ENDED'));
 
   state.combatQueue             = [];
   state.currentEngagementIndex  = 0;
@@ -583,7 +598,7 @@ function finishCombatPhase(room) {
   const winner = checkWinner(state);
   if (winner) {
     state.winner = winner;
-    state.log.unshift(`🏆 ${winner === 'blue' ? 'Força Azul' : 'Força Vermelha'} VENCEU!`);
+    state.log.unshift(logEntry('TEAM_WON', { team: winner === 'blue' ? 'TEAM_BLUE' : 'TEAM_RED' }));
     const obj = computeObjectives(state);
     gameLogger.logGameOver(room.id, state.turn, winner, 'victory', obj, state);
     const payload = { winner, objectives: obj, reason: 'victory' };
@@ -601,8 +616,10 @@ function finishCombatPhase(room) {
     const redProg  = objectiveProgress(obj.red);
     const winner = redProg > blueProg ? 'red' : 'blue';   // empate → Azul
     state.winner = winner;
-    state.log.unshift(`⏱ Limite operacional de ${MAX_TURNS} dias atingido — adjudicação por progresso nos objetivos (Azul ${(blueProg * 100).toFixed(0)}% · Vermelho ${(redProg * 100).toFixed(0)}%).`);
-    state.log.unshift(`🏆 ${winner === 'blue' ? 'Força Azul' : 'Força Vermelha'} VENCEU!`);
+    state.log.unshift(logEntry('TIMEOUT_ADJUDICATION', {
+      maxTurns: MAX_TURNS, bluePct: (blueProg * 100).toFixed(0), redPct: (redProg * 100).toFixed(0),
+    }));
+    state.log.unshift(logEntry('TEAM_WON', { team: winner === 'blue' ? 'TEAM_BLUE' : 'TEAM_RED' }));
     gameLogger.logGameOver(room.id, state.turn, winner, 'timeout', obj, state);
     const payload = { winner, objectives: obj, reason: 'timeout' };
     if (room.players.blue) io.to(room.players.blue).emit('game_over', { ...payload, state: stateFor(state, 'blue') });
@@ -676,21 +693,24 @@ function computeObjectives(state) {
   const surfMet   = surfDegPct >= TH.blueSurfaceDegPct;
 
   const blueConds = [
-    { id: 'carrier',   label: 'Destruir Porta-Aviões',          met: carrierMet,
+    { id: 'carrier',   labelCode: 'DESTROY_CARRIER', labelParams: {}, met: carrierMet,
       progress: killProgress(carrier),
-      current: carrier   ? `SP: ${carrier.hp}/${carrier.maxHp}` : 'Destruído ✓' },
-    { id: 'logistics', label: `Neutralizar ${TH.blueLogisticsKills} de ${logUnits.length} Logísticos`, met: logMet,
+      currentCode: carrier ? 'SP_CURRENT' : 'DESTROYED_CHECK',
+      currentParams: carrier ? { hp: carrier.hp, maxHp: carrier.maxHp } : {} },
+    { id: 'logistics', labelCode: 'NEUTRALIZE_LOGISTICS', labelParams: { needed: TH.blueLogisticsKills, total: logUnits.length }, met: logMet,
       progress: frac(logDead, TH.blueLogisticsKills),
-      current: `${logDead}/${logUnits.length} neutralizados (precisa ${TH.blueLogisticsKills})` },
-    { id: 'amphib',    label: 'Neutralizar GT Anfíbio',          met: amphibMet,
+      currentCode: 'NEUTRALIZE_LOGISTICS_CURRENT', currentParams: { dead: logDead, total: logUnits.length, needed: TH.blueLogisticsKills } },
+    { id: 'amphib',    labelCode: 'NEUTRALIZE_AMPHIB', labelParams: {}, met: amphibMet,
       progress: killProgress(amphib),
-      current: amphib    ? `SP: ${amphib.hp}/${amphib.maxHp}` : 'Neutralizado ✓' },
-    { id: 'nucsub',    label: 'Destruir Submarino Nuclear',      met: nucsubMet,
+      currentCode: amphib ? 'SP_CURRENT' : 'NEUTRALIZED_CHECK',
+      currentParams: amphib ? { hp: amphib.hp, maxHp: amphib.maxHp } : {} },
+    { id: 'nucsub',    labelCode: 'DESTROY_NUCSUB', labelParams: {}, met: nucsubMet,
       progress: killProgress(nucsub),
-      current: nucsub    ? `SP: ${nucsub.hp}/${nucsub.maxHp}` : 'Destruído ✓' },
-    { id: 'surface',   label: `Degradar ≥${TH.blueSurfaceDegPct}% Nav. Combatentes`, met: surfMet,
+      currentCode: nucsub ? 'SP_CURRENT' : 'DESTROYED_CHECK',
+      currentParams: nucsub ? { hp: nucsub.hp, maxHp: nucsub.maxHp } : {} },
+    { id: 'surface',   labelCode: 'DEGRADE_SURFACE', labelParams: { pct: TH.blueSurfaceDegPct }, met: surfMet,
       progress: frac(surfDegPct, TH.blueSurfaceDegPct),
-      current: `${surfDegPct}% degradado` },
+      currentCode: 'DEGRADED_PCT', currentParams: { pct: surfDegPct } },
   ];
   const blueAchieved = blueConds.filter(c => c.met).length;
 
@@ -708,12 +728,12 @@ function computeObjectives(state) {
   const garrMet   = garrDegPct >= TH.redGarrisonDegPct;
 
   const redConds = [
-    { id: 'airsup',   label: `Degradar ≥${TH.redAirSupDegPct}% Presença Aérea/Naval Local (Pucará, patrulhas, caça-minas)`, met: airsupMet,
+    { id: 'airsup',   labelCode: 'DEGRADE_AIRSUP', labelParams: { pct: TH.redAirSupDegPct }, met: airsupMet,
       progress: frac(airsupDegPct, TH.redAirSupDegPct),
-      current: `${airsupDegPct}% degradado  (SP: ${airsupCur}/${airsupMax})` },
-    { id: 'garrison', label: `Degradar ≥${TH.redGarrisonDegPct}% Guarnição das Ilhas`, met: garrMet,
+      currentCode: 'DEGRADED_PCT_SP', currentParams: { pct: airsupDegPct, cur: airsupCur, max: airsupMax } },
+    { id: 'garrison', labelCode: 'DEGRADE_GARRISON', labelParams: { pct: TH.redGarrisonDegPct }, met: garrMet,
       progress: frac(garrDegPct, TH.redGarrisonDegPct),
-      current: `${garrDegPct}% degradado  (SP: ${garrCur}/${garrMax})` },
+      currentCode: 'DEGRADED_PCT_SP', currentParams: { pct: garrDegPct, cur: garrCur, max: garrMax } },
   ];
   const redAchieved = redConds.filter(c => c.met).length;
 
@@ -780,7 +800,7 @@ function nextTurn(state) {
         }
       }
       if (restored.length > 0) {
-        state.log.unshift(`🔄 ${u.name} recompletou: ${restored.join(', ')}`);
+        state.log.unshift(logEntry('WEAPONS_RESTOCKED', { name: u.name, weapons: restored.join(', ') }));
       }
     }
   }
@@ -788,7 +808,7 @@ function nextTurn(state) {
   // ── Fuel: naval refuel for units stacked with a provider at end of turn ──────
   const fuelReports = recoverNavalFuel(state);
   for (const { unit: u } of fuelReports) {
-    state.log.unshift(`⛽ ${u.name}(${u.team}) reabasteceu: ${u.fuel.current}/${u.fuel.max} FP.`);
+    state.log.unshift(logEntry('NAVAL_REFUELED', { name: u.name, team: u.team, current: u.fuel.current, max: u.fuel.max }));
   }
 
   // ── Fuel: aircraft that landed last turn become ready ─────────────────────
@@ -803,9 +823,8 @@ function nextTurn(state) {
   state.phase     = 'movement';
   state.blueDone  = state.redDone = false;
   state.blueAttacks = state.redAttacks = null;
-  const per = state.period === 'day' ? 'Diurno' : 'Noturno';
-  state.log.unshift(`──── Turno ${state.turn} · Período ${per} ────`);
-  state.log.unshift('Fase de Movimentação iniciada.');
+  state.log.unshift(logEntry('TURN_HEADER', { turn: state.turn, period: state.period === 'day' ? 'PERIOD_DAY' : 'PERIOD_NIGHT' }));
+  state.log.unshift(logEntry('MOVEMENT_PHASE_STARTED'));
   if (state.log.length > 50) state.log = state.log.slice(0, 50);
   saveMovementSnapshot(state);
 }
@@ -837,13 +856,13 @@ function applyDegradation(unit, damageDealt) {
       if ((unit.detectionRange[key] ?? 0) > 0)
         unit.detectionRange[key] = Math.max(1, unit.detectionRange[key] - reduction);
     }
-    return `Detecção −${reduction}`;
+    return { code: 'DEGRADE_DETECTION', params: { n: reduction } };
   }
 
   if (category === 'movement') {
     const reduction = Math.max(1, Math.floor(ratio * (unit.initMovement || 1)));
     unit.movement = Math.max(1, unit.movement - reduction);
-    return `Movimentação −${reduction}`;
+    return { code: 'DEGRADE_MOVEMENT', params: { n: reduction } };
   }
 
   if (category === 'combat_capability') {
@@ -854,14 +873,14 @@ function applyDegradation(unit, damageDealt) {
     const initVal   = unit.initCapabilities?.[capKey] ?? capVal;
     const reduction = Math.max(1, Math.floor(ratio * initVal));
     caps[capKey] = Math.max(1, capVal - reduction);
-    return `${capKey} −${reduction}`;
+    return { code: 'DEGRADE_CAPABILITY', params: { cap: capKey, n: reduction } };
   }
 
   if (category === 'fuel') {
     const reduction = Math.max(1, Math.floor(ratio * (unit.initFuelMax || 1) * 0.5));
     unit.fuel.max     = Math.max(1, unit.fuel.max - reduction);
     if (unit.fuel.current > unit.fuel.max) unit.fuel.current = unit.fuel.max;
-    return `Combustível −${reduction}FP`;
+    return { code: 'DEGRADE_FUEL', params: { n: reduction } };
   }
 
   return null;
@@ -1143,7 +1162,7 @@ function applyBotMovesToState(state, botTeam, moves) {
     if (!unit) continue;
     const dest = path[path.length - 1];
     unit.col = dest.col; unit.row = dest.row; unit.moved = true;
-    state.log.unshift(`${unit.name}(${botTeam}) → ${String.fromCharCode(65 + dest.col)}${dest.row + 1}`);
+    state.log.unshift(logEntry('UNIT_MOVED', { name: unit.name, team: botTeam, hex: `${String.fromCharCode(65 + dest.col)}${dest.row + 1}` }));
     const dist = path.length - 1;
     if (unit.category !== 'air') {
       spendNavalFuel(unit, navalMoveCost(dist));
@@ -1181,18 +1200,18 @@ function applyBotMoves(room) {
     for (const u of navalEmpty) {
       const pid = room.players[u.team];
       if (pid) io.to(pid).emit('fuel_alert', { unitId: u.id, name: u.name, type: 'naval_empty' });
-      state.log.unshift(`⛽ ${u.name}(${u.team}) sem combustível: não pode mover, atacar ou se defender.`);
+      state.log.unshift(logEntry('NAVAL_FUEL_EMPTY', { name: u.name, team: u.team }));
     }
     const airLost = checkAirFuelLosses(state);
     for (const u of airLost) {
       const pid = room.players[u.team];
       if (pid) io.to(pid).emit('fuel_alert', { unitId: u.id, name: u.name, type: 'air_lost' });
-      state.log.unshift(`✈ ${u.name}(${u.team}) perdida por falta de combustível.`);
+      state.log.unshift(logEntry('AIR_LOST_FUEL', { name: u.name, team: u.team }));
     }
     state.phase = 'combat';
-    state.log.unshift('Fase de Combate iniciada. Declare seus ataques.');
+    state.log.unshift(logEntry('COMBAT_PHASE_STARTED'));
   } else {
-    state.log.unshift('BOT encerrou a movimentação.');
+    state.log.unshift(logEntry('BOT_ENDED_MOVEMENT'));
   }
   if (state.log.length > 50) state.log = state.log.slice(0, 50);
   broadcast(room);
@@ -1233,7 +1252,7 @@ app.get('/api/export-logs', (_, res) => {
 app.get('/api/export-logs/:roomId', (req, res) => {
   const roomId = String(req.params.roomId || '').toUpperCase();
   if (!/^[A-Z0-9]+$/.test(roomId)) {
-    return res.status(400).json({ error: 'ID de sala inválido.' });
+    return res.status(400).json({ error: 'ERR_INVALID_ROOM_ID' });
   }
   const logDir = path.join(__dirname, 'data', 'game-logs');
   const file = fs.existsSync(logDir)
@@ -1241,7 +1260,7 @@ app.get('/api/export-logs/:roomId', (req, res) => {
     : null;
 
   if (!file) {
-    return res.status(404).json({ error: 'Log não encontrado para esta partida neste servidor.' });
+    return res.status(404).json({ error: 'ERR_LOG_NOT_FOUND' });
   }
   res.download(path.join(logDir, file), file);
 });
@@ -1286,7 +1305,7 @@ io.on('connection', socket => {
   });
 
   socket.on('create_solo_room', ({ team } = {}) => {
-    if (!['blue','red'].includes(team)) { socket.emit('join_error','Equipe inválida.'); return; }
+    if (!['blue','red'].includes(team)) { socket.emit('join_error','ERR_INVALID_TEAM'); return; }
     const id      = genId();
     const botTeam = team === 'blue' ? 'red' : 'blue';
     const room    = { id, players: { blue: null, red: null }, state: null, solo: true, botTeam,
@@ -1303,8 +1322,8 @@ io.on('connection', socket => {
 
   socket.on('join_room', ({roomId}) => {
     const room=rooms.get(roomId?.toUpperCase?.());
-    if (!room)           { socket.emit('join_error','Sala não encontrada.'); return; }
-    if (room.players.red){ socket.emit('join_error','Sala cheia.');          return; }
+    if (!room)           { socket.emit('join_error','ERR_ROOM_NOT_FOUND'); return; }
+    if (room.players.red){ socket.emit('join_error','ERR_ROOM_FULL');      return; }
     room.players.red=socket.id; socket.data.roomId=room.id; socket.data.team='red';
     socket.join(room.id);
     room.state=newGame();
@@ -1355,24 +1374,24 @@ io.on('connection', socket => {
     if (!room?.state) return;
     const {state}=room, {team}=socket.data;
 
-    if (state.phase!=='movement')                  { socket.emit('action_error','Não é a fase de movimentação.'); return; }
-    if (state[team==='blue'?'blueDone':'redDone']) { socket.emit('action_error','Você já encerrou a movimentação.'); return; }
+    if (state.phase!=='movement')                  { socket.emit('action_error','ERR_NOT_MOVEMENT_PHASE'); return; }
+    if (state[team==='blue'?'blueDone':'redDone']) { socket.emit('action_error','ERR_ALREADY_ENDED_MOVEMENT'); return; }
 
     // Validate all paths before applying any
     for (const {unitId, path} of (moves||[])) {
       if (!Array.isArray(path)||path.length<2) continue;
       const unit=state.units.find(u=>u.id===unitId&&u.team===team&&u.hp>0);
-      if (!unit) { socket.emit('action_error',`Unidade ${unitId} inválida.`); return; }
-      if (unit.movement === 0) { socket.emit('action_error',`${unit.name}: unidade fixa.`); return; }
-      if (isFuelDisabled(unit)) { socket.emit('action_error',`${unit.name}: sem combustível — não pode se mover.`); return; }
-      if (path[0].col!==unit.col||path[0].row!==unit.row) { socket.emit('action_error',`Caminho inválido para ${unit.name}.`); return; }
+      if (!unit) { socket.emit('action_error',{code:'ERR_INVALID_UNIT', params:{unitId}}); return; }
+      if (unit.movement === 0) { socket.emit('action_error',{code:'ERR_UNIT_IMMOBILE', params:{name:unit.name}}); return; }
+      if (isFuelDisabled(unit)) { socket.emit('action_error',{code:'ERR_UNIT_NO_FUEL', params:{name:unit.name}}); return; }
+      if (path[0].col!==unit.col||path[0].row!==unit.row) { socket.emit('action_error',{code:'ERR_INVALID_PATH', params:{name:unit.name}}); return; }
       const maxRange = unit.category === 'air' ? airMovementRange(unit) : unit.movement;
-      if (path.length-1>maxRange) { socket.emit('action_error',`${unit.name}: caminho excede alcance máximo.`); return; }
+      if (path.length-1>maxRange) { socket.emit('action_error',{code:'ERR_PATH_EXCEEDS_RANGE', params:{name:unit.name}}); return; }
       for (let i=1;i<path.length;i++) {
         const {col,row}=path[i];
-        if (col<0||col>=GRID_W||row<0||row>=GRID_H) { socket.emit('action_error',`${unit.name}: posição fora do tabuleiro.`); return; }
-        if (hexDist(path[i-1].col,path[i-1].row,col,row)!==1) { socket.emit('action_error',`${unit.name}: passo não adjacente.`); return; }
-        if (!canEnterTerrain(unit.category,getTerrain(col,row))) { socket.emit('action_error',`${unit.name}: terreno intransponível em ${String.fromCharCode(65+col)}${row+1}.`); return; }
+        if (col<0||col>=GRID_W||row<0||row>=GRID_H) { socket.emit('action_error',{code:'ERR_OUT_OF_BOUNDS', params:{name:unit.name}}); return; }
+        if (hexDist(path[i-1].col,path[i-1].row,col,row)!==1) { socket.emit('action_error',{code:'ERR_STEP_NOT_ADJACENT', params:{name:unit.name}}); return; }
+        if (!canEnterTerrain(unit.category,getTerrain(col,row))) { socket.emit('action_error',{code:'ERR_IMPASSABLE_TERRAIN', params:{name:unit.name, hex:`${String.fromCharCode(65+col)}${row+1}`}}); return; }
       }
     }
 
@@ -1386,7 +1405,7 @@ io.on('connection', socket => {
       if (!unit) continue;
       const dest=path[path.length-1];
       unit.col=dest.col; unit.row=dest.row; unit.moved=true;
-      state.log.unshift(`${unit.name}(${team}) → ${String.fromCharCode(65+dest.col)}${dest.row+1}`);
+      state.log.unshift(logEntry('UNIT_MOVED', { name: unit.name, team, hex: `${String.fromCharCode(65+dest.col)}${dest.row+1}` }));
       const dist = path.length - 1;
       if (unit.category !== 'air') {
         spendNavalFuel(unit, navalMoveCost(dist));
@@ -1434,20 +1453,21 @@ io.on('connection', socket => {
       for (const u of navalEmpty) {
         const pid = room.players[u.team];
         if (pid) io.to(pid).emit('fuel_alert', { unitId: u.id, name: u.name, type: 'naval_empty' });
-        state.log.unshift(`⛽ ${u.name}(${u.team}) sem combustível: não pode mover, atacar ou se defender.`);
+        state.log.unshift(logEntry('NAVAL_FUEL_EMPTY', { name: u.name, team: u.team }));
       }
       const airLost = checkAirFuelLosses(state);
       for (const u of airLost) {
         const pid = room.players[u.team];
         if (pid) io.to(pid).emit('fuel_alert', { unitId: u.id, name: u.name, type: 'air_lost' });
-        state.log.unshift(`✈ ${u.name}(${u.team}) perdida por falta de combustível.`);
+        state.log.unshift(logEntry('AIR_LOST_FUEL', { name: u.name, team: u.team }));
       }
 
       state.phase='combat';
-      state.log.unshift('Fase de Combate iniciada. Declare seus ataques.');
+      state.log.unshift(logEntry('COMBAT_PHASE_STARTED'));
     } else {
-      const waiting=team==='blue'?'Força Vermelha':'Força Azul';
-      state.log.unshift(`${team==='blue'?'Força Azul':'Força Vermelha'} encerrou a movimentação. Aguardando ${waiting}...`);
+      state.log.unshift(logEntry('TEAM_ENDED_MOVEMENT_WAITING', {
+        team: team==='blue'?'TEAM_BLUE':'TEAM_RED', waiting: team==='blue'?'TEAM_RED':'TEAM_BLUE',
+      }));
     }
     if (state.log.length>50) state.log=state.log.slice(0,50);
     broadcast(room);
@@ -1467,10 +1487,10 @@ io.on('connection', socket => {
     const room=rooms.get(socket.data.roomId);
     if (!room?.state) return;
     const {state}=room, {team}=socket.data;
-    if (state.phase!=='combat') { socket.emit('action_error','Não é a fase de combate.'); return; }
+    if (state.phase!=='combat') { socket.emit('action_error','ERR_NOT_COMBAT_PHASE'); return; }
     gameLogger.logAttacks(room.id, state.turn, state.period, team, attacks, state);
     if (team==='blue') state.blueAttacks=attacks||[]; else state.redAttacks=attacks||[];
-    state.log.unshift(`${team==='blue'?'Força Azul':'Força Vermelha'} confirmou ${(attacks||[]).length} ataque(s).`);
+    state.log.unshift(logEntry('ATTACKS_CONFIRMED', { team: team==='blue'?'TEAM_BLUE':'TEAM_RED', n: (attacks||[]).length }));
     // Solo: bot declara ataques imediatamente após o humano
     if (room.solo) {
       const btAtkKey = room.botTeam === 'blue' ? 'blueAttacks' : 'redAttacks';
@@ -1478,12 +1498,11 @@ io.on('connection', socket => {
         const botAtks = computeBotAttacks(state, room.botTeam);
         gameLogger.logAttacks(room.id, state.turn, state.period, room.botTeam, botAtks, state);
         state[btAtkKey] = botAtks;
-        const botLabel = room.botTeam === 'blue' ? 'Força Azul (BOT)' : 'Força Vermelha (BOT)';
-        state.log.unshift(`${botLabel} confirmou ${botAtks.length} ataque(s).`);
+        state.log.unshift(logEntry('ATTACKS_CONFIRMED', { team: room.botTeam==='blue'?'TEAM_BLUE_BOT':'TEAM_RED_BOT', n: botAtks.length }));
       }
     }
     if (state.blueAttacks!==null && state.redAttacks!==null) {
-      state.log.unshift('── Resolução de Combate ──');
+      state.log.unshift(logEntry('COMBAT_RESOLUTION'));
       state.combatQueue            = buildCombatQueue(state);
       state.currentEngagementIndex = 0;
       state.battleRoundDecisions   = { blue: null, red: null };
@@ -1532,8 +1551,10 @@ io.on('connection', socket => {
     const myTeam    = socket.data.team;
     const otherTeam = myTeam === 'blue' ? 'red' : 'blue';
     room.state.winner = otherTeam;
-    const label = myTeam === 'blue' ? 'Força Azul' : 'Força Vermelha';
-    room.state.log.unshift(`🏳 ${label} abandonou o jogo. ${otherTeam === 'blue' ? 'Força Azul' : 'Força Vermelha'} vence por W.O.`);
+    room.state.log.unshift(logEntry('TEAM_ABANDONED', {
+      team: myTeam === 'blue' ? 'TEAM_BLUE' : 'TEAM_RED',
+      winner: otherTeam === 'blue' ? 'TEAM_BLUE' : 'TEAM_RED',
+    }));
     const obj = computeObjectives(room.state);
     gameLogger.logGameOver(room.id, room.state.turn, otherTeam, 'abandon', obj, room.state);
     const payload = { winner: otherTeam, objectives: obj, reason: 'abandon' };

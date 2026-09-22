@@ -62,7 +62,8 @@ const WEAPON_LABELS = {
   navalGun:'CANHÃO', airDefense:'DEFA', bmd:'BMD', asw:'ASW',
   airAttack:'AT.AÉR', raid:'OP.ESP.',
 };
-// Nomes por extenso (tooltips e glossário da ajuda)
+// Nomes por extenso (tooltips e glossário da ajuda) — fallback PT; localizado via
+// weaponLabel()/weaponGlossary() abaixo, que leem locales/{pt,en}.json quando prontos.
 const WEAPON_GLOSSARY = {
   ascm:       'Míssil de Cruzeiro Antinavio — longo alcance contra navios de superfície',
   mss:        'Míssil Superfície-Superfície — curto alcance contra navios de superfície',
@@ -76,6 +77,57 @@ const WEAPON_GLOSSARY = {
   airAttack:  'Ataque Aéreo — aeronaves contra navios, aeronaves ou alvos terrestres',
   raid:       'Incursão de Operações Especiais — ataques a instalações e navios',
 };
+function weaponLabel(k) {
+  const dict = (typeof tRaw === 'function' && tRaw('weapon.labels')) || WEAPON_LABELS;
+  return dict[k] || k.toUpperCase();
+}
+function weaponGlossary(k) {
+  const dict = (typeof tRaw === 'function' && tRaw('weapon.glossary')) || WEAPON_GLOSSARY;
+  return dict[k] || '';
+}
+
+// A subsystem-degradation result from the server: {code, params}, where a
+// DEGRADE_CAPABILITY code carries a weapon/capability key that itself needs
+// its own display label resolved (not just plain interpolation).
+function degradeText(d) {
+  if (!d) return '';
+  if (typeof d === 'string') return d; // defensive: pre-i18n server payload
+  const params = d.code === 'DEGRADE_CAPABILITY' ? { ...d.params, cap: weaponLabel(d.params.cap) } : d.params;
+  return t('log.' + d.code, params);
+}
+
+// Raw composition-type keys from shared/order_of_battle.js (Portuguese platform
+// class names, e.g. 'ataque', 'fragata') → display label in the active locale.
+function compTypeLabel(type) {
+  const dict = (typeof tRaw === 'function' && tRaw('comp')) || {};
+  return dict[type] || type;
+}
+
+// An objective-condition object from the server ({labelCode, labelParams,
+// currentCode, currentParams, ...}) → the two localized display strings.
+function condLabel(c) { return t('obj.' + c.labelCode, c.labelParams); }
+function condCurrent(c) { return t('obj.' + c.currentCode, c.currentParams); }
+
+// A battle-log entry from the server: {code, params}. Most entries are flat
+// t('log.'+code, params) lookups, but a few params are themselves nested
+// codes (a team name, a period, a sub-reason) that need their own resolution
+// before being interpolated into the parent template.
+const LOG_NESTED_TEAM_PARAMS = ['team', 'waiting', 'winner'];
+function logText(entry) {
+  if (typeof entry === 'string') return entry; // defensive: pre-i18n server payload
+  const params = { ...entry.params };
+  for (const k of LOG_NESTED_TEAM_PARAMS) {
+    if (params[k]) params[k] = t('log.' + params[k]);
+  }
+  if (params.period) params.period = t('log.' + entry.params.period);
+  if (entry.code === 'ENGAGEMENT_FAILED') {
+    params.reason = entry.params.reasonCode ? t('log.' + entry.params.reasonCode, entry.params.reasonParams) : '';
+  }
+  if (entry.code === 'DEGRADED') {
+    params.what = degradeText({ code: entry.params.degradeCode, params: entry.params.degradeParams });
+  }
+  return t('log.' + entry.code, params);
+}
 // Default ranges for capability-based weapons (not present in unit.weapons)
 const WEAPON_DEFAULT_RANGE = {
   ascm:6, mss:3, torpedo:2, lacm:10, asbm:10,
@@ -250,8 +302,10 @@ document.addEventListener('keydown', e => {
 });
 
 // ─── Ajuda em jogo (manual rápido) ────────────────────────────────────────────
+// Conteúdo vem de locales/{pt,en}.json (help.fases/combate/logistica); os
+// blocos abaixo são só o fallback em português antes do i18n carregar.
 const helpModal = $('help-modal');
-const HELP_SECTIONS = {
+const HELP_SECTIONS_FALLBACK = {
   fases: `
     <h4>ESTRUTURA DO TURNO</h4>
     <p>Cada <b>turno</b> é um dia de operação com dois períodos: <b>☀ Diurno</b> e
@@ -306,6 +360,9 @@ const HELP_SECTIONS = {
     unidades Azuis paradas em porto, aeronaves em base e unidades terrestres.
     A força Vermelha <b>não recompleta armas navais em mar</b> — economize salvas.</p>`,
 };
+function helpSectionHtml(tab) {
+  return (typeof tRaw === 'function' && tRaw(`help.${tab}`)) || HELP_SECTIONS_FALLBACK[tab] || '';
+}
 
 // A aba "Vitória" é gerada a partir dos objetivos que o servidor envia (cujos
 // rótulos derivam das constantes de limiar), para que o manual não possa
@@ -313,22 +370,17 @@ const HELP_SECTIONS = {
 function buildVictoryHtml() {
   const obj = gameState?.objectives;
   const side = (o, titulo) => `
-    <h4>${titulo} — ${o.needed} DE ${o.conditions.length} OBJETIVOS</h4>
-    <ul>${o.conditions.map(c => `<li>${c.label}</li>`).join('')}</ul>`;
+    <h4>${titulo} — ${o.needed} ${t('help.of')} ${o.conditions.length} ${t('help.objectives')}</h4>
+    <ul>${o.conditions.map(c => `<li>${condLabel(c)}</li>`).join('')}</ul>`;
   const listas = obj
-    ? side(obj.blue, 'FORÇA AZUL') + side(obj.red, 'FORÇA VERMELHA')
-    : '<p>As condições aparecem aqui quando a partida começa.</p>';
+    ? side(obj.blue, t('team.blue')) + side(obj.red, t('team.red'))
+    : `<p>${t('help.victoryFallback')}</p>`;
   const prazo = gameState?.maxTurns ?? 12;
-  return `${listas}
-    <h4>PRAZO</h4>
-    <p>Ao fim de <b>${prazo} dias</b> sem vencedor, ganha quem tiver maior
-    progresso nos seus objetivos — o progresso conta <b>dano parcial</b>, não só
-    condições concluídas. O painel <b>OBJETIVOS DE VITÓRIA</b> acompanha os dois
-    lados em tempo real.</p>`;
+  return `${listas}${t('help.victoryDeadline', {days: prazo})}`;
 }
 
 function buildGlossaryHtml() {
-  const general = [
+  const general = (typeof tRaw === 'function' && tRaw('glossary.general')) || [
     ['SP',  'Poder de Permanência — os "pontos de vida" da unidade'],
     ['FP',  'Pontos de Combustível — autonomia da unidade'],
     ['MOV', 'Movimento — hexágonos por período'],
@@ -336,10 +388,10 @@ function buildGlossaryHtml() {
   ];
   const rows = [
     ...general,
-    ...Object.entries(WEAPON_GLOSSARY).map(([k, v]) => [WEAPON_LABELS[k] || k.toUpperCase(), v]),
+    ...Object.keys(WEAPON_GLOSSARY).map(k => [weaponLabel(k), weaponGlossary(k)]),
   ];
-  return '<h4>TERMOS E SIGLAS</h4><ul>' +
-    rows.map(([t, d]) => `<li><span class="help-gloss-term">${t}</span> — ${d}</li>`).join('') +
+  return `<h4>${t('glossary.termsTitle')}</h4><ul>` +
+    rows.map(([term, d]) => `<li><span class="help-gloss-term">${term}</span> — ${d}</li>`).join('') +
     '</ul>';
 }
 
@@ -348,7 +400,7 @@ function showHelpTab(tab) {
     b.classList.toggle('active', b.dataset.tab === tab));
   $('help-content').innerHTML =
     tab === 'glossario' ? buildGlossaryHtml() :
-    tab === 'vitoria'   ? buildVictoryHtml()  : (HELP_SECTIONS[tab] || '');
+    tab === 'vitoria'   ? buildVictoryHtml()  : helpSectionHtml(tab);
 }
 function showHelpModal() { showHelpTab('fases'); helpModal.classList.remove('hidden'); }
 function hideHelpModal() { helpModal.classList.add('hidden'); }
@@ -370,14 +422,14 @@ function _showTooltip(units, clientX, clientY) {
   const hpPct = Math.round(u.hp / u.maxHp * 100);
   const det   = u.detectionRange || {};
   const extra = units.length > 1
-    ? `<div class="ut-hint">${units.length} unidades neste hexágono</div>` : '';
+    ? `<div class="ut-hint">${t('ui.unitsInHex', {count: units.length})}</div>` : '';
   const hasCard = units.some(x => UNIT_CARD[x.id]);
-  const cardHint = hasCard ? '<div class="ut-hint">Clique direito · card completo</div>' : '';
+  const cardHint = hasCard ? `<div class="ut-hint">${t('ui.rightClickFullCard')}</div>` : '';
   unitTooltipEl.innerHTML = `
     <div class="ut-name ${u.team}">${u.name}</div>
     <div class="ut-stats">
-      <span>SP</span><b>${u.hp}/${u.maxHp} (${hpPct}%)</b>
-      <span>MOV</span><b>${u.movement}</b>
+      <span>${t('ui.sp')}</span><b>${u.hp}/${u.maxHp} (${hpPct}%)</b>
+      <span>${t('ui.mov')}</span><b>${u.movement}</b>
       <span>Det S/A/Sb</span><b>${det.surface||0}/${det.air||0}/${det.submarine||0}</b>
     </div>
     ${extra}${cardHint}`;
@@ -493,14 +545,14 @@ socket.on('rejoin_failed', () => {
   hideReconnectBanner();
   // Só é terminal se o jogador estava no meio de uma partida
   if (!gameScreen.classList.contains('hidden') && gameOver.classList.contains('hidden')) {
-    $('disconnect-msg').textContent = 'Não foi possível reconectar — a partida foi encerrada.';
+    $('disconnect-msg').textContent = t('ui.reconnectFailed');
     disconnected.classList.remove('hidden');
   }
 });
 
 socket.on('opponent_reconnected', () => {
   hideReconnectBanner();
-  if (gameState) { gameState.log?.unshift('🔌 Adversário reconectou.'); updateUI(); }
+  if (gameState) { gameState.log?.unshift(t('ui.opponentReconnected')); updateUI(); }
 });
 
 socket.on('room_created', ({roomId, team}) => {
@@ -509,7 +561,10 @@ socket.on('room_created', ({roomId, team}) => {
   lobbyMenu.classList.add('hidden');
   lobbyWaiting.classList.remove('hidden');
 });
-socket.on('join_error', msg => showLobbyErr(msg));
+socket.on('join_error', err => {
+  const { code, params } = typeof err === 'string' ? { code: err, params: {} } : err;
+  showLobbyErr(t('server.' + code, params));
+});
 
 socket.on('game_start', ({team, state, solo, roomId, rejoinToken, rejoined}) => {
   myTeam = team; gameState = state; isSolo = !!solo;
@@ -519,8 +574,8 @@ socket.on('game_start', ({team, state, solo, roomId, rejoinToken, rejoined}) => 
   }
   hideReconnectBanner();
   disconnected.classList.add('hidden');
-  if (rejoined) { gameState.log?.unshift('🔌 Você reconectou à partida.'); }
-  if (isSolo) document.title = 'Guerra das Malvinas / Falkland · Solo vs BOT';
+  if (rejoined) { gameState.log?.unshift(t('ui.youReconnected')); }
+  if (isSolo) document.title = t('ui.soloTitle');
   selUnitId = null; selGroupIds = []; moveHexes = []; atkHexes = []; reachableHexes = new Map(); pendingAtks = [];
   activePath = []; plannedMoves.clear(); hideStackPicker(); hideTargetPicker(); closeWeaponPicker();
   closeBrPanel();
@@ -569,8 +624,8 @@ socket.on('game_update', state => {
       brQueue = [];
     }
     if (state.turn !== prevTurn) {
-      const per = state.period === 'day' ? '☀ Diurno' : '🌙 Noturno';
-      flashScene(`TURNO ${state.turn}  ·  ${per}`, 'rgba(0,0,0,0.55)', 1800);
+      const per = state.period === 'day' ? t('period.day') : t('period.night');
+      flashScene(t('ui.turnPeriodFlash', {turn: state.turn, period: per}), 'rgba(0,0,0,0.55)', 1800);
       SFX.play('turnChange');
     }
   } else if (selUnitId) {
@@ -592,18 +647,16 @@ socket.on('game_over', ({winner, state, objectives, reason}) => {
   hideReconnectBanner();
   gameState = state; updateUI(); render();
   const mine = winner === myTeam;
+  const winnerTeamLabel = winner === 'blue' ? t('team.blueTitle') : t('team.redTitle');
   if (reason === 'abandon') {
-    winnerMsg.textContent = mine ? '🏆 VITÓRIA! Adversário abandonou.' : '🏳 Você abandonou o jogo.';
-    $('winner-sub').textContent = mine ? 'Vitória por W.O.' : '';
+    winnerMsg.textContent = mine ? t('ui.victoryWO') : t('ui.defeatWO');
+    $('winner-sub').textContent = mine ? t('ui.victoryWOSub') : '';
   } else if (reason === 'timeout') {
-    winnerMsg.textContent = mine ? '🏆 VITÓRIA!' : '💀 DERROTA';
-    $('winner-sub').textContent =
-      `Limite operacional atingido — ${winner === 'blue' ? 'Força Azul' : 'Força Vermelha'} venceu por maior progresso nos objetivos.`;
+    winnerMsg.textContent = mine ? t('ui.victory') : t('ui.defeat');
+    $('winner-sub').textContent = t('ui.timeoutSub', {team: winnerTeamLabel});
   } else {
-    winnerMsg.textContent = mine ? '🏆 VITÓRIA!' : '💀 DERROTA';
-    $('winner-sub').textContent = mine
-      ? `${winner === 'blue' ? 'Força Azul' : 'Força Vermelha'} atingiu seus objetivos.`
-      : `${winner === 'blue' ? 'Força Azul' : 'Força Vermelha'} atingiu seus objetivos.`;
+    winnerMsg.textContent = mine ? t('ui.victory') : t('ui.defeat');
+    $('winner-sub').textContent = t('ui.objectivesReached', {team: winnerTeamLabel});
   }
   winnerMsg.className = mine ? 'victory' : 'defeat';
   renderOverObjectives(objectives, winner, reason);
@@ -612,13 +665,13 @@ socket.on('game_over', ({winner, state, objectives, reason}) => {
 socket.on('opponent_disconnected', (info = {}) => {
   if (info.grace) {
     // Queda com período de graça: aviso não-terminal enquanto o servidor espera
-    showReconnectBanner('⌛ Adversário desconectou — aguardando reconexão', info.seconds || 75);
+    showReconnectBanner(t('ui.opponentDisconnectedGrace'), info.seconds || 75);
     return;
   }
   hideReconnectBanner();
   localStorage.removeItem('oas_session');
   if (!gameOver.classList.contains('hidden')) return; // partida já encerrada normalmente
-  $('disconnect-msg').textContent = 'Oponente desconectou.';
+  $('disconnect-msg').textContent = t('ui.opponentDisconnected');
   disconnected.classList.remove('hidden');
 });
 // Própria conexão caiu (rede/aba/sleep): o socket.io tenta reconectar sozinho;
@@ -628,11 +681,12 @@ socket.on('disconnect', reason => {
   if (gameScreen.classList.contains('hidden')) return; // ainda no lobby
   if (!gameOver.classList.contains('hidden')) return;   // partida já tinha terminado normalmente
   if (!disconnected.classList.contains('hidden')) return; // já exibindo aviso terminal
-  showReconnectBanner('⌛ Conexão perdida — tentando reconectar...', 0);
+  showReconnectBanner(t('ui.connectionLostReconnecting'), 0);
 });
-socket.on('action_error', msg => {
+socket.on('action_error', err => {
+  const { code, params } = typeof err === 'string' ? { code: err, params: {} } : err;
   SFX.play('error');
-  flashError(msg);
+  flashError(t('server.' + code, params));
   // Reverse optimistic done flag so the button becomes available again
   if (gameState?.phase === 'movement') {
     if (myTeam === 'blue') gameState.blueDone = false; else gameState.redDone = false;
@@ -646,15 +700,15 @@ socket.on('battle_round_result', data => {
     flashUnit(eng.attackerId, '#ffd700', 900);
     const hitColor = data.totalDamage > 0 ? '#ff5252' : '#888';
     flashUnit(eng.targetId, hitColor, data.destroyed ? 1800 : 1000);
-    if (data.destroyed) { flashScene('💥 DESTRUÍDO', 'rgba(180,0,0,0.45)', 1200); SFX.play('destroy'); }
+    if (data.destroyed) { flashScene(t('battle.destroyedFlash'), 'rgba(180,0,0,0.45)', 1200); SFX.play('destroy'); }
     else if (data.totalDamage > 0) SFX.play('hit');
     else SFX.play('miss');
   }
 });
 socket.on('fuel_alert', ({ name, type }) => {
   const msg = type === 'air_lost'
-    ? `✈ ${name} perdida por falta de combustível!`
-    : `⛽ ${name} sem combustível — imóvel e indefesa até reabastecimento.`;
+    ? t('ui.fuelLostAir', {name})
+    : t('ui.fuelEmpty', {name});
   SFX.play('error');
   flashError(msg);
 });
@@ -733,7 +787,7 @@ exportFullLogBtn.addEventListener('click', () => exportFullLog());
 
 abandonBtn.addEventListener('click', () => {
   if (!gameState || gameState.winner) return;
-  if (!confirm('Tem certeza que deseja abandonar o jogo? O adversário será declarado vencedor.')) return;
+  if (!confirm(t('ui.confirmAbandon'))) return;
   socket.emit('abandon_game');
 });
 
@@ -763,8 +817,8 @@ canvas.addEventListener('mousemove', e => {
   if (h.col >= 0 && h.col < GRID_W && h.row >= 0 && h.row < GRID_H) {
     const t = TERRAIN_MAP[h.row][h.col];
     const inf = INFRA.filter(i => i.col === h.col && i.row === h.row);
-    let tip = `${hexLabel(h.col)}${h.row + 1} · ${T_NAME[t]}`;
-    if (inf.length) tip += ' · ' + inf.map(i => i.name).join(', ');
+    let tip = `${hexLabel(h.col)}${h.row + 1} · ${terrainName(t)}`;
+    if (inf.length) tip += ' · ' + inf.map(i => infraName(i)).join(', ');
     terrainTip.textContent = tip;
     terrainTip.style.display = 'block';
 
@@ -1281,14 +1335,14 @@ function openWeaponPicker(attackerId, targetId, targetCategory, dist) {
   wpTargetName.textContent = `→ ${tgtUnit?.name || targetId}`;
 
   wpBody.innerHTML = available.map(([wpn, info], i) => {
-    const label  = WEAPON_LABELS[wpn] || wpn.toUpperCase();
+    const label  = weaponLabel(wpn);
     const qty    = info.quantity ?? 0;
     const isExp  = !!info.expendable;
     return `<div class="wp-row">
       <label class="wp-label">
         <input type="radio" name="wp-radio" value="${wpn}" ${i === 0 ? 'checked' : ''}>
-        <span class="wp-name" title="${WEAPON_GLOSSARY[wpn] || ''}">${label}</span>
-        <span class="wp-qty">${isExp ? `(${qty} disp.)` : '(ilimitado)'}</span>
+        <span class="wp-name" title="${weaponGlossary(wpn)}">${label}</span>
+        <span class="wp-qty">${isExp ? t('ui.wpQtyAvailable', {qty}) : t('ui.wpQtyUnlimited')}</span>
       </label>
       ${isExp ? `<div class="wp-qty-ctrl" data-max="${qty}">
         <button class="wp-adj" data-adj="-1">−</button>
@@ -1417,22 +1471,22 @@ function isMyTurn() {
 function fuelRow(unit) {
   const f = unit.fuel;
   if (!f || !f.usesFuel) {
-    return `<span>Combustível</span><span class="fp-inf">∞</span>`;
+    return `<span>${t('ui.fuel')}</span><span class="fp-inf">∞</span>`;
   }
   if (unit.category === 'air') {
-    const STATUS = { ready: 'Pronta', airborne: 'Em voo', recovering: 'Reabastecendo' };
+    const STATUS = { ready: t('ui.airReady'), airborne: t('ui.airborne'), recovering: t('ui.recovering') };
     const statusLabel = STATUS[unit.airStatus] || unit.airStatus || '—';
     const fpLabel = unit.airStatus === 'ready' || unit.airStatus === 'recovering'
       ? `${f.max} FP` : `${f.current ?? 0}/${f.max} FP`;
     const fpClass = (f.current ?? f.max) <= Math.ceil(f.max * 0.25) ? 'fp-low' : 'fp-ok';
-    return `<span>Status</span><span>${statusLabel}</span>
-            <span>Combustível</span><span class="${fpClass}">${fpLabel}</span>`;
+    return `<span>${t('ui.status')}</span><span>${statusLabel}</span>
+            <span>${t('ui.fuel')}</span><span class="${fpClass}">${fpLabel}</span>`;
   }
   // Naval
   const cur = f.current ?? 0;
   const pct = f.max > 0 ? cur / f.max : 0;
   const cls = cur <= 0 ? 'fp-empty' : pct <= 0.25 ? 'fp-low' : 'fp-ok';
-  return `<span>Combustível</span><span class="${cls}">${cur}/${f.max} FP</span>`;
+  return `<span>${t('ui.fuel')}</span><span class="${cls}">${cur}/${f.max} FP</span>`;
 }
 
 function buildAtkListHtml(atks) {
@@ -1445,7 +1499,7 @@ function buildAtkListHtml(atks) {
     const isExp   = a.weaponType ? !!WEAPON_EXPENDABLE[a.weaponType] : false;
     const maxAmt  = wpnInfo?.quantity ?? (attUnit ? Math.max(1, ...Object.values(attUnit.weapons || {}).map(w => w.quantity || 0)) : 4);
     const amt     = a.amount || 1;
-    const wpnTag  = a.weaponType ? `<span class="atk-wpn-tag">[${WEAPON_LABELS[a.weaponType] || a.weaponType.toUpperCase()}]</span>` : '';
+    const wpnTag  = a.weaponType ? `<span class="atk-wpn-tag">[${weaponLabel(a.weaponType)}]</span>` : '';
     return `<div class="atk-entry">
       <span class="atk-target">→ ${tgtName} ${wpnTag}</span>
       ${isExp ? `<span class="atk-amt-ctrl">
@@ -1455,7 +1509,7 @@ function buildAtkListHtml(atks) {
       </span>` : ''}
     </div>`;
   }).join('');
-  return `<div class="atk-list"><div class="atk-list-title">Ataques declarados:</div>${items}</div>`;
+  return `<div class="atk-list"><div class="atk-list-title">${t('ui.declaredAttacks')}</div>${items}</div>`;
 }
 
 // ─── UI update ────────────────────────────────────────────────────────────────
@@ -1463,11 +1517,11 @@ function updateUI() {
   if (!gameState) return;
   const {turn, period, phase, units, log, winner} = gameState;
 
-  teamBadge.textContent  = myTeam === 'blue' ? 'FORÇA AZUL' : 'FORÇA VERMELHA';
+  teamBadge.textContent  = myTeam === 'blue' ? t('team.blue') : t('team.red');
   teamBadge.className    = `team-badge ${myTeam}`;
-  turnLabel.textContent  = gameState.maxTurns ? `Turno ${turn}/${gameState.maxTurns}` : `Turno ${turn}`;
-  periodLabel.textContent= period === 'day' ? '☀ Diurno' : '🌙 Noturno';
-  phaseLabel.textContent = phase === 'movement' ? 'Movimentação' : 'Combate';
+  turnLabel.textContent  = gameState.maxTurns ? t('ui.turnLabelMax', {turn, max: gameState.maxTurns}) : t('ui.turnLabel', {turn});
+  periodLabel.textContent= period === 'day' ? t('period.day') : t('period.night');
+  phaseLabel.textContent = phase === 'movement' ? t('ui.movementPhase') : t('ui.combatPhase');
 
   myTurnBanner.classList.toggle('visible', isMyTurn() && !winner);
 
@@ -1480,86 +1534,86 @@ function updateUI() {
     if (phase === 'movement') {
       endPhaseBtn.classList.remove('hidden');
       const n = plannedMoves.size + (selUnitId !== null && activePath.length > 1 && !plannedMoves.has(selUnitId) ? 1 : 0);
-      endPhaseBtn.textContent = n > 0 ? `Encerrar Movimentação (${n})` : 'Encerrar Movimentação';
+      endPhaseBtn.textContent = n > 0 ? t('ui.endMovementCount', {n}) : t('ui.endMovement');
       if (selUnitId !== null && activePath.length > 1) {
         undoStepBtn.classList.remove('hidden');
       }
     }
     if (phase === 'combat') combatBtn.classList.remove('hidden');
   }
-  combatBtn.textContent = `Confirmar Ataques (${pendingAtks.length})`;
+  combatBtn.textContent = t('ui.confirmAttacks', {n: pendingAtks.length});
 
   const b = units.filter(u => u.team === 'blue' && u.hp > 0).length;
   const r = units.filter(u => u.team === 'red'  && u.hp > 0).length;
-  fleetBlue.textContent = `Azul: ${b}`;
-  fleetRed.textContent  = `Verm: ${r}`;
+  fleetBlue.textContent = t('ui.fleetBlue', {count: b});
+  fleetRed.textContent  = t('ui.fleetRed', {count: r});
 
   const sel = selUnitId ? gameState.units.find(u => u.id === selUnitId && u.hp > 0) : null;
   if (sel) {
     const hpPct = sel.hp / sel.maxHp * 100;
     const bar   = hpPct > 60 ? '#69f0ae' : hpPct > 30 ? '#ffca28' : '#ff5252';
-    const t     = sel.col >= 0 ? TERRAIN_MAP[sel.row][sel.col] : 3;
+    const terr  = sel.col >= 0 ? TERRAIN_MAP[sel.row][sel.col] : 3;
     const pathSteps    = activePath.length - 1;
     const pathStepsMov = selGroupIds.length > 0
       ? Math.min(...selGroupIds.map(id => { const u2 = gameState.units.find(u => u.id === id); return u2 ? u2.movement : 99; }))
       : sel.movement;
     const pathHint  = pathSteps > 0
-      ? `<div class="u-hint">Caminho: ${pathSteps}/${pathStepsMov} passo(s)</div>` : '';
+      ? `<div class="u-hint">${t('ui.path', {steps: pathSteps, max: pathStepsMov})}</div>` : '';
     const groupHint = selGroupIds.length > 1
-      ? `<div class="u-hint">Grupo: ${selGroupIds.length} unidades em conjunto</div>` : '';
+      ? `<div class="u-hint">${t('ui.group', {count: selGroupIds.length})}</div>` : '';
     const myAtks = selGroupIds.length > 0
       ? pendingAtks.filter(a => selGroupIds.includes(a.attackerId))
       : pendingAtks.filter(a => a.attackerId === sel.id);
     const det  = sel.detectionRange || {};
-    const comp = (sel.composition||[]).map(c=>`${c.quantity}× ${c.type}`).join(' · ');
+    const comp = (sel.composition||[]).map(c=>`${c.quantity}× ${compTypeLabel(c.type)}`).join(' · ');
 
     // Weapons inventory
     const wpns = sel.weapons || {};
     const initW = sel.initWeapons || {};
     const wpnLines = Object.entries(wpns)
       .filter(([k, w]) => w.quantity > 0 || (initW[k]?.quantity ?? 0) > 0)
-      .map(([k, w]) => `<span title="${WEAPON_GLOSSARY[k] || ''}">${(WEAPON_LABELS[k] || k).toUpperCase()}: <b>${w.quantity}</b>/${initW[k]?.quantity ?? w.quantity}</span>`);
+      .map(([k, w]) => `<span title="${weaponGlossary(k)}">${weaponLabel(k)}: <b>${w.quantity}</b>/${initW[k]?.quantity ?? w.quantity}</span>`);
 
     // Persistent capabilities
     const caps = sel.capabilities || {};
     const capLines = Object.entries(caps)
       .filter(([, v]) => v > 0)
-      .map(([k, v]) => `<span title="${WEAPON_GLOSSARY[k] || ''}">${(WEAPON_LABELS[k] || k).toUpperCase()}: ${v}</span>`);
+      .map(([k, v]) => `<span title="${weaponGlossary(k)}">${weaponLabel(k)}: ${v}</span>`);
 
     const cardFile = cardUrl(sel.id);
     const cardThumb = cardFile ? `
       <div class="card-thumb-wrap">
         <img class="card-thumb" src="${cardFile}" alt="Card ${sel.name}"
-             data-card-unit="${sel.id}" title="Clique para ver o card completo">
-        <div class="card-thumb-hint">CLIQUE · CARD COMPLETO</div>
+             data-card-unit="${sel.id}" title="${t('ui.clickFullCard')}">
+        <div class="card-thumb-hint">${t('ui.clickFullCardHint')}</div>
       </div>` : '';
 
     unitPanel.innerHTML = `
       <div class="u-name ${sel.team}">${sel.name}</div>
       <div class="hp-bar"><div class="hp-fill" style="width:${hpPct}%;background:${bar}"></div></div>
       <div class="u-stats">
-        <span>SP</span><span>${sel.hp}/${sel.maxHp}</span>
-        <span>MOV</span><span>${sel.movement}</span>
-        <span>Categoria</span><span>${sel.category}</span>
+        <span>${t('ui.sp')}</span><span>${sel.hp}/${sel.maxHp}</span>
+        <span>${t('ui.mov')}</span><span>${sel.movement}</span>
+        <span>${t('ui.category')}</span><span>${sel.category}</span>
         ${fuelRow(sel)}
-        <span>Det S/Aé/Sb/T</span><span>${det.surface||0}/${det.air||0}/${det.submarine||0}/${det.land||0}</span>
-        <span>Terreno</span><span style="font-size:0.7em">${T_NAME[t]}</span>
+        <span>${t('ui.detection')}</span><span>${det.surface||0}/${det.air||0}/${det.submarine||0}/${det.land||0}</span>
+        <span>${t('ui.terrain')}</span><span style="font-size:0.7em">${terrainName(terr)}</span>
       </div>
       ${wpnLines.length ? `<div class="u-hint" style="font-size:0.67rem;line-height:1.7">🚀 ${wpnLines.join(' · ')}</div>` : ''}
       ${capLines.length ? `<div class="u-hint" style="color:var(--text-dim);font-size:0.67rem;line-height:1.7">⚙ ${capLines.join(' · ')}</div>` : ''}
       ${comp ? `<div class="u-hint" style="color:var(--dim);font-size:0.67rem;line-height:1.5">${comp}</div>` : ''}
       ${groupHint}
       ${pathHint}
-      ${atkHexes.length ? '<div class="u-hint">Clique em alvos vermelhos p/ declarar ataque</div>' : ''}
+      ${atkHexes.length ? `<div class="u-hint">${t('ui.clickRedTargets')}</div>` : ''}
       ${myAtks.length ? buildAtkListHtml(myAtks) : ''}
       ${cardThumb}
     `;
   } else {
-    unitPanel.innerHTML = '<p class="no-sel">Clique em uma unidade sua</p>';
+    unitPanel.innerHTML = `<p class="no-sel">${t('ui.clickYourUnit')}</p>`;
   }
   logEl.innerHTML = (log && log.length)
-    ? log.map(l=>`<p>${l}</p>`).join('')
-    : '<p class="no-sel no-log">Nenhum evento registrado ainda</p>';
+    ? log.map(l=>`<p>${logText(l)}</p>`).join('')
+    : `<p class="no-sel no-log">${t('ui.noLogYet')}</p>`;
 
   // Show/hide game-level buttons
   const inGame = !winner;
@@ -1573,7 +1627,7 @@ function updateUI() {
 // ─── Objectives panel ─────────────────────────────────────────────────────────
 function updateObjectives() {
   if (!gameState?.objectives) {
-    objectivesContent.innerHTML = '<p class="no-sel">Aguardando início...</p>';
+    objectivesContent.innerHTML = `<p class="no-sel">${t('ui.awaitingStart')}</p>`;
     return;
   }
   const obj    = gameState.objectives;
@@ -1586,15 +1640,15 @@ function updateObjectives() {
   const condRows = mine.conditions.map(c => `
     <div class="obj-row ${c.met ? 'obj-met' : 'obj-unmet'}">
       <span class="obj-check">${c.met ? '✓' : '○'}</span>
-      <span class="obj-label">${c.label}</span>
-      <span class="obj-prog">${c.current}</span>
+      <span class="obj-label">${condLabel(c)}</span>
+      <span class="obj-prog">${condCurrent(c)}</span>
     </div>`).join('');
 
   const oppRows = theirs.conditions.map(c => `
     <div class="obj-row obj-opp ${c.met ? 'obj-met' : 'obj-unmet'}">
       <span class="obj-check">${c.met ? '✓' : '○'}</span>
-      <span class="obj-label">${c.label}</span>
-      <span class="obj-prog">${c.current}</span>
+      <span class="obj-label">${condLabel(c)}</span>
+      <span class="obj-prog">${condCurrent(c)}</span>
     </div>`).join('');
 
   const myNeeded  = mine.needed;
@@ -1604,21 +1658,21 @@ function updateObjectives() {
 
   objectivesContent.innerHTML = `
     <div class="obj-section">
-      <div class="obj-section-title" style="color:${myColor}">SEUS OBJETIVOS</div>
+      <div class="obj-section-title" style="color:${myColor}">${t('ui.yourObjectives')}</div>
       <div class="obj-summary ${myAch >= myNeeded ? 'obj-complete' : ''}">
         ${myAch >= myNeeded
-          ? '🏆 CONDIÇÃO ATINGIDA!'
-          : `${myAch}/${mine.conditions.length} condições · precisa de ${myNeeded}`}
+          ? t('ui.conditionMet')
+          : t('ui.conditionsProgress', {achieved: myAch, total: mine.conditions.length, needed: myNeeded})}
       </div>
       ${condRows}
     </div>
     <div class="obj-divider"></div>
     <div class="obj-section">
-      <div class="obj-section-title" style="color:${oppColor}">OBJ. ADVERSÁRIO</div>
+      <div class="obj-section-title" style="color:${oppColor}">${t('ui.opponentObjectives')}</div>
       <div class="obj-summary ${oppAch >= oppNeeded ? 'obj-complete' : ''}">
         ${oppAch >= oppNeeded
-          ? '⚠ ADVERSÁRIO ATINGIU OBJETIVO!'
-          : `${oppAch}/${theirs.conditions.length} condições · precisa de ${oppNeeded}`}
+          ? t('ui.opponentMetObjective')
+          : t('ui.conditionsProgress', {achieved: oppAch, total: theirs.conditions.length, needed: oppNeeded})}
       </div>
       ${oppRows}
     </div>`;
@@ -1630,31 +1684,32 @@ function renderOverObjectives(objectives, winner, reason) {
   const winnerObj = winner === 'blue' ? objectives.blue : objectives.red;
   const rows = winnerObj.conditions.map(c =>
     `<div class="over-cond ${c.met ? 'over-cond-met' : 'over-cond-unmet'}">
-      ${c.met ? '✓' : '○'} ${c.label}
-      <span class="over-cond-prog">${c.current}</span>
+      ${c.met ? '✓' : '○'} ${condLabel(c)}
+      <span class="over-cond-prog">${condCurrent(c)}</span>
     </div>`
   ).join('');
-  const label = winner === 'blue' ? 'Força Azul' : 'Força Vermelha';
+  const label = winner === 'blue' ? t('team.blueTitle') : t('team.redTitle');
   $('over-objectives').innerHTML = `
-    <div class="over-obj-title">${label} — condições atendidas (${winnerObj.achieved}/${winnerObj.conditions.length}):</div>
+    <div class="over-obj-title">${t('ui.conditionsMetSummary', {team: label, achieved: winnerObj.achieved, total: winnerObj.conditions.length})}</div>
     ${rows}`;
 }
 
 // ─── Export log ───────────────────────────────────────────────────────────────
 function exportLog() {
   if (!gameState) return;
-  const teamLabel = myTeam === 'blue' ? 'Força Azul' : 'Força Vermelha';
+  const teamLabel = myTeam === 'blue' ? t('team.blueTitle') : t('team.redTitle');
+  const localeTag = i18nGetLocale() === 'en' ? 'en-US' : 'pt-BR';
   const lines = [
     '══════════════════════════════════════════════',
-    '   GUERRA DAS MALVINAS / FALKLAND — LOG DE JOGO  ',
+    `   ${t('ui.exportHeader')}  `,
     '══════════════════════════════════════════════',
-    `Equipe:   ${teamLabel}`,
-    `Turno:    ${gameState.turn}`,
-    `Período:  ${gameState.period === 'day' ? 'Diurno' : 'Noturno'}`,
-    `Exportado: ${new Date().toLocaleString('pt-BR')}`,
+    `${t('ui.exportTeam')}   ${teamLabel}`,
+    `${t('ui.exportTurn')}    ${gameState.turn}`,
+    `${t('ui.exportPeriod')}  ${gameState.period === 'day' ? t('period.dayPlain') : t('period.nightPlain')}`,
+    `${t('ui.exportExported')} ${new Date().toLocaleString(localeTag)}`,
     '',
-    '── REGISTRO DE BATALHA ──────────────────────',
-    ...(gameState.log || []).map(l => l.replace(/<[^>]+>/g, '')),
+    `── ${t('ui.exportBattleLog')} ──────────────────────`,
+    ...(gameState.log || []).map(l => logText(l).replace(/<[^>]+>/g, '')),
   ];
   const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
@@ -1670,12 +1725,12 @@ function exportLog() {
 // Exporta o log completo da partida (.jsonl com estado inicial, movimentos,
 // ataques, engajamentos e estado final), gerado pelo game_logger no servidor.
 async function exportFullLog() {
-  if (!currentRoomId) { alert('ID da partida não disponível para exportação completa.'); return; }
+  if (!currentRoomId) { alert(t('ui.exportRoomMissing')); return; }
   try {
     const res = await fetch(`/api/export-logs/${currentRoomId}`);
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      alert(err.error || 'Não foi possível exportar o log completo desta partida.');
+      alert(err.error ? t('server.' + err.error) : t('ui.exportFullFailed'));
       return;
     }
     const blob = await res.blob();
@@ -1688,7 +1743,7 @@ async function exportFullLog() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } catch (e) {
-    alert('Erro ao exportar log completo: ' + e.message);
+    alert(t('ui.exportError', {msg: e.message}));
   }
 }
 
@@ -2047,7 +2102,7 @@ function sendBrDecision(decision) {
   // Show waiting state while opponent decides
   $('br-decision').classList.add('hidden');
   $('br-waiting').classList.remove('hidden');
-  const chosen = decision === 'continue' ? 'Você escolheu CONTINUAR.' : 'Você escolheu PARAR.';
+  const chosen = decision === 'continue' ? t('battle.chosenContinue') : t('battle.chosenStop');
   $('br-panel-body').insertAdjacentHTML('beforeend',
     `<div class="br-row br-decision-made">${chosen}</div>`);
 }
@@ -2055,7 +2110,8 @@ function sendBrDecision(decision) {
 function buildResultHtml(eng) {
   if (!eng) return '';
   if (!eng.ok) {
-    return `<div class="br-row br-miss">⚠ ${eng.reason || 'Sem armamento válido.'}</div>`;
+    const reasonText = eng.reasonCode ? t('log.' + eng.reasonCode, eng.reasonParams) : t('battle.noValidWeapon');
+    return `<div class="br-row br-miss">⚠ ${reasonText}</div>`;
   }
 
   const intStr = eng.interception?.intercepted > 0
@@ -2072,21 +2128,21 @@ function buildResultHtml(eng) {
   let cls, icon, detail;
   if (eng.destroyed) {
     cls = 'br-destroyed'; icon = '💥';
-    detail = `−${eng.totalDamage}SP <strong>DESTRUÍDO!</strong>`;
+    detail = `−${eng.totalDamage}SP <strong>${t('battle.destroyed')}</strong>`;
   } else if (eng.totalDamage > 0) {
     cls = 'br-hit'; icon = '✓';
-    detail = `−${eng.totalDamage}SP  (restante: ${eng.remainingHp}SP)`;
-    if (eng.degradation) detail += `<div class="br-degrad">↘ Capacidade degradada: ${eng.degradation}</div>`;
+    detail = `−${eng.totalDamage}SP  ${t('battle.remaining', {hp: eng.remainingHp})}`;
+    if (eng.degradation) detail += `<div class="br-degrad">↘ ${t('battle.degradedCapability', {what: degradeText(eng.degradation)})}</div>`;
   } else {
     cls = 'br-miss'; icon = '✗';
-    detail = `sem dano  (restante: ${eng.remainingHp}SP)`;
+    detail = `${t('battle.noDamage')}  ${t('battle.remaining', {hp: eng.remainingHp})}`;
   }
 
   return `
     <div class="br-row ${cls}">
       ${icon} ${wpnTag}${advTag}
-      <span class="br-launched">Lançados: ${eng.launched}</span>${intStr}
-      <span class="br-impacts"> Impactos: ${eng.effectiveShots}</span>
+      <span class="br-launched">${t('battle.launched', {n: eng.launched})}</span>${intStr}
+      <span class="br-impacts">${t('battle.impacts', {n: eng.effectiveShots})}</span>
       <div class="br-detail">${detail}</div>
       <div class="br-rolls">${rollsDesc}</div>
     </div>`;
@@ -2095,10 +2151,10 @@ function buildResultHtml(eng) {
 function renderBrPanel({ engagement, result, mustDecide, decisions, initiativeBonusTeam, counterResults }) {
   brDecisionMade = false;
 
-  const brLabel = `${engagement.id} · Rodada de Combate ${engagement.battleRound}`;
+  const brLabel = t('battle.roundTitle', {id: engagement.id, round: engagement.battleRound});
   const singleRound = engagement.maxBattleRounds === 1;
 
-  $('br-panel-header').textContent = `── ${brLabel} ──`;
+  $('br-panel-header').textContent = t('battle.roundHeader', {label: brLabel});
 
   let html = '';
 
@@ -2118,23 +2174,23 @@ function renderBrPanel({ engagement, result, mustDecide, decisions, initiativeBo
   </div>`;
 
   if (singleRound) {
-    html += `<div class="br-single-label">Arma estratégica — rodada única</div>`;
+    html += `<div class="br-single-label">${t('battle.singleRoundWeapon')}</div>`;
   }
 
   if (initiativeBonusTeam) {
-    const bonusTeamLabel = initiativeBonusTeam === myTeam ? 'SUA FORÇA' : 'FORÇA ADVERSÁRIA';
-    html += `<div class="br-init-bonus">★ Bônus de iniciativa: ${bonusTeamLabel} (2d6, maior valor)</div>`;
+    const bonusTeamLabel = initiativeBonusTeam === myTeam ? t('battle.yourForce') : t('battle.enemyForce');
+    html += `<div class="br-init-bonus">★ ${t('battle.initiativeBonus', {team: bonusTeamLabel})}</div>`;
   }
 
   // Result block
   if (result === null && decisions) {
-    const blueDecided = decisions.blue === 'stop' ? 'PAROU' : 'CONTINUOU';
-    const redDecided  = decisions.red  === 'stop' ? 'PAROU' : 'CONTINUOU';
+    const blueDecided = decisions.blue === 'stop' ? t('battle.stopped') : t('battle.continued');
+    const redDecided  = decisions.red  === 'stop' ? t('battle.stopped') : t('battle.continued');
     html += `<div class="br-row br-decision-summary">
-      Azul: ${blueDecided} · Vermelho: ${redDecided} — combate encerrado.
+      ${t('battle.decisionSummary', {blue: blueDecided, red: redDecided})}
     </div>`;
   } else if (result === null) {
-    html += `<div class="br-row br-miss">⚠ Unidade já destruída — engajamento cancelado.</div>`;
+    html += `<div class="br-row br-miss">${t('battle.alreadyDestroyed')}</div>`;
   } else {
     html += buildResultHtml(result);
   }
@@ -2143,8 +2199,8 @@ function renderBrPanel({ engagement, result, mustDecide, decisions, initiativeBo
   // group, so several contributors may appear.
   const counters = counterResults || [];
   if (counters.length) {
-    const grpLabel = counters.length > 1 ? ' em grupo' : '';
-    html += `<div class="br-counter-header">── Contrataque${grpLabel} ──</div>`;
+    const grpLabel = counters.length > 1 ? t('battle.counterAttackGroup') : '';
+    html += `<div class="br-counter-header">${t('battle.counterAttack', {group: grpLabel})}</div>`;
     for (const cr of counters) {
       const cAtt = gameState?.units.find(u => u.id === cr.attackerId);
       const cDef = gameState?.units.find(u => u.id === cr.defenderId);
@@ -2160,8 +2216,8 @@ function renderBrPanel({ engagement, result, mustDecide, decisions, initiativeBo
         <span class="br-wpn-tag"> [${(cr.weaponType || '').toUpperCase()}]</span>
       </div>`;
       if (cr.advantage) {
-        const cBonusLabel = cAtt?.team === myTeam ? 'SUA FORÇA' : 'FORÇA ADVERSÁRIA';
-        html += `<div class="br-init-bonus">★ Bônus de iniciativa: ${cBonusLabel} (2d6, maior valor)</div>`;
+        const cBonusLabel = cAtt?.team === myTeam ? t('battle.yourForce') : t('battle.enemyForce');
+        html += `<div class="br-init-bonus">★ ${t('battle.initiativeBonus', {team: cBonusLabel})}</div>`;
       }
       html += buildResultHtml(cr);
     }
@@ -2180,7 +2236,7 @@ function renderBrPanel({ engagement, result, mustDecide, decisions, initiativeBo
   if (mustDecide && !singleRound && !result?.destroyed) {
     decisionEl.classList.remove('hidden');        // show CONTINUAR / PARAR
   } else {
-    const label = brQueue.length > 0 ? 'Próximo ▶' : 'OK ✓';
+    const label = brQueue.length > 0 ? t('battle.next') : t('battle.ok');
     $('br-btn-ok').textContent = label;
     okAreaEl.classList.remove('hidden');          // show OK / Próximo
   }

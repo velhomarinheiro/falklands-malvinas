@@ -108,6 +108,24 @@ h2 {
   margin-bottom: 2.5rem;
 }
 
+/* ═══ LANGUAGE SWITCH ═══════════════════════════════════════════════════════ */
+.lang-switch { display: flex; gap: 4px; justify-content: center; }
+.hero-lang-switch { margin-bottom: 1.6rem; }
+.lang-btn {
+  background: none;
+  border: 1px solid rgba(201,168,76,0.35);
+  color: var(--text-dim);
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.lang-btn:hover { border-color: var(--gold); color: var(--gold); }
+.lang-btn.active { color: var(--navy); background: var(--gold); border-color: var(--gold); }
+
 .btn-primary {
   display: inline-block;
   padding: 14px 36px;

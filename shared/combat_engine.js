@@ -94,19 +94,19 @@ function resolveInterception(defenders, incomingWeaponType, incomingAmount) {
 //            When omitted, falls back to the lone defender (or none, if disabled).
 function resolveEngagement({ attacker, defender, defenders, weaponType, amount, distance, initiativeBonusTeam = null, defenderDisabled = false }) {
   const profile = COMBAT.weaponProfiles?.[weaponType];
-  if (!profile) return { ok: false, reason: 'Tipo de arma desconhecido: ' + weaponType };
+  if (!profile) return { ok: false, reasonCode: 'UNKNOWN_WEAPON', reasonParams: { weaponType } };
 
   if (!profile.targets.includes(defender.category)) {
-    return { ok: false, reason: `${weaponType} não ataca ${defender.category}` };
+    return { ok: false, reasonCode: 'WEAPON_WRONG_TARGET', reasonParams: { weaponType, category: defender.category } };
   }
 
   const range = getWeaponRange(attacker, weaponType);
   if (distance > range) {
-    return { ok: false, reason: 'Fora de alcance', distance, range };
+    return { ok: false, reasonCode: 'OUT_OF_RANGE', reasonParams: {}, distance, range };
   }
 
   const qty = getWeaponQuantity(attacker, weaponType);
-  if (qty <= 0) return { ok: false, reason: 'Sem armamento disponível' };
+  if (qty <= 0) return { ok: false, reasonCode: 'NO_WEAPON_AVAILABLE', reasonParams: {} };
 
   const launched = Math.min(amount, qty);
   spendWeapon(attacker, weaponType, launched);

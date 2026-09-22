@@ -304,28 +304,28 @@ function pathLegal(state, unitId, path) {
   check('presença aérea/naval intacta → não cumprida', redCond(s, 'airsup').met === false);
   dealDamage(s, airsupIds, 8);
   check('presença a 8 SP (47%) → não cumprida', redCond(s, 'airsup').met === false,
-    redCond(s, 'airsup').current);
+    JSON.stringify(redCond(s, 'airsup').currentParams));
   s = newGame(); dealDamage(s, airsupIds, 9);
   check('presença a 9 SP (53%) → cumprida', redCond(s, 'airsup').met === true,
-    redCond(s, 'airsup').current);
+    JSON.stringify(redCond(s, 'airsup').currentParams));
 
   // Guarnição: fronteira exata em 10 SP de 23 (40%)
   s = newGame(); dealGarrisonDamage(s, 9);
   check('guarnição a 9 SP (39%) → não cumprida', redCond(s, 'garrison').met === false,
-    redCond(s, 'garrison').current);
+    JSON.stringify(redCond(s, 'garrison').currentParams));
   s = newGame(); dealGarrisonDamage(s, 10);
   check('guarnição a 10 SP (43%) → cumprida', redCond(s, 'garrison').met === true,
-    redCond(s, 'garrison').current);
+    JSON.stringify(redCond(s, 'garrison').currentParams));
 
-  // Rótulos derivados das constantes (não podem divergir da regra)
+  // Rótulos (por código, i18n-friendly) derivados das constantes — não podem divergir da regra
   s = newGame();
   const o = computeObjectives(s);
-  check('rótulo do objetivo aéreo cita o Pucará',
-    o.red.conditions[0].label.includes('Pucará'),
-    o.red.conditions[0].label);
+  check('rótulo do objetivo aéreo é o código de degradação da presença local (Pucará/patrulhas/caça-minas)',
+    o.red.conditions[0].labelCode === 'DEGRADE_AIRSUP',
+    o.red.conditions[0].labelCode);
   check('rótulo do objetivo guarnição cita o limiar',
-    o.red.conditions[1].label.includes(`${TH.redGarrisonDegPct}%`),
-    o.red.conditions[1].label);
+    o.red.conditions[1].labelCode === 'DEGRADE_GARRISON' && o.red.conditions[1].labelParams.pct === TH.redGarrisonDegPct,
+    JSON.stringify(o.red.conditions[1].labelParams));
 
   // progress: 0..1, limitado a 1
   check('progress inicial é 0 nos dois lados',

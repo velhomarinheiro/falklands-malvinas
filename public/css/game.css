@@ -349,6 +349,7 @@ body {
 }
 .lobby-box h1 { font-size: 1.4rem; letter-spacing: 3px; color: var(--gold); margin-bottom: 0.3rem; }
 .lobby-box p  { color: var(--dim); font-size: 0.8rem; margin-bottom: 1.5rem; }
+.lobby-box .lang-switch { justify-content: center; margin-bottom: 1.2rem; }
 
 .or-sep { margin: 1rem 0; color: var(--dim); font-size: 0.8rem; }
 .join-row { display: flex; gap: 8px; }
@@ -1011,6 +1012,25 @@ input[type=text]:focus-visible {
 }
 .sfx-toggle:hover { border-color: var(--gold); color: var(--gold-l); }
 .sfx-toggle.muted { color: #444; border-color: rgba(80,80,80,0.3); }
+
+/* ═══ LANGUAGE SWITCH ═══════════════════════════════════════════════════════ */
+.lang-switch { display: flex; gap: 2px; }
+.lang-btn {
+  background: none;
+  border: 1px solid rgba(80,140,200,0.3);
+  color: var(--dim);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  line-height: 1.4;
+}
+.lang-btn:hover { border-color: var(--gold); color: var(--gold-l); }
+.lang-btn.active { color: var(--gold); border-color: var(--gold); background: rgba(255,200,0,0.08); }
 
 /* ═══ AJUDA EM JOGO ══════════════════════════════════════════════════════════ */
 .help-box {
