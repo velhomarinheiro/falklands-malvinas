@@ -53,6 +53,15 @@ function getTerrain(col, row) {
 function logEntry(code, params) {
   return { code, params: params || {} };
 }
+// Terreno em que uma unidade 'land' pode pisar — usado tanto para legalidade
+// de movimento (canEnterTerrain) quanto para saber se a força de desembarque
+// já chegou às Ilhas (isAshore). Ilhas pequenas neste grid de 75 NM/hex caem
+// em T_SHALLOW, não em T_LAND (que representa interior continental) — por
+// isso os dois usos precisam da MESMA condição, não só T_LAND puro.
+function isAshore(unit) {
+  const t = getTerrain(unit.col, unit.row);
+  return t === T_LAND || t === T_SHALLOW;
+}
 function canEnterTerrain(category, terrain) {
   if (category === 'air' || category === 'specops') return true;
   if (category === 'land')      return terrain === T_LAND || terrain === T_SHALLOW;
@@ -201,6 +210,27 @@ function applyUnitMovement(unit, path, team, state) {
     if (isAirRefuelLocation(unit, state)) {
       unit.fuel.wasAtRefuelLocation = true;
       unit.baseHex = { col: dest.col, row: dest.row };
+    }
+  }
+}
+
+// Unidades hospedadas/embarcadas que não receberam ordem própria neste
+// período seguem a posição de quem as carrega: forças especiais furtivas
+// (hostId, ex. SOF embarcado num submarino) e a força de desembarque ainda a
+// bordo do navio-transporte (baseUnitId, via campo `embarked` do OOB) —
+// enquanto ela não estiver em terra firme, não tem como se mover sozinha por
+// cima d'água (canEnterTerrain barra categoria 'land' em água profunda), então
+// precisa "pegar carona" até o navio chegar perto o bastante para saltar
+// (ver computeBotMoves passo 4).
+function syncEmbarkedForces(state, team) {
+  for (const u of state.units) {
+    if ((u.hp ?? 0) <= 0 || u.moved || u.team !== team) continue;
+    if (u.category === 'specops' && u.hostId) {
+      const host = state.units.find(h => h.id === u.hostId && (h.hp ?? 0) > 0);
+      if (host) { u.col = host.col; u.row = host.row; }
+    } else if (u.category === 'land' && u.baseUnitId && !isAshore(u)) {
+      const host = state.units.find(h => h.id === u.baseUnitId && (h.hp ?? 0) > 0);
+      if (host) { u.col = host.col; u.row = host.row; }
     }
   }
 }
@@ -724,6 +754,13 @@ const OBJECTIVE_IDS = {
     // operacionais reais (superioridade aérea/naval local + reposse das ilhas).
     airsup:   ['BLUE-PUCARA', 'BLUE-PAT', 'BLUE-MCM'],
     garrison: ['BLUE-GARR-STANLEY', 'BLUE-EXOCET-STANLEY', 'BLUE-GARR-GOOSE'],
+    // Força de desembarque (ainda embarcada em RED-TROOP/RED-LR até avançar
+    // perto o bastante da costa para saltar em terra — ver computeBotMoves
+    // passo 4 e syncEmbarkedForces) e os alvos terrestres válidos "nas Ilhas"
+    // para ela perseguir — mesma restrição de RCE acima, exclui Geórgia do Sul
+    // (BLUE-GARR-SG, teatro à parte) e as bases continentais.
+    landingForce: ['RED-3CDO', 'RED-5BDE'],
+    islandsLand:  ['BLUE-GARR-STANLEY', 'BLUE-EXOCET-STANLEY', 'BLUE-GARR-GOOSE', 'BLUE-GARR-PEBBLE', 'BLUE-GARR-WEST'],
   },
 };
 
@@ -803,6 +840,12 @@ function computeObjectives(state) {
   const garrDegPct = garrMax > 0 ? Math.round((1 - garrCur / garrMax) * 100) : 0;
   const garrMet   = garrDegPct >= TH.redGarrisonDegPct;
 
+  // Desembarque: pelo menos uma unidade da força de desembarque (ainda
+  // embarcada até o bot/jogador aproximar o suficiente para saltar — ver
+  // computeBotMoves passo 4) precisa estar de pé em terra firme das Ilhas.
+  const landingUnits = RT.landingForce.map(id => u.find(x => x.id === id)).filter(Boolean);
+  const landingMet = landingUnits.some(x => x.hp > 0 && isAshore(x));
+
   const redConds = [
     { id: 'airsup',   labelCode: 'DEGRADE_AIRSUP', labelParams: { pct: TH.redAirSupDegPct }, met: airsupMet,
       progress: frac(airsupDegPct, TH.redAirSupDegPct),
@@ -810,12 +853,15 @@ function computeObjectives(state) {
     { id: 'garrison', labelCode: 'DEGRADE_GARRISON', labelParams: { pct: TH.redGarrisonDegPct }, met: garrMet,
       progress: frac(garrDegPct, TH.redGarrisonDegPct),
       currentCode: 'DEGRADED_PCT_SP', currentParams: { pct: garrDegPct, cur: garrCur, max: garrMax } },
+    { id: 'landing',  labelCode: 'LAND_TROOPS', labelParams: {}, met: landingMet,
+      progress: landingMet ? 1 : 0,
+      currentCode: landingMet ? 'LANDED_CHECK' : 'NOT_LANDED_CHECK', currentParams: {} },
   ];
   const redAchieved = redConds.filter(c => c.met).length;
 
   return {
     blue: { conditions: blueConds, needed: 3, achieved: blueAchieved, won: blueAchieved >= 3 },
-    red:  { conditions: redConds,  needed: 2, achieved: redAchieved,  won: redAchieved  >= 2 },
+    red:  { conditions: redConds,  needed: 3, achieved: redAchieved,  won: redAchieved  >= 3 },
   };
 }
 
@@ -1147,7 +1193,54 @@ function computeBotMoves(state, botTeam) {
     }
   }
 
-  // 3. Demais unidades: reabastecer, decolar com critério, ou avançar ao alvo
+  // 3. Força de desembarque (RT.landingForce, ainda embarcada) avança para
+  //    terra nas Ilhas (RT.islandsLand) — sempre tenta fechar a distância até
+  //    <=1 hex, ignorando o atalho "já está no alcance de tiro" do passo
+  //    seguinte, porque desembarcar exige pisar em terra, não só alcançar com
+  //    uma arma. Enquanto ainda não há caminho legal até a costa (água
+  //    profunda barra categoria 'land' — ver canEnterTerrain), o navio-
+  //    transporte avança na mesma direção, escoltado por um petroleiro, para
+  //    não ficar sem combustível na travessia (ver botNeedsRefuel).
+  const islandsLand = enemies.filter(e => OBJECTIVE_IDS.redTargets.islandsLand.includes(e.id));
+  if (islandsLand.length) {
+    for (const force of own.filter(u => u.category === 'land' && u.baseUnitId && !handled.has(u.id))) {
+      handled.add(force.id);
+      if (isAshore(force)) continue; // já desembarcada
+      if (force.movement <= 0 || isFuelDisabled(force)) continue;
+      const target = nearest(force, islandsLand);
+
+      // Tenta sempre o salto pra terra primeiro — hexDist<=1 do alvo NÃO
+      // significa estar pronta pra desembarcar: pode ser um hex de água
+      // adjacente. Só desiste do salto quando não há caminho legal (BFS de
+      // botMoveToward barra água profunda pra categoria 'land').
+      const hopPath = botMoveToward(force, target, state);
+      if (hopPath && hopPath.length >= 2) {
+        moves.push({ unitId: force.id, path: hopPath }); // salta pra terra agora
+        continue;
+      }
+
+      // Ainda no mar: avança o navio-hospedeiro, com escolta de combustível.
+      const host = own.find(u => u.id === force.baseUnitId && !handled.has(u.id));
+      if (!host || !mobile(host)) continue;
+      handled.add(host.id);
+      if (hexDist(host.col, host.row, target.col, target.row) > 1) {
+        const hostPath = botMoveToward(host, target, state);
+        if (hostPath && hostPath.length >= 2) moves.push({ unitId: host.id, path: hostPath });
+      }
+      const tanker = own
+        .filter(u => u.type === 'tanque' && isNavalRefuelProvider(u) && mobile(u) && !handled.has(u.id))
+        .sort((a, b) => hexDist(a.col, a.row, host.col, host.row) - hexDist(b.col, b.row, host.col, host.row))[0];
+      if (tanker) {
+        handled.add(tanker.id);
+        if (hexDist(tanker.col, tanker.row, host.col, host.row) > 2) {
+          const tPath = botMoveToward(tanker, host, state);
+          if (tPath && tPath.length >= 2) moves.push({ unitId: tanker.id, path: tPath });
+        }
+      }
+    }
+  }
+
+  // 4. Demais unidades: reabastecer, decolar com critério, ou avançar ao alvo
   for (const unit of own) {
     if (handled.has(unit.id) || !mobile(unit)) continue;
 
@@ -1247,6 +1340,7 @@ function applyBotMovesToState(state, botTeam, moves) {
       }
     } else { spendNavalFuel(u, navalMoveCost(0)); }
   }
+  syncEmbarkedForces(state, botTeam);
   state[botTeam === 'blue' ? 'blueDone' : 'redDone'] = true;
 }
 
@@ -1489,13 +1583,7 @@ io.on('connection', socket => {
       }
     }
 
-    // Sync unmoved specops to their current host position
-    for (const u of state.units) {
-      if (u.category !== 'specops' || (u.hp ?? 0) <= 0 || u.moved || u.team !== team) continue;
-      if (!u.hostId) continue;
-      const host = state.units.find(h => h.id === u.hostId && (h.hp ?? 0) > 0);
-      if (host) { u.col = host.col; u.row = host.row; }
-    }
+    syncEmbarkedForces(state, team);
 
     if (team==='blue') state.blueDone=true; else state.redDone=true;
     if (state.blueDone&&state.redDone) {
@@ -1653,5 +1741,5 @@ module.exports = {
   botObjectiveWeights, botPickTarget, botNeedsRefuel, botRefuelProvider,
   botMoveToward, botMoveAway, botBattleRoundDecision,
   nextTurn, checkWinner, MAX_TURNS,
-  applyUnitMovement, MINESWEEPER_IDS,
+  applyUnitMovement, MINESWEEPER_IDS, syncEmbarkedForces,
 };

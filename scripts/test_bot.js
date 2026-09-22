@@ -273,8 +273,8 @@ function pathLegal(state, unitId, path) {
 {
   const s = newGame();
   const o = computeObjectives(s);
-  check('objetivos iniciais: azul 0/3, vermelho 0/2',
-    o.blue.achieved === 0 && o.blue.needed === 3 && o.red.achieved === 0 && o.red.needed === 2);
+  check('objetivos iniciais: azul 0/3, vermelho 0/3',
+    o.blue.achieved === 0 && o.blue.needed === 3 && o.red.achieved === 0 && o.red.needed === 3);
 }
 
 // ── 12b. Limiares de vitória e progresso contínuo ─────────────────────────────
@@ -342,14 +342,19 @@ function pathLegal(state, unitId, path) {
     halfProg > 0.3 && halfProg < 0.7, `progress=${halfProg.toFixed(3)}`);
 
   // Adjudicação: dano acumulado abaixo do limiar deixa de valer zero.
-  // Vermelho com guarnição a 39% (quase lá, mas nenhuma condição cumprida)
-  // contra Azul que só matou o sub nuclear (1 condição barata cumprida).
+  // Vermelho com guarnição a 31% e presença aérea/naval a 41% (quase lá nas
+  // duas, mas nenhuma condição cumprida — e o 3º objetivo, desembarque, segue
+  // em 0) contra Azul que só matou o sub nuclear (1 condição barata cumprida).
+  // Precisa de progresso em 2 das 3 condições vermelhas porque uma só, sozinha,
+  // não supera mais a média de 3 (era suficiente quando o vermelho precisava
+  // de só 2 condições, antes do objetivo de desembarque).
   s = newGame();
   dealGarrisonDamage(s, 9);
+  dealDamage(s, airsupIds, 7);
   byId(s, OBJECTIVE_IDS.blueTargets.nucsub).hp = 0;
   const o2 = computeObjectives(s);
   const bp = objectiveProgress(o2.blue), rp = objectiveProgress(o2.red);
-  const oldWinner = (o2.red.achieved / 2) > (o2.blue.achieved / 3) ? 'red' : 'blue';
+  const oldWinner = (o2.red.achieved / o2.red.needed) > (o2.blue.achieved / o2.blue.needed) ? 'red' : 'blue';
   const newWinner = rp > bp ? 'red' : 'blue';
   check('adjudicação: dano acumulado vermelho passa a vencer contagem azul barata',
     oldWinner === 'blue' && newWinner === 'red',

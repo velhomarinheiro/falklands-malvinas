@@ -34,13 +34,15 @@ function playOne() {
   const obj = computeObjectives(s);
   const garrisonCond  = obj.red.conditions.find(c => c.id === 'garrison');
   const airsupCond    = obj.red.conditions.find(c => c.id === 'airsup');
+  const landingCond   = obj.red.conditions.find(c => c.id === 'landing');
   const strandedNaval = s.units.filter(u =>
     u.hp > 0 && u.fuel?.fuelType === 'naval' && u.fuel.current === 0).length;
   return {
     winner: s.winner, turn: s.turn,
-    blueAchieved: obj.blue.achieved, redAchieved: obj.red.achieved,
+    blueAchieved: obj.blue.achieved, redAchieved: obj.red.achieved, redNeeded: obj.red.needed,
     garrisonPct: garrisonCond?.currentParams?.pct ?? 0,
     airsupMet: !!airsupCond?.met,
+    landingMet: !!landingCond?.met,
     strandedNaval,
   };
 }
@@ -57,8 +59,9 @@ console.log(`Vitórias  Argentina (Azul): ${count(r => r.winner === 'blue')} (${
 console.log(`      Reino Unido (Vermelho): ${count(r => r.winner === 'red')} (${pct(count(r => r.winner === 'red'))})`);
 console.log(`   sem vencedor: ${count(r => !r.winner)}`);
 console.log(`\nTurno médio final: ${avg(r => r.turn).toFixed(1)} (limite ${MAX_TURNS})`);
-console.log(`Objetivos médios — Azul ${avg(r => r.blueAchieved).toFixed(2)}/3 · Vermelho ${avg(r => r.redAchieved).toFixed(2)}/2`);
+console.log(`Objetivos médios — Azul ${avg(r => r.blueAchieved).toFixed(2)}/3 · Vermelho ${avg(r => r.redAchieved).toFixed(2)}/${runs[0]?.redNeeded ?? 3}`);
 console.log(`\nProgresso vermelho:`);
 console.log(`  guarnição das ilhas degradada: média ${avg(r => r.garrisonPct).toFixed(1)}% · máx ${Math.max(...runs.map(r => r.garrisonPct))}%`);
 console.log(`  esquadrão Pucará destruído: ${count(r => r.airsupMet)} partidas (${pct(count(r => r.airsupMet))})`);
+console.log(`  desembarque nas Ilhas: ${count(r => r.landingMet)} partidas (${pct(count(r => r.landingMet))})`);
 console.log(`\nUnidades navais a 0 FP ao fim da partida: média ${avg(r => r.strandedNaval).toFixed(1)}`);
