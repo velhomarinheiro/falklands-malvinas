@@ -114,7 +114,7 @@ function pathLegal(state, unitId, path) {
   const T = OBJECTIVE_IDS.blueTargets;
   check('pesos azuis cobrem carrier/logística/anfíbio/sub',
     w.get(T.carrier) === 0 && T.logistics.every(id => w.get(id) === 0) &&
-    w.get(T.amphib) === 0 && w.get(T.nucsub) === 0);
+    T.amphib.every(id => w.get(id) === 0) && w.get(T.nucsub) === 0);
 }
 
 // ── 4. Re-tarefa após objetivo cumprido ───────────────────────────────────────

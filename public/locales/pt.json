@@ -213,7 +213,7 @@
     "step4Title": "Resolução Simultânea",
     "step4Body": "Quando ambos confirmam, os ataques são resolvidos ao mesmo tempo. Unidades destruídas são removidas do tabuleiro.",
     "step5Title": "Vitória",
-    "step5Body": "Cada força tem objetivos próprios: a Argentina (Azul) vence ao cumprir 3 de 5 objetivos — afundar o porta-aviões, a logística, o grupo anfíbio, o submarino nuclear ou degradar a esquadra britânica; o Reino Unido (Vermelha) vence ao cumprir seus 2, ambos restritos às ilhas — a Inglaterra operava sob regras de engajamento que proibiam ataques ao continente argentino — degradar a presença aérea/naval local (Pucará, patrulhas, caça-minas) e a guarnição das ilhas. Ao fim de 8 dias de operação, vence quem tiver maior progresso. O jogo alterna períodos diurnos e noturnos.",
+    "step5Body": "Cada força tem objetivos próprios: a Argentina (Azul) vence ao cumprir 3 de 5 objetivos — afundar o porta-aviões, a logística, o grupo anfíbio, o submarino nuclear ou degradar a esquadra britânica; o Reino Unido (Vermelha) vence ao cumprir seus 3, todos restritos às ilhas — a Inglaterra operava sob regras de engajamento que proibiam ataques ao continente argentino — degradar a presença aérea/naval local (Pucará, patrulhas, caça-minas), a guarnição das ilhas, e desembarcar uma unidade terrestre em solo insular. Ao fim de 8 dias de operação, vence quem tiver maior progresso. O jogo alterna períodos diurnos e noturnos.",
     "startOpSection": "INICIAR OPERAÇÃO",
     "tutorialCta": "📖 COMO JOGAR — Tutorial",
     "orDirect": "— ou entre direto no jogo —",
@@ -438,6 +438,7 @@
     "SP_CURRENT": "SP: {{hp}}/{{maxHp}}",
     "DESTROYED_CHECK": "Destruído ✓",
     "NEUTRALIZED_CHECK": "Neutralizado ✓",
+    "GROUP_INTACT_CHECK": "Grupo intacto",
     "NEUTRALIZE_LOGISTICS_CURRENT": "{{dead}}/{{total}} neutralizados (precisa {{needed}})",
     "DEGRADED_PCT": "{{pct}}% degradado",
     "DEGRADED_PCT_SP": "{{pct}}% degradado  (SP: {{cur}}/{{max}})"

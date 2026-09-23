@@ -213,7 +213,7 @@
     "step4Title": "Simultaneous Resolution",
     "step4Body": "Once both confirm, attacks are resolved at the same time. Destroyed units are removed from the board.",
     "step5Title": "Victory",
-    "step5Body": "Each force has its own objectives: Argentina (Blue) wins by completing 3 of 5 objectives — sinking the carrier, the logistics ships, the amphibious group, the nuclear submarine, or degrading the British squadron; the United Kingdom (Red) wins by completing its 2, both restricted to the islands theater — Britain operated under rules of engagement that forbade attacks on the Argentine mainland — degrading the local air/naval presence (Pucará, patrols, minesweepers) and the islands' garrison. At the end of 8 days of operations, whoever has the greater progress wins. The game alternates day and night periods.",
+    "step5Body": "Each force has its own objectives: Argentina (Blue) wins by completing 3 of 5 objectives — sinking the carrier, the logistics ships, the amphibious group, the nuclear submarine, or degrading the British squadron; the United Kingdom (Red) wins by completing all 3 of its own, all restricted to the islands theater — Britain operated under rules of engagement that forbade attacks on the Argentine mainland — degrading the local air/naval presence (Pucará, patrols, minesweepers), the islands' garrison, and landing a ground unit on the islands. At the end of 8 days of operations, whoever has the greater progress wins. The game alternates day and night periods.",
     "startOpSection": "START OPERATION",
     "tutorialCta": "📖 HOW TO PLAY — Tutorial",
     "orDirect": "— or jump straight into the game —",
@@ -438,6 +438,7 @@
     "SP_CURRENT": "SP: {{hp}}/{{maxHp}}",
     "DESTROYED_CHECK": "Destroyed ✓",
     "NEUTRALIZED_CHECK": "Neutralized ✓",
+    "GROUP_INTACT_CHECK": "Group intact",
     "NEUTRALIZE_LOGISTICS_CURRENT": "{{dead}}/{{total}} neutralized (needs {{needed}})",
     "DEGRADED_PCT": "{{pct}}% degraded",
     "DEGRADED_PCT_SP": "{{pct}}% degraded  (SP: {{cur}}/{{max}})"

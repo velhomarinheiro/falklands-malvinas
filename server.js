@@ -8,7 +8,7 @@ const fs       = require('fs');
 const archiver = require('archiver');
 const { ORDER_OF_BATTLE }  = require('./shared/order_of_battle');
 const { COMBAT_CONFIG }    = require('./shared/combat_config');
-const { resolveEngagement, getWeaponQuantity, getWeaponRange, resolveMineHit, resolveMineSweep } = require('./shared/combat_engine');
+const { resolveEngagement, getWeaponQuantity, getWeaponRange, resolveMineHit, resolveMineSweep, applyDamage } = require('./shared/combat_engine');
 const {
   initializeFuel, isFuelDisabled,
   canMove, canAttack, canDefend,
@@ -61,6 +61,24 @@ function logEntry(code, params) {
 function isAshore(unit) {
   const t = getTerrain(unit.col, unit.row);
   return t === T_LAND || t === T_SHALLOW;
+}
+// Força de desembarque ainda a bordo do navio-transporte: sem capacidade
+// ofensiva própria (não ataca, não pode ser alvo direto — só o navio pode),
+// e sofre o mesmo dano que o navio via mirrorDamageToEmbarked.
+function isEmbarkedAfloat(unit) {
+  return unit.category === 'land' && !!unit.baseUnitId && !isAshore(unit);
+}
+// Espelha o dano recebido pelo navio-hospedeiro (hostId) nas unidades
+// terrestres que ele transporta, ainda embarcadas — refletindo que um hit no
+// navio também ameaça a tropa a bordo. SP delas foi calibrado 1:1 com o do
+// navio-hospedeiro para isso bater exato. Perda total já é tratada à parte
+// pela cascata de destruição (baseUnitId) em resolveBattleRound/applyUnitMovement.
+function mirrorDamageToEmbarked(state, hostId, damage) {
+  if (damage <= 0) return;
+  for (const u of state.units) {
+    if ((u.hp ?? 0) <= 0) continue;
+    if (u.category === 'land' && u.baseUnitId === hostId && !isAshore(u)) applyDamage(u, damage);
+  }
 }
 function canEnterTerrain(category, terrain) {
   if (category === 'air' || category === 'specops') return true;
@@ -189,6 +207,8 @@ function applyUnitMovement(unit, path, team, state) {
             state.log.unshift(logEntry('UNIT_LOST_WITH', { u: u.name, def: unit.name }));
           }
         }
+      } else {
+        mirrorDamageToEmbarked(state, unit.id, hit.damage);
       }
     }
     haltedAt = i;
@@ -274,7 +294,11 @@ function stateFor(state, team) {
   const enemiesForDetection = enemies.filter(e => e.category !== 'specops');
 
   const detected = enemiesForDetection.filter(enemy => {
-    if (enemy.category === 'land') return true; // fixed positions always known
+    // Infraestrutura fixa (base aérea, porto) tem posição conhecida de
+    // antemão — o resto de 'land' (guarnições, força de desembarque) segue
+    // a mesma detecção por alcance de todo mundo, e só aparece quando alguém
+    // com capacidade de detecção estiver perto o bastante.
+    if (enemy.type === 'aeroporto' || enemy.type === 'porto') return true;
     const stealthy  = !!enemy.stealthy;
     const deepBonus = getTerrain(enemy.col, enemy.row) === T_DEEP ? 1 : 0;
     return mineForDetection.some(f => {
@@ -423,6 +447,9 @@ function buildCombatQueue(state) {
     const att = state.units.find(u => u.id === atk.attackerId && u.hp > 0);
     const def = state.units.find(u => u.id === atk.targetId   && u.hp > 0);
     if (!att || !def) return null;
+    // Força de desembarque embarcada: sem capacidade ofensiva própria, e não
+    // é alvo direto — só o navio que a transporta pode atacar/ser atacado.
+    if (isEmbarkedAfloat(att) || isEmbarkedAfloat(def)) return null;
     const dist      = hexDist(att.col, att.row, def.col, def.row);
     const reqWpn    = atk.weaponType;
     const wpnType   = (reqWpn && getWeaponQuantity(att, reqWpn) > 0)
@@ -530,6 +557,7 @@ function resolveBattleRound(state, engagement, initiativeBonusTeam = null) {
       state.log.unshift(logEntry(n > 0 ? 'HIT_INTERCEPTED' : 'HIT',
         { att: att.name, def: def.name, dmg: eng.totalDamage, weapon: eng.weaponLabel, n }));
       spendDamageFuel(def);    // defender burns extra FP absorbing the hit
+      mirrorDamageToEmbarked(state, def.id, eng.totalDamage);
       const degrad = applyDegradation(def, eng.totalDamage);
       if (degrad) {
         state.log.unshift(logEntry('DEGRADED', { def: def.name, degradeCode: degrad.code, degradeParams: degrad.params }));
@@ -604,7 +632,7 @@ function resolveCounterAttacks(state, engagement, blue, red) {
   const results = [];
   let idx = 0;
   for (const unit of group) {
-    if ((unit.hp ?? 0) <= 0 || !canAttack(unit) || unit.id === att.id) continue;
+    if ((unit.hp ?? 0) <= 0 || !canAttack(unit) || unit.id === att.id || isEmbarkedAfloat(unit)) continue;
 
     const dist       = hexDist(unit.col, unit.row, att.col, att.row);
     const counterWpn = selectBestWeapon(unit, att, dist);
@@ -742,7 +770,12 @@ const OBJECTIVE_IDS = {
   blueTargets: {
     carrier:   'RED-HERMES',
     logistics: ['RED-LOG-1', 'RED-LOG-2', 'RED-LOG-3'],
-    amphib:    'RED-LPD',
+    // Grupo anfíbio: as embarcações de desembarque (Fearless/Intrepid) E os
+    // dois navios-transporte que levam a força de desembarque em si — afundar
+    // qualquer um deles neutraliza a capacidade de pôr tropas em terra, então
+    // qualquer um já cumpre a condição (mesma dificuldade binária de antes,
+    // só que agora reconhece os navios que carregam a tropa de verdade).
+    amphib:    ['RED-LPD', 'RED-TROOP', 'RED-LR'],
     nucsub:    'RED-SUB-CONQ',
     surface:   ['RED-HERMES', 'RED-INVINCIBLE', 'RED-SCR-1', 'RED-SCR-2', 'RED-ESC-1', 'RED-ESC-2', 'RED-TRAIL', 'RED-LAND-SCR', 'RED-SG-SCR', 'RED-TROOP'],
   },
@@ -793,8 +826,9 @@ function computeObjectives(state) {
   const logDead   = logUnits.filter(x => x.hp <= 0).length;
   const logMet    = logDead >= TH.blueLogisticsKills;
 
-  const amphib    = u.find(x => x.id === BT.amphib);
-  const amphibMet = !amphib || amphib.hp <= 0;
+  const amphibUnits = BT.amphib.map(id => u.find(x => x.id === id)).filter(Boolean);
+  const amphibMet   = amphibUnits.length === 0 || amphibUnits.some(x => x.hp <= 0);
+  const amphibProgress = amphibUnits.length ? Math.max(...amphibUnits.map(killProgress)) : 1;
 
   const nucsub    = u.find(x => x.id === BT.nucsub);
   const nucsubMet = !nucsub || nucsub.hp <= 0;
@@ -814,9 +848,8 @@ function computeObjectives(state) {
       progress: frac(logDead, TH.blueLogisticsKills),
       currentCode: 'NEUTRALIZE_LOGISTICS_CURRENT', currentParams: { dead: logDead, total: logUnits.length, needed: TH.blueLogisticsKills } },
     { id: 'amphib',    labelCode: 'NEUTRALIZE_AMPHIB', labelParams: {}, met: amphibMet,
-      progress: killProgress(amphib),
-      currentCode: amphib ? 'SP_CURRENT' : 'NEUTRALIZED_CHECK',
-      currentParams: amphib ? { hp: amphib.hp, maxHp: amphib.maxHp } : {} },
+      progress: amphibProgress,
+      currentCode: amphibMet ? 'NEUTRALIZED_CHECK' : 'GROUP_INTACT_CHECK', currentParams: {} },
     { id: 'nucsub',    labelCode: 'DESTROY_NUCSUB', labelParams: {}, met: nucsubMet,
       progress: killProgress(nucsub),
       currentCode: nucsub ? 'SP_CURRENT' : 'DESTROYED_CHECK',
@@ -1044,7 +1077,7 @@ function botObjectiveWeights(state, botTeam) {
     const T   = OBJECTIVE_IDS.blueTargets;
     if (!met.carrier)   w.set(T.carrier, 0);
     if (!met.logistics) T.logistics.forEach(id => w.set(id, 0));
-    if (!met.amphib)    w.set(T.amphib, 0);
+    if (!met.amphib)    T.amphib.forEach(id => { if (!w.has(id)) w.set(id, 0); });
     if (!met.nucsub)    w.set(T.nucsub, 0);
     if (!met.surface)   T.surface.forEach(id => { if (!w.has(id)) w.set(id, 1); });
   } else {
@@ -1271,9 +1304,9 @@ function computeBotMoves(state, botTeam) {
 function computeBotAttacks(state, botTeam) {
   const attacks = [];
   const objW    = botObjectiveWeights(state, botTeam);
-  const enemies = state.units.filter(u => u.team !== botTeam && u.hp > 0);
+  const enemies = state.units.filter(u => u.team !== botTeam && u.hp > 0 && !isEmbarkedAfloat(u));
   for (const unit of state.units.filter(u => u.team === botTeam && u.hp > 0)) {
-    if (!canAttack(unit)) continue;
+    if (isEmbarkedAfloat(unit) || !canAttack(unit)) continue;
     const d = e => hexDist(unit.col, unit.row, e.col, e.row);
     const inRange = enemies
       .filter(e => {
@@ -1742,4 +1775,5 @@ module.exports = {
   botMoveToward, botMoveAway, botBattleRoundDecision,
   nextTurn, checkWinner, MAX_TURNS,
   applyUnitMovement, MINESWEEPER_IDS, syncEmbarkedForces,
+  stateFor, isAshore, isEmbarkedAfloat,
 };

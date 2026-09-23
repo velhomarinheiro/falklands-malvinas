@@ -52,11 +52,12 @@ só em português.
   empilhamento com navios-tanque/logísticos/portos, munição limitada.
 - Vitória por objetivos assimétricos: Argentina (Azul) precisa de 3 de 5
   (afundar porta-aviões, logística, grupo anfíbio, submarino nuclear ou
-  degradar a esquadra britânica); Reino Unido (Vermelho), de seus 2 — ambos
-  restritos ao teatro insular, já que a Inglaterra operava sob regras de
-  engajamento que proibiam ataques ao continente argentino (degradar a
-  presença aérea/naval local — Pucará, patrulhas, caça-minas — e a
-  guarnição das ilhas). Limite operacional de 8 dias com adjudicação por progresso (configurável
+  degradar a esquadra britânica); Reino Unido (Vermelho) precisa dos seus 3
+  — todos restritos ao teatro insular, já que a Inglaterra operava sob
+  regras de engajamento que proibiam ataques ao continente argentino
+  (degradar a presença aérea/naval local — Pucará, patrulhas, caça-minas —,
+  a guarnição das ilhas, e desembarcar uma unidade terrestre em solo
+  insular). Limite operacional de 8 dias com adjudicação por progresso (configurável
   via `MAX_TURNS`).
 
 ## Estrutura do repositório
