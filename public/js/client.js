@@ -795,7 +795,7 @@ $('btn-export-full-over').addEventListener('click', () => exportFullLog());
 $('br-btn-continue').addEventListener('click', () => { SFX.play('click'); sendBrDecision('continue'); });
 $('br-btn-stop'    ).addEventListener('click', () => { SFX.play('click'); sendBrDecision('stop'); });
 $('br-btn-ok'      ).addEventListener('click', () => { SFX.play('click'); onBrOk(); });
-$('btn-back').addEventListener('click', () => location.reload());
+$('btn-back').addEventListener('click', () => { location.href = '/'; });
 
 exportLogBtn.addEventListener('click', () => exportLog());
 exportFullLogBtn.addEventListener('click', () => exportFullLog());
