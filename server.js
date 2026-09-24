@@ -163,6 +163,31 @@ function isAirRefuelLocation(unit, state) {
   );
 }
 
+// ─── Reabastecimento em voo (escolta de avião-tanque) ─────────────────────────
+// No início de cada período, qualquer aeronave própria "pronta" que comece no
+// mesmo hex de um avião-tanque amigo (TANKER_AIR_IDS) recebe um bônus de FP
+// acima do seu tanque normal — simula o rendezvous com o KC-130H/Victor K.2
+// antes da sortida, estendendo o raio de ação daquele período. Chamada em
+// nextTurn, junto com o resto da recuperação de combustível.
+function applyAirEscortRefuel(state) {
+  const tankers = state.units.filter(u => TANKER_AIR_IDS.includes(u.id) && (u.hp ?? 0) > 0);
+  if (!tankers.length) return;
+  for (const u of state.units) {
+    if ((u.hp ?? 0) <= 0 || u.category !== 'air' || TANKER_AIR_IDS.includes(u.id)) continue;
+    if (u.airStatus !== 'ready' || !u.fuel?.usesFuel) continue;
+    const tanker = tankers.find(t => t.team === u.team && t.col === u.col && t.row === u.row);
+    if (!tanker) continue;
+    const cap   = Math.round(u.fuel.max * (1 + AIR_ESCORT_BONUS_FRAC));
+    const bonus = Math.round(u.fuel.max * AIR_ESCORT_BONUS_FRAC);
+    const before = u.fuel.current;
+    u.fuel.current = Math.min(cap, u.fuel.current + bonus);
+    if (u.fuel.current > before) {
+      state.log.unshift(logEntry('AIR_ESCORT_REFUELED',
+        { name: u.name, team: u.team, tanker: tanker.name, current: u.fuel.current, max: u.fuel.max }));
+    }
+  }
+}
+
 // ─── Movement application (mines-aware) ───────────────────────────────────────
 // Walks `unit` along `path` (array of {col,row}, path[0] = current position),
 // mutating `state` in place: applies the destination, logs UNIT_MOVED, and
@@ -236,12 +261,16 @@ function applyUnitMovement(unit, path, team, state) {
 
 // Unidades hospedadas/embarcadas que não receberam ordem própria neste
 // período seguem a posição de quem as carrega: forças especiais furtivas
-// (hostId, ex. SOF embarcado num submarino) e a força de desembarque ainda a
+// (hostId, ex. SOF embarcado num submarino), a força de desembarque ainda a
 // bordo do navio-transporte (baseUnitId, via campo `embarked` do OOB) —
 // enquanto ela não estiver em terra firme, não tem como se mover sozinha por
 // cima d'água (canEnterTerrain barra categoria 'land' em água profunda), então
 // precisa "pegar carona" até o navio chegar perto o bastante para saltar
-// (ver computeBotMoves passo 4).
+// (ver computeBotMoves passo 4) — e aeronaves embarcadas que não decolaram
+// neste período (baseUnitId, ex. esquadrilhas num porta-aviões ou os Harriers
+// de reposição no Atlantic Conveyor): se ficam paradas no convés e o navio se
+// move, elas têm que ir junto, senão ficam "esquecidas" no meio do mar (bug
+// visto em partida real: RED-HAR-RES isolado longe do Atlantic Conveyor).
 function syncEmbarkedForces(state, team) {
   for (const u of state.units) {
     if ((u.hp ?? 0) <= 0 || u.moved || u.team !== team) continue;
@@ -251,6 +280,9 @@ function syncEmbarkedForces(state, team) {
     } else if (u.category === 'land' && u.baseUnitId && !isAshore(u)) {
       const host = state.units.find(h => h.id === u.baseUnitId && (h.hp ?? 0) > 0);
       if (host) { u.col = host.col; u.row = host.row; }
+    } else if (u.category === 'air' && u.baseUnitId) {
+      const host = state.units.find(h => h.id === u.baseUnitId && (h.hp ?? 0) > 0);
+      if (host) { u.col = host.col; u.row = host.row; u.baseHex = { col: host.col, row: host.row }; }
     }
   }
 }
@@ -332,6 +364,13 @@ const WEAPON_PRIORITY = {
 // Unidades de caça-minas — únicas que podem varrer (em vez de detonar) um
 // campo minado ao entrar no seu hex.
 const MINESWEEPER_IDS = ['BLUE-MCM', 'RED-MCM'];
+
+// Aviões-tanque — KC-130H (Azul) e Victor K.2 (Vermelho). Reabastecimento em
+// voo: uma aeronave amiga que começa o período no mesmo hex de um avião-tanque
+// próprio recebe um bônus de combustível acima do seu tanque normal, estendendo
+// o raio de ação da sortida deste período (ver applyAirEscortRefuel).
+const TANKER_AIR_IDS = ['BLUE-TANKER-AIR', 'RED-TANKER-AIR'];
+const AIR_ESCORT_BONUS_FRAC = 0.5; // +50% de FP acima do tanque normal
 
 function selectBestWeapon(attacker, target, dist) {
   const priority = WEAPON_PRIORITY[target.category] || [];
@@ -968,6 +1007,9 @@ function nextTurn(state) {
 
   // ── Fuel: aircraft that landed last turn become ready ─────────────────────
   recoverAircraft(state);
+
+  // ── Fuel: in-flight refuel for aircraft escorted by a friendly tanker ─────
+  applyAirEscortRefuel(state);
 
   // ── Advance turn ────────────────────────────────────────────────────────────
   state.units.forEach(u => { u.moved = false; });
@@ -1776,4 +1818,5 @@ module.exports = {
   nextTurn, checkWinner, MAX_TURNS,
   applyUnitMovement, MINESWEEPER_IDS, syncEmbarkedForces,
   stateFor, isAshore, isEmbarkedAfloat,
+  TANKER_AIR_IDS, applyAirEscortRefuel,
 };

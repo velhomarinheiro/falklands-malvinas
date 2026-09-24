@@ -41,6 +41,7 @@ const unitTooltipEl     = $('unit-tooltip');
 const cardModal         = $('card-modal');
 const cardModalImg      = $('card-modal-img');
 const sfxToggle         = $('sfx-toggle');
+const fogToggle         = $('fog-toggle');
 const weaponPicker      = $('weapon-picker');
 const wpBody            = $('wp-body');
 const wpTargetName      = $('wp-target-name');
@@ -728,9 +729,24 @@ function _updateSfxBtn() {
 }
 sfxToggle.addEventListener('click', () => { SFX.toggleMute(); _updateSfxBtn(); });
 _updateSfxBtn();
+
+// ─── Fog-of-war mist toggle ────────────────────────────────────────────────
+let fogOfWarOn = localStorage.getItem('oas_fog') !== 'off';
+function _updateFogBtn() {
+  fogToggle.textContent = fogOfWarOn ? '🌫' : '☀';
+  fogToggle.classList.toggle('muted', !fogOfWarOn);
+}
+fogToggle.addEventListener('click', () => {
+  fogOfWarOn = !fogOfWarOn;
+  localStorage.setItem('oas_fog', fogOfWarOn ? 'on' : 'off');
+  _updateFogBtn(); render();
+});
+_updateFogBtn();
+
 document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || document.activeElement.tagName === 'INPUT') return;
   if (e.key === 's') { SFX.toggleMute(); _updateSfxBtn(); }
+  if (e.key === 'f') { fogToggle.click(); }
   if (e.key === 'h') {
     helpModal.classList.contains('hidden') ? showHelpModal() : hideHelpModal();
   }
@@ -1094,11 +1110,12 @@ function handleClick(col, row) {
       }
     }
     const ownUnits = gameState.units.filter(u => u.col === col && u.row === row && u.hp > 0 && u.team === myTeam);
-    if (ownUnits.length > 1) { showStackPicker(col, row, ownUnits); return; }
-    if (ownUnits.length === 1) {
-      selGroupIds = []; selUnitId = ownUnits[0].id;
+    const pick = pickableUnits(ownUnits);
+    if (pick.length > 1) { showStackPicker(col, row, ownUnits); return; }
+    if (pick.length === 1) {
+      selGroupIds = []; selUnitId = pick[0].id;
       SFX.play('select');
-      recalcHighlights(ownUnits[0]); updateUI(); render();
+      recalcHighlights(pick[0]); updateUI(); render();
     } else { if (!tryShowEnemyCard(col, row)) deselect(); }
     return;
   }
@@ -1132,8 +1149,9 @@ function handleClick(col, row) {
     // Click on own unit(s)
     const ownUnits = gameState.units.filter(u => u.col === col && u.row === row && u.hp > 0 && u.team === myTeam);
     if (ownUnits.length === 0) { if (!tryShowEnemyCard(col, row)) deselect(true); return; }
-    if (ownUnits.length > 1) { deselect(true); showStackPicker(col, row, ownUnits); return; }
-    const unit = ownUnits[0];
+    const pick = pickableUnits(ownUnits);
+    if (pick.length > 1) { deselect(true); showStackPicker(col, row, ownUnits); return; }
+    const unit = pick[0];
     if (selUnitId === unit.id && selGroupIds.length === 0) return; // already selected alone
     deselect(true);
     selUnitId = unit.id; selGroupIds = [];
@@ -1213,9 +1231,31 @@ function recalcHighlightsGroup(units) {
 }
 
 // ─── Stack picker ─────────────────────────────────────────────────────────────
+// Embarked land force still afloat on its transport (baseUnitId set, not yet on
+// land/shallow terrain): pure cargo with no independent movement — the server
+// auto-follows it onto the host's new hex (syncEmbarkedForces) whether or not it
+// gets an explicit move order. It must stay out of stack selection and group-move
+// (its 'land' category would otherwise veto the whole group's ability to cross
+// open water in recalcHighlightsGroup's canEnterTerrain check). Mirrors server's
+// isEmbarkedAfloat. Once ashore it behaves like any other independent land unit.
+function isEmbarkedCargo(u) {
+  if (u.category !== 'land' || !u.baseUnitId) return false;
+  const t = TERRAIN_MAP[u.row]?.[u.col];
+  return t !== T_LAND && t !== T_SHALLOW;
+}
+// Units at a hex that can actually be selected/moved on their own — excludes
+// embarked cargo (falls back to the raw list if nothing else is selectable, e.g.
+// a transport was destroyed and only its cargo remains momentarily).
+function pickableUnits(units) {
+  const actionable = units.filter(u => !isEmbarkedCargo(u));
+  return actionable.length ? actionable : units;
+}
+
 function showStackPicker(col, row, units) {
   spList.innerHTML = '';
-  for (const u of units) {
+  const actionable = units.filter(u => !isEmbarkedCargo(u));
+  const cargo      = units.filter(u => isEmbarkedCargo(u));
+  for (const u of actionable) {
     const btn = document.createElement('button');
     btn.className = 'sp-unit-btn';
     const c = u.team === 'blue' ? 'var(--blue-l)' : 'var(--red-l)';
@@ -1223,7 +1263,19 @@ function showStackPicker(col, row, units) {
     btn.addEventListener('click', () => { hideStackPicker(); _selectUnit(u); });
     spList.appendChild(btn);
   }
-  spGroupBtn.onclick = () => { hideStackPicker(); _selectGroup(units); };
+  for (const u of cargo) {
+    const note = document.createElement('div');
+    note.className = 'sp-cargo-note';
+    const host = units.find(h => h.id === u.baseUnitId);
+    note.textContent = `⚓ ${u.name} — ${t('game.followsHost', { host: host ? host.name : '?' })}`;
+    spList.appendChild(note);
+  }
+  if (actionable.length > 1) {
+    spGroupBtn.classList.remove('hidden');
+    spGroupBtn.onclick = () => { hideStackPicker(); _selectGroup(actionable); };
+  } else {
+    spGroupBtn.classList.add('hidden');
+  }
 
   const {x, y} = hexToPixel(col, row);
   const rect  = canvas.getBoundingClientRect();
@@ -1772,8 +1824,9 @@ function render() {
   ctx.scale(zoom, zoom);
 
   drawBackground();
-  drawHighlights();
+  drawFogOfWar();
   drawGrid();
+  drawHighlights();
   drawInfrastructure();
   drawUnits();
   drawUnitFlashes();
@@ -1933,6 +1986,53 @@ function drawGrid() {
       const t = TERRAIN_MAP[r][c];
       const {x, y} = hexToPixel(c, r);
       drawHex(ctx, x, y, null, T_BORDER[t], 0.8);
+    }
+  }
+}
+
+// ── Layer 3b: Fog-of-war mist ─────────────────────────────────────────────────
+// Visual companion to the server's detection filtering: hexes within the
+// combined detection "bubble" of at least one own unit are left clear (you can
+// trust what you see, or the lack of it); hexes outside every own unit's reach
+// get a translucent mist over the terrain, making unknown ground immediately
+// obvious at a glance instead of the player having to infer it from absence.
+// A unit's bubble radius is the max of its 4 category detection ranges (the
+// per-category split matters for who it can spot, not for how far the haze
+// around it should visually reach) — night halves it (-2, sonar-equipped
+// submarines unaffected), mirroring stateFor's server-side rule.
+function unitFogRadius(u) {
+  const dr = u.detectionRange || {};
+  let r = Math.max(dr.surface || 0, dr.air || 0, dr.submarine || 0, dr.land || 0);
+  if (gameState.period === 'night' && u.category !== 'submarine') r = Math.max(0, r - 2);
+  return r;
+}
+
+function computeDetectionCoverage() {
+  const covered = new Set();
+  for (const u of gameState.units) {
+    if (u.team !== myTeam || u.hp <= 0) continue;
+    covered.add(`${u.col},${u.row}`);
+    const radius = unitFogRadius(u);
+    if (radius <= 0) continue;
+    for (let r = 0; r < GRID_H; r++) {
+      for (let c = 0; c < GRID_W; c++) {
+        const key = `${c},${r}`;
+        if (covered.has(key)) continue;
+        if (hexDist(u.col, u.row, c, r) <= radius) covered.add(key);
+      }
+    }
+  }
+  return covered;
+}
+
+function drawFogOfWar() {
+  if (!gameState || !fogOfWarOn) return;
+  const covered = computeDetectionCoverage();
+  for (let r = 0; r < GRID_H; r++) {
+    for (let c = 0; c < GRID_W; c++) {
+      if (covered.has(`${c},${r}`)) continue;
+      const {x, y} = hexToPixel(c, r);
+      drawHex(ctx, x, y, 'rgba(7,22,36,0.72)', 'rgba(80,140,200,0.10)', 0.6);
     }
   }
 }

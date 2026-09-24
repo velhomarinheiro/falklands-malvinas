@@ -11,6 +11,11 @@ const NAVAL_FP = {
 // Per-unit FP overrides (surface ships only; subs use NAVAL_FP.submarine).
 // v2: valores das tabelas de Fuel Points dos dois cadernos (planilha do autor,
 // aba "Divergências e Notas" — unidades sem entrada aqui usam NAVAL_FP.surface).
+// Petroleiros (navio_tanque) tiveram a autonomia aumentada em ~50% em relação
+// à tabela original: numa partida real, o RFA Olmeda (RED-LOG-1) — que começa
+// com metade do tanque e escolta o grupo porta-aviões — ficou à deriva sem
+// combustível já no turno 4, preso em água hostil sem conseguir se reabastecer
+// nem recuar (ver data/game-logs/game_W1ADKZ.jsonl).
 const UNIT_FP = {
   // ── Força Azul (Argentina) ──────────────────────────────────────────────────
   'BLUE-VM':       12,   // GT Porta-Aviões
@@ -18,9 +23,9 @@ const UNIT_FP = {
   'BLUE-BV':       10,   // Esquadra de Corvetas
   'BLUE-B':        10,   // Belgrano
   'BLUE-BS':       10,   // Escolta Belgrano
-  'BLUE-LOG-1':    24,   // Petroleiro ARA Punta Médanos
-  'BLUE-LOG-2':    24,   // Petroleiro ARA Punta Delgada
-  'BLUE-LOG-3':    24,   // Petroleiro de Serviço Geral
+  'BLUE-LOG-1':    36,   // Petroleiro ARA Punta Médanos
+  'BLUE-LOG-2':    36,   // Petroleiro ARA Punta Delgada
+  'BLUE-LOG-3':    36,   // Petroleiro de Serviço Geral
   'BLUE-MCM':       6,   // Grupo Caça-Minas
   'BLUE-LG':       12,   // Grupo de Desembarque
   // ── Força Vermelha (Reino Unido) ────────────────────────────────────────────
@@ -30,30 +35,31 @@ const UNIT_FP = {
   'RED-SCR-2':     10,   // Screen 2
   'RED-ESC-1':     10,   // Escort 1
   'RED-ESC-2':     10,   // Escort 2
-  'RED-LOG-1':     24,   // RFA Olmeda
-  'RED-LOG-2':     24,   // RFA Appleleaf
+  'RED-LOG-1':     36,   // RFA Olmeda
+  'RED-LOG-2':     36,   // RFA Appleleaf
   'RED-SG-SCR':    10,   // South Georgia Screen
   'RED-SG-ICE':    10,   // HMS Endurance
-  'RED-LOG-3':     24,   // RFA Tidespring
+  'RED-LOG-3':     36,   // RFA Tidespring
   'RED-TRAIL':     10,   // Trail Screen
-  'RED-LOG-4':     24,   // RFA Plumleaf
-  'RED-TANK':      48,   // RFA British Tay
+  'RED-LOG-4':     36,   // RFA Plumleaf
+  'RED-TANK':      60,   // RFA British Tay
   'RED-LAND-SCR':  10,   // Landing Screen
   'RED-LPD':       12,   // Fearless / Intrepid
   'RED-TROOP':     10,   // SS Canberra / QE2
   'RED-AC':        10,   // SS Atlantic Conveyor
-  'RED-LOG-5':     24,   // RFA Bayleaf
+  'RED-LOG-5':     36,   // RFA Bayleaf
   'RED-MCM':        6,   // Esquadrilha Caça-Minas
   'RED-HOSP':      12,   // Navio-Hospital
   'RED-LR':        10,   // SS Norland / Atlantic Causeway
-  'RED-TANK-2':    48,   // RFA British Tamar / British Esk
+  'RED-TANK-2':    60,   // RFA British Tamar / British Esk
 };
 
 // Unidades que começam com o tanque pela metade (petroleiros de escalões
-// posteriores, ainda não completados na zona de exclusão) — mesma fonte.
+// posteriores, ainda não completados na zona de exclusão) — metade do UNIT_FP
+// acima, mesma fonte.
 const UNIT_FP_INITIAL = {
-  'BLUE-LOG-1': 12, 'BLUE-LOG-2': 12,
-  'RED-LOG-1': 12, 'RED-LOG-2': 12, 'RED-LOG-3': 12, 'RED-LOG-4': 12, 'RED-LOG-5': 12,
+  'BLUE-LOG-1': 18, 'BLUE-LOG-2': 18,
+  'RED-LOG-1': 18, 'RED-LOG-2': 18, 'RED-LOG-3': 18, 'RED-LOG-4': 18, 'RED-LOG-5': 18,
 };
 
 // unit.type values (from COMP_DISPLAY_TYPE in server.js)

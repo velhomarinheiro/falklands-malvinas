@@ -442,6 +442,10 @@ input[type=text]:focus-visible {
 }
 .sp-unit-btn:hover { background: rgba(21,101,192,0.25); border-color: var(--blue-l); }
 .sp-group { font-size: 0.72rem; padding: 6px 10px; margin-top: 2px; }
+.sp-cargo-note {
+  font-family: 'Courier New', monospace; font-size: 0.68rem; color: var(--dim);
+  padding: 4px 10px; margin-bottom: 4px; font-style: italic;
+}
 
 /* ─── Weapon picker ──────────────────────────────────────────────────────── */
 .weapon-picker {
