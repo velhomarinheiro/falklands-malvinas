@@ -2032,7 +2032,9 @@ function drawFogOfWar() {
     for (let c = 0; c < GRID_W; c++) {
       if (covered.has(`${c},${r}`)) continue;
       const {x, y} = hexToPixel(c, r);
-      drawHex(ctx, x, y, 'rgba(7,22,36,0.72)', 'rgba(80,140,200,0.10)', 0.6);
+      // Near-opaque, near-black fill: covered hexes must read as unmistakably
+      // brighter/more detailed by comparison.
+      drawHex(ctx, x, y, 'rgba(2,6,11,0.88)', null, 0);
     }
   }
 }
