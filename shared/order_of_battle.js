@@ -468,7 +468,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":1,"submarine":1,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1,"asw":2},
-        "position":{"col":13,"row":3},
+        "position":{"col":16,"row":2},
         "echelon":"START",
         "notes":"Nau capitânia da Força-Tarefa. Casco de 1959, blindagem espessa (maior sobrevivência que o Invincible) e grupo aéreo maior. Alvo prioritário dos Exocet."
       },
@@ -480,7 +480,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":2,"submarine":0,"land":2},
         "weapons":{"aam":{"quantity":8,"range":2}},
         "capabilities":{"airDefense":9,"airAttack":6},
-        "position":{"col":13,"row":3},
+        "position":{"col":16,"row":2},
         "embarked":"RED-HERMES",
         "echelon":"START",
         "notes":"12× Sea Harrier FRS.1 do 800 NAS, com AIM-9L Sidewinder. CAP e ataque ao solo. Nenhuma perda em combate ar-ar durante toda a guerra."
@@ -493,7 +493,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":1,"submarine":1,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1,"asw":2},
-        "position":{"col":13,"row":2},
+        "position":{"col":16,"row":1},
         "echelon":"START",
         "notes":"Porta-aviões leve (\"through-deck cruiser\"), mais moderno e resistente que o Hermes, grupo aéreo menor."
       },
@@ -505,7 +505,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":2,"submarine":0,"land":2},
         "weapons":{"aam":{"quantity":6,"range":2}},
         "capabilities":{"airDefense":7,"airAttack":5},
-        "position":{"col":13,"row":2},
+        "position":{"col":16,"row":1},
         "embarked":"RED-INVINCIBLE",
         "echelon":"START",
         "notes":"9× Sea Harrier FRS.1 do 801 NAS, com AIM-9L. Reforçado pelos Harriers de reposição do Atlantic Conveyor."
@@ -518,7 +518,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"mss":{"quantity":6,"range":3}},
         "capabilities":{"navalGun":1,"airDefense":2,"asw":2},
-        "position":{"col":13,"row":3},
+        "position":{"col":15,"row":2},
         "echelon":"START",
         "notes":"HMS Glasgow + HMS Sheffield (Type 42, Sea Dart). Sem Exocet — ao contrário do caderno original, que atribui 2 a este grupo. Sheffield afundado por Exocet em 4 mai 1982 — 20 mortos."
       },
@@ -530,7 +530,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"ascm":{"quantity":2,"range":3},"mss":{"quantity":3,"range":3}},
         "capabilities":{"navalGun":1,"airDefense":2,"asw":2},
-        "position":{"col":13,"row":4},
+        "position":{"col":15,"row":3},
         "echelon":"START",
         "notes":"HMS Coventry (Type 42, Sea Dart) + HMS Arrow (Type 21, Exocet). Coventry afundado em 25 mai após 3 ataques aéreos, abatendo 2 aeronaves antes."
       },
@@ -542,7 +542,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":2},
         "weapons":{"ascm":{"quantity":2,"range":6},"mss":{"quantity":3,"range":3}},
         "capabilities":{"navalGun":1,"airDefense":2,"asw":2},
-        "position":{"col":12,"row":3},
+        "position":{"col":15,"row":2},
         "echelon":"START",
         "notes":"HMS Glamorgan (County, Exocet + Sea Slug) + HMS Broadsword (Type 22, Sea Wolf). Glamorgan sobreviveu a um Exocet lançado de terra em 12 jun — 13 mortos."
       },
@@ -554,7 +554,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":1,"land":1},
         "weapons":{"ascm":{"quantity":2,"range":6}},
         "capabilities":{"navalGun":1,"airDefense":2,"asw":2},
-        "position":{"col":12,"row":4},
+        "position":{"col":15,"row":3},
         "echelon":"START",
         "notes":"HMS Yarmouth + HMS Alacrity (Leander/Type 21). Sem míssil dual-role — mais vulnerável ao ataque aéreo."
       },
@@ -602,7 +602,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":14,"row":2},
+        "position":{"col":16,"row":2},
         "echelon":"START",
         "notes":"RFA Olmeda. Reabastece o grupo porta-aviões."
       },
@@ -614,7 +614,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":14,"row":3},
+        "position":{"col":16,"row":1},
         "echelon":"START",
         "notes":"Reabastece as escoltas do grupo de porta-aviões."
       },
@@ -662,7 +662,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"ascm":{"quantity":3,"range":6},"mss":{"quantity":3,"range":3}},
         "capabilities":{"navalGun":1,"airDefense":3,"asw":3},
-        "position":{"col":16,"row":3},
+        "position":{"col":19,"row":5},
         "echelon":"START (força avançada)",
         "notes":"HMS Antrim + HMS Plymouth + HMS Brilliant. Força-tarefa de vanguarda — retomou a Geórgia do Sul em 25 abr 1982 (Op. Paraquet)."
       },
@@ -674,7 +674,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1,"asw":1},
-        "position":{"col":17,"row":3},
+        "position":{"col":19,"row":5},
         "echelon":"START (força avançada)",
         "notes":"Navio de vigilância do Antártico. Sua retirada planejada em 1981 é citada como sinal que motivou a invasão argentina."
       },
@@ -686,7 +686,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":2},
         "weapons":{"raid":{"quantity":4,"range":2}},
         "capabilities":{},
-        "position":{"col":17,"row":3},
+        "position":{"col":19,"row":5},
         "hostId":"RED-SG-ICE",
         "stealthy":true,
         "echelon":"START (força avançada)",
@@ -700,7 +700,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":17,"row":2},
+        "position":{"col":19,"row":6},
         "echelon":"START (força avançada)",
         "notes":"Acompanha a força avançada da Geórgia do Sul; começa com metade da capacidade."
       },
@@ -712,7 +712,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"ascm":{"quantity":2,"range":6}},
         "capabilities":{"navalGun":1,"airDefense":2,"asw":2},
-        "position":{"col":15,"row":1},
+        "position":{"col":18,"row":1},
         "echelon":"TURNO 2",
         "notes":"HMS Ardent + HMS Argonaut. Ardent afundado em 22 mai após apoiar o raid do SAS em Ganso Verde — 22 mortos."
       },
@@ -724,7 +724,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":15,"row":2},
+        "position":{"col":18,"row":1},
         "echelon":"TURNO 2",
         "notes":"Petroleiro do segundo escalão, apoia o Trail Screen."
       },
@@ -736,7 +736,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":16,"row":1},
+        "position":{"col":17,"row":1},
         "echelon":"TURNO 2",
         "notes":"Ponte logística com Ascensão. Só reabastece outros petroleiros, nunca navios de combate."
       },
@@ -748,7 +748,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":1,"land":1},
         "weapons":{"ascm":{"quantity":2,"range":6}},
         "capabilities":{"navalGun":1,"airDefense":2,"asw":2},
-        "position":{"col":17,"row":0},
+        "position":{"col":18,"row":0},
         "echelon":"TURNO 3",
         "notes":"HMS Antelope + HMS Ambuscade. Antelope afundado em 24 mai ao tentar desarmar uma bomba não detonada."
       },
@@ -760,7 +760,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":1},
         "weapons":{},
         "capabilities":{"airDefense":2},
-        "position":{"col":17,"row":1},
+        "position":{"col":18,"row":0},
         "echelon":"TURNO 3",
         "notes":"HMS Fearless + HMS Intrepid (LPD), com 8 helicópteros e embarcações de desembarque. Únicos meios de pôr tropas e viaturas em terra em San Carlos — vulnerabilidade crítica."
       },
@@ -772,7 +772,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1},
-        "position":{"col":18,"row":1},
+        "position":{"col":18,"row":2},
         "echelon":"TURNO 3",
         "notes":"Transatlânticos requisitados que levam a 3ª Brigada de Comandos. As tropas só chegam à praia via Fearless/Intrepid."
       },
@@ -784,7 +784,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":18,"row":2},
+        "position":{"col":19,"row":2},
         "echelon":"TURNO 3",
         "notes":"Porta-contêineres requisitado com Harriers de reposição e helicópteros pesados (Chinook/Wessex). Afundado por Exocet em 25 mai 1982 — 12 mortos e a perda dos Chinook que transportariam a infantaria."
       },
@@ -796,7 +796,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":18,"row":2},
+        "position":{"col":19,"row":2},
         "embarked":"RED-AC",
         "echelon":"TURNO 3",
         "notes":"8× Sea Harrier/Harrier GR.3 transportados como reposição. Não operam do Atlantic Conveyor: só podem transferir-se para o Hermes ou o Invincible."
@@ -809,7 +809,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":2},
         "weapons":{},
         "capabilities":{"navalGun":3,"airDefense":2},
-        "position":{"col":18,"row":1},
+        "position":{"col":18,"row":2},
         "embarked":"RED-TROOP",
         "echelon":"TURNO 3",
         "notes":"40, 42 e 45 Cdo (Royal Marines) + 2 e 3 Para + 29º RA (3 baterias L118) e 2 baterias de defesa antiaérea. Força de assalto inicial — desembarcou em San Carlos em 21 mai 1982."
@@ -822,7 +822,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":18,"row":2},
+        "position":{"col":19,"row":2},
         "echelon":"TURNO 3",
         "notes":"Apoia o grupo de desembarque — no jogo original tem sete navios a sustentar sozinho."
       },
@@ -834,7 +834,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":18,"row":3},
+        "position":{"col":19,"row":3},
         "echelon":"TURNO 3",
         "notes":"HMS Junella, Cordella, Farnella, Northella — traineiras convertidas em caça-minas. Abrem caminho para o Estreito de San Carlos."
       },
@@ -858,7 +858,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1},
-        "position":{"col":19,"row":2},
+        "position":{"col":19,"row":4},
         "echelon":"TURNO 4",
         "notes":"Transportes do escalão de reforço, com a 5ª Brigada de Infantaria. Também dependem dos LPD para desembarcar."
       },
@@ -870,7 +870,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":2},
         "weapons":{},
         "capabilities":{"navalGun":2,"airDefense":1},
-        "position":{"col":19,"row":2},
+        "position":{"col":19,"row":4},
         "embarked":"RED-LR",
         "echelon":"TURNO 4",
         "notes":"2º Scots Guards, 1º Welsh Guards e 1/7 Gurkhas + 97ª Bateria/4 RA e 21ª Bateria de defesa antiaérea. Reforço para ampliar a cabeça de praia ou explorar o êxito."
@@ -883,7 +883,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":19,"row":1},
+        "position":{"col":19,"row":4},
         "echelon":"TURNO 4",
         "notes":"Segundo par de petroleiros-lançadeira. Só reabastecem outros petroleiros."
       }
