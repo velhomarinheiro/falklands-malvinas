@@ -566,7 +566,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":2,"land":0},
         "weapons":{"torpedo":{"quantity":9,"range":2}},
         "capabilities":{},
-        "position":{"col":5,"row":8},
+        "position":{"col":5,"row":9},
         "echelon":"START",
         "notes":"SSN classe Churchill. Afundou o ARA General Belgrano em 2 mai 1982 — primeiro ataque de submarino nuclear da história."
       },
@@ -578,7 +578,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":2,"land":0},
         "weapons":{"torpedo":{"quantity":9,"range":2}},
         "capabilities":{},
-        "position":{"col":8,"row":5},
+        "position":{"col":11,"row":5},
         "echelon":"START",
         "notes":"SSN classe Swiftsure. Um dos primeiros submarinos a chegar à zona de exclusão, em 12 abr 1982."
       },
@@ -590,7 +590,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":2,"land":0},
         "weapons":{"torpedo":{"quantity":9,"range":2}},
         "capabilities":{},
-        "position":{"col":8,"row":6},
+        "position":{"col":8,"row":3},
         "echelon":"START",
         "notes":"SSN classe Swiftsure. Patrulhou a costa continental argentina em busca do porta-aviões 25 de Mayo."
       },
@@ -662,7 +662,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":2,"air":1,"submarine":1,"land":1},
         "weapons":{"ascm":{"quantity":3,"range":6},"mss":{"quantity":3,"range":3}},
         "capabilities":{"navalGun":1,"airDefense":3,"asw":3},
-        "position":{"col":19,"row":5},
+        "position":{"col":18,"row":0},
         "echelon":"START (força avançada)",
         "notes":"HMS Antrim + HMS Plymouth + HMS Brilliant. Força-tarefa de vanguarda — retomou a Geórgia do Sul em 25 abr 1982 (Op. Paraquet)."
       },
@@ -674,7 +674,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{"airDefense":1,"asw":1},
-        "position":{"col":19,"row":5},
+        "position":{"col":18,"row":0},
         "echelon":"START (força avançada)",
         "notes":"Navio de vigilância do Antártico. Sua retirada planejada em 1981 é citada como sinal que motivou a invasão argentina."
       },
@@ -686,7 +686,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":1,"air":0,"submarine":0,"land":2},
         "weapons":{"raid":{"quantity":4,"range":2}},
         "capabilities":{},
-        "position":{"col":19,"row":5},
+        "position":{"col":18,"row":0},
         "hostId":"RED-SG-ICE",
         "stealthy":true,
         "echelon":"START (força avançada)",
