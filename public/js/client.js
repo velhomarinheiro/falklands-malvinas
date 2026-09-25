@@ -2028,15 +2028,45 @@ function computeDetectionCoverage() {
 function drawFogOfWar() {
   if (!gameState || !fogOfWarOn) return;
   const covered = computeDetectionCoverage();
+  const misted = [];
   for (let r = 0; r < GRID_H; r++) {
     for (let c = 0; c < GRID_W; c++) {
-      if (covered.has(`${c},${r}`)) continue;
-      const {x, y} = hexToPixel(c, r);
-      // Near-opaque, near-black fill: covered hexes must read as unmistakably
-      // brighter/more detailed by comparison.
-      drawHex(ctx, x, y, 'rgba(2,6,11,0.88)', null, 0);
+      if (!covered.has(`${c},${r}`)) misted.push({c, r});
     }
   }
+  if (!misted.length) return;
+
+  // Blurred, translucent haze instead of a flat opaque fill: clip to the
+  // union of misted hexes, redraw the base map blurred/dimmed/desaturated
+  // inside that clip (so coastline — land vs. sea — stays readable), then
+  // lay a light tint on top so the area still reads as "unknown" at a
+  // glance. Softer and less contrasty than a near-opaque block, per
+  // feedback that the previous version hid the terrain entirely.
+  ctx.save();
+  ctx.beginPath();
+  for (const {c, r} of misted) {
+    const {x, y} = hexToPixel(c, r);
+    for (let i = 0; i < 6; i++) {
+      const a  = (Math.PI / 3) * i;
+      const vx = x + HEX_R * Math.cos(a);
+      const vy = y + HEX_R * Math.sin(a);
+      if (i === 0) ctx.moveTo(vx, vy); else ctx.lineTo(vx, vy);
+    }
+    ctx.closePath();
+  }
+  ctx.clip();
+  ctx.filter = 'blur(5px) brightness(0.62) saturate(0.55)';
+  if (mapReady) {
+    // Slight overdraw so the blur doesn't shrink-fade the clipped edges.
+    ctx.drawImage(mapImg, -8, -8, CVS_W + 16, CVS_H + 16);
+  } else {
+    ctx.fillStyle = '#0a2035';
+    ctx.fillRect(-8, -8, CVS_W + 16, CVS_H + 16);
+  }
+  ctx.filter = 'none';
+  ctx.fillStyle = 'rgba(6,16,28,0.30)';
+  ctx.fillRect(0, 0, CVS_W, CVS_H);
+  ctx.restore();
 }
 
 // ── Layer 5: Infrastructure ───────────────────────────────────────────────────
