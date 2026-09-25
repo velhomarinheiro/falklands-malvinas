@@ -1122,6 +1122,17 @@ const POSTURE_TUNING = {
   },
 };
 
+// Resolve a escolha de um eixo de doutrina feita no lobby: um valor válido
+// é usado como está, 'random' sorteia entre as opções válidas (o sorteio
+// acontece uma vez, na criação da sala — o valor sorteado fica fixo em
+// room.botDoctrine pelo resto da partida), e qualquer outra coisa cai no
+// padrão.
+function resolveDoctrineChoice(value, options, fallback) {
+  if (options.includes(value)) return value;
+  if (value === 'random') return options[Math.floor(Math.random() * options.length)];
+  return fallback;
+}
+
 function resolveBotTuning(doctrine) {
   const posture = POSTURE_TUNING[doctrine?.posture] || POSTURE_TUNING[DOCTRINE_DEFAULT.posture];
   return {
@@ -1664,8 +1675,8 @@ io.on('connection', socket => {
     const id      = genId();
     const botTeam = team === 'blue' ? 'red' : 'blue';
     const botDoctrine = {
-      formation: ['concentrated','divided'].includes(formation) ? formation : DOCTRINE_DEFAULT.formation,
-      posture:   ['offensive','defensive'].includes(posture)    ? posture   : DOCTRINE_DEFAULT.posture,
+      formation: resolveDoctrineChoice(formation, ['concentrated','divided'],   DOCTRINE_DEFAULT.formation),
+      posture:   resolveDoctrineChoice(posture,   ['offensive','defensive'],    DOCTRINE_DEFAULT.posture),
     };
     const room    = { id, players: { blue: null, red: null }, state: null, solo: true, botTeam, botDoctrine,
                       rejoinTokens: { blue: genToken(), red: genToken() } };
@@ -1674,7 +1685,7 @@ io.on('connection', socket => {
     socket.data.roomId = id; socket.data.team = team;
     socket.join(id);
     room.state = newGame();
-    gameLogger.logStart(room.id, room.state);
+    gameLogger.logStart(room.id, room.state, { solo: true, botTeam, botDoctrine });
     socket.emit('game_start', { team, state: stateFor(room.state, team), solo: true, roomId: room.id,
                                 rejoinToken: room.rejoinTokens[team] });
   });
@@ -1878,7 +1889,7 @@ io.on('connection', socket => {
       gameLogger.logGameOver(room.id, room.state.turn, null, 'restart', obj, room.state);
     }
     room.state=newGame();
-    gameLogger.logStart(room.id, room.state);
+    gameLogger.logStart(room.id, room.state, room.solo ? { solo: true, botTeam: room.botTeam, botDoctrine: room.botDoctrine } : undefined);
     if (room.players.blue) io.to(room.players.blue).emit('game_start',{team:'blue',state:stateFor(room.state,'blue'),solo:!!room.solo,roomId:room.id,rejoinToken:room.rejoinTokens?.blue});
     if (room.players.red)  io.to(room.players.red ).emit('game_start',{team:'red', state:stateFor(room.state,'red'), solo:!!room.solo,roomId:room.id,rejoinToken:room.rejoinTokens?.red});
   });
@@ -1936,7 +1947,7 @@ module.exports = {
   resolveBattleRound, resolveCounterAttacks,
   computeObjectives, OBJECTIVE_IDS, OBJECTIVE_THRESHOLDS, objectiveProgress,
   WEAPON_PRIORITY, BOT_TUNING,
-  DOCTRINE_DEFAULT, POSTURE_TUNING, resolveBotTuning,
+  DOCTRINE_DEFAULT, POSTURE_TUNING, resolveBotTuning, resolveDoctrineChoice,
   computeBotMoves, computeBotAttacks, applyBotMovesToState,
   botObjectiveWeights, botPickTarget, botNeedsRefuel, botRefuelProvider, botIsCombatant,
   botMoveToward, botMoveAway, botBattleRoundDecision,

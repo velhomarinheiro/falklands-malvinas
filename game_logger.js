@@ -70,8 +70,11 @@ function _ts() { return new Date().toISOString(); }
 /**
  * Abre o arquivo de log de uma nova partida e registra o estado inicial.
  * Deve ser chamado logo após newGame() no join_room.
+ * @param {object} [solo]  Em partidas solo: { solo: true, botTeam, botDoctrine }
+ *   — a doutrina (formação/postura) já resolvida (sem 'random') com que o
+ *   bot foi configurado para esta partida.
  */
-function logStart(roomId, state) {
+function logStart(roomId, state, solo) {
   const ts   = _ts();
   const date = ts.slice(0, 10).replace(/-/g, '');
   const time = ts.slice(11, 19).replace(/:/g, '');
@@ -81,6 +84,7 @@ function logStart(roomId, state) {
     event: 'game_start',
     ts,
     room:  roomId,
+    solo:  solo?.solo ? { botTeam: solo.botTeam, botDoctrine: solo.botDoctrine } : null,
     state: snapshotState(state),
   });
 }
