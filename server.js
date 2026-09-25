@@ -1096,6 +1096,44 @@ const BOT_TUNING = {
   finishHpThreshold:   2,               // ...exceto se o alvo está a isto de cair
 };
 
+// ─── Doutrina de operação do bot ───────────────────────────────────────────────
+// Duas variáveis independentes de emprego da força, configuráveis por partida
+// solo (ver create_solo_room): formação (como as unidades de superfície se
+// posicionam entre si) e postura (o quanto buscam ou evitam o contato). Uma
+// partida sem doutrina explícita usa DOCTRINE_DEFAULT — mesmo comportamento
+// de sempre (dividida/ofensiva), então scripts e testes existentes que chamam
+// computeBotMoves/computeBotAttacks/botBattleRoundDecision sem esse argumento
+// continuam funcionando sem mudança.
+const DOCTRINE_DEFAULT = { formation: 'divided', posture: 'offensive' };
+
+// Postura ajusta BOT_TUNING: ofensiva busca contato e gasta munição/combustível
+// livremente (valores atuais, inalterados); defensiva evita se expor sem poder
+// revidar, recua mais cedo em combate e reabastece com mais margem.
+const POSTURE_TUNING = {
+  offensive: {
+    stopHpFrac: 0.4, finishHpThreshold: 2,
+    opportunityRadius: 2, refuelFloorMult: 1.0,
+    holdOutsideRange: false,
+  },
+  defensive: {
+    stopHpFrac: 0.65, finishHpThreshold: 3,
+    opportunityRadius: 1, refuelFloorMult: 1.6,
+    holdOutsideRange: true,
+  },
+};
+
+function resolveBotTuning(doctrine) {
+  const posture = POSTURE_TUNING[doctrine?.posture] || POSTURE_TUNING[DOCTRINE_DEFAULT.posture];
+  return {
+    ...BOT_TUNING,
+    stopHpFrac:        posture.stopHpFrac,
+    finishHpThreshold: posture.finishHpThreshold,
+    opportunityRadius: posture.opportunityRadius,
+    refuelFloor:        Math.round(BOT_TUNING.refuelFloor * posture.refuelFloorMult),
+    holdOutsideRange:  posture.holdOutsideRange,
+  };
+}
+
 const BOT_COMBATANT_TYPES =
   ['carrier','amphib','fragata','destroier','corveta','cruzador','sub_nuclear','submarino','caca','ataque'];
 function botIsCombatant(u) { return BOT_COMBATANT_TYPES.includes(u.type); }
@@ -1131,13 +1169,14 @@ function botObjectiveWeights(state, botTeam) {
   return w;
 }
 
-function botPickTarget(unit, enemies, objWeights = new Map()) {
+function botPickTarget(unit, enemies, objWeights = new Map(), tuning = BOT_TUNING) {
   const attackable = enemies.filter(e => rangeAgainst(unit.attackRange, e.category) > 0);
   if (!attackable.length) return null;
   const d = e => hexDist(unit.col, unit.row, e.col, e.row);
 
   // Defesa oportunista: combatente inimigo já colado vence qualquer objetivo
-  const oppRadius = Math.round(BOT_TUNING.opportunityRadius * (2 - BOT_TUNING.aggressiveness));
+  // (postura defensiva reduz esse raio — evita se distrair perseguindo contato).
+  const oppRadius = Math.round(tuning.opportunityRadius * (2 - tuning.aggressiveness));
   const near = attackable.filter(e => botIsCombatant(e) && d(e) <= oppRadius);
   if (near.length) {
     return near.sort((a, b) => botGenericPrio(a) - botGenericPrio(b) || d(a) - d(b))[0];
@@ -1165,12 +1204,12 @@ function botRefuelProvider(unit, state) {
 
 // FP baixo o suficiente para priorizar reabastecimento sobre a missão.
 // Custo estimado da viagem: ~3 FP por turno de deslocamento + 1 de folga.
-function botNeedsRefuel(unit, provider) {
+function botNeedsRefuel(unit, provider, tuning = BOT_TUNING) {
   if (unit.fuel?.fuelType !== 'naval' || !provider) return false;
   if (isNavalRefuelProvider(unit)) return false;
   const dist = hexDist(unit.col, unit.row, provider.col, provider.row);
   const tripCost = Math.ceil(dist / Math.max(1, unit.movement)) * 3 + 1;
-  return unit.fuel.current <= Math.max(BOT_TUNING.refuelFloor, tripCost);
+  return unit.fuel.current <= Math.max(tuning.refuelFloor, tripCost);
 }
 
 function botMoveToward(unit, target, state) {
@@ -1223,7 +1262,8 @@ function botMoveAway(unit, threats, state) {
   return bestPath;
 }
 
-function computeBotMoves(state, botTeam) {
+function computeBotMoves(state, botTeam, doctrine = DOCTRINE_DEFAULT) {
+  const tuning   = resolveBotTuning(doctrine);
   const moves    = [];
   const handled  = new Set();
   const enemies  = state.units.filter(u => u.team !== botTeam && u.hp > 0);
@@ -1234,13 +1274,54 @@ function computeBotMoves(state, botTeam) {
   const nearest  = (u, list) => list.reduce((best, e) =>
     !best || hexDist(u.col, u.row, e.col, e.row) < hexDist(u.col, u.row, best.col, best.row) ? e : best, null);
 
+  // Formação concentrada: as unidades de superfície se mantêm coladas na mais
+  // forte ainda de pé (o "porta-estandarte") e, uma vez próximas, avançam
+  // juntas sobre o MESMO alvo — o melhor alvo do ponto de vista da âncora.
+  // `anchorDest` é a posição que ela terá ao final deste turno (calculada já
+  // aqui, não perseguida turno a turno), pra as seguidoras convergirem numa
+  // única passada em vez de sempre ficarem um turno atrás de uma âncora que
+  // também está se movendo. Formação dividida (padrão) não usa nada disto —
+  // cada unidade escolhe seu próprio alvo, como sempre.
+  let anchor = null, anchorDest = null, sharedTarget = null;
+  if (doctrine?.formation === 'concentrated') {
+    const surfaceCombatants = own.filter(u => botIsCombatant(u) && u.category === 'surface');
+    anchor = surfaceCombatants.reduce((best, u) => (!best || u.maxHp > best.maxHp) ? u : best, null);
+    if (anchor) {
+      anchorDest = { col: anchor.col, row: anchor.row };
+      sharedTarget = botPickTarget(anchor, enemies, objW, tuning);
+      if (sharedTarget) {
+        const distA = hexDist(anchor.col, anchor.row, sharedTarget.col, sharedTarget.row);
+        const atkRA = rangeAgainst(anchor.attackRange, sharedTarget.category);
+        if (distA > atkRA) {
+          const p = botMoveToward(anchor, sharedTarget, state);
+          if (p && p.length >= 2) anchorDest = p[p.length - 1];
+        }
+      }
+    }
+  }
+  // Postura defensiva: não avança para um hex ao alcance de tiro de um
+  // inimigo se não puder atacar de volta a partir dele — evita se expor sem
+  // poder revidar, aguardando uma posição melhor.
+  const exposedWithoutReturn = (unit, dest) => {
+    if (!tuning.holdOutsideRange) return false;
+    const exposed = enemies.some(e => {
+      const r = rangeAgainst(e.attackRange, unit.category);
+      return r > 0 && hexDist(dest.col, dest.row, e.col, e.row) <= r;
+    });
+    if (!exposed) return false;
+    return !enemies.some(e => {
+      const r = rangeAgainst(unit.attackRange, e.category);
+      return r > 0 && hexDist(dest.col, dest.row, e.col, e.row) <= r;
+    });
+  };
+
   // 1. Logística própria foge de combatentes inimigos próximos
   const plannedDest = new Map();
   const providers = own.filter(u => isNavalRefuelProvider(u) && u.category === 'surface');
   for (const logi of providers) {
     if (!mobile(logi)) continue;
     const threat = nearest(logi, enemyCombatants);
-    if (!threat || hexDist(logi.col, logi.row, threat.col, threat.row) > BOT_TUNING.logisticsFleeRadius) continue;
+    if (!threat || hexDist(logi.col, logi.row, threat.col, threat.row) > tuning.logisticsFleeRadius) continue;
     const path = botMoveAway(logi, enemyCombatants, state);
     if (path && path.length >= 2) {
       moves.push({ unitId: logi.id, path });
@@ -1257,7 +1338,7 @@ function computeBotMoves(state, botTeam) {
     const goal = plannedDest.get(prime.id) ?? { col: prime.col, row: prime.row };
     const escort = own
       .filter(u => botIsCombatant(u) && u.category === 'surface' && mobile(u) &&
-                   !handled.has(u.id) && !botNeedsRefuel(u, botRefuelProvider(u, state)))
+                   !handled.has(u.id) && !botNeedsRefuel(u, botRefuelProvider(u, state), tuning))
       .sort((a, b) => hexDist(a.col, a.row, goal.col, goal.row) - hexDist(b.col, b.row, goal.col, goal.row))[0];
     if (escort) {
       if (hexDist(escort.col, escort.row, goal.col, goal.row) > 1) {
@@ -1320,14 +1401,48 @@ function computeBotMoves(state, botTeam) {
     if (handled.has(unit.id) || !mobile(unit)) continue;
 
     const provider = botRefuelProvider(unit, state);
-    if (botNeedsRefuel(unit, provider)) {
+    if (botNeedsRefuel(unit, provider, tuning)) {
       if (unit.col === provider.col && unit.row === provider.row) continue; // já empilhado
       const path = botMoveToward(unit, provider, state);
       if (path && path.length >= 2) moves.push({ unitId: unit.id, path });
       continue;
     }
 
-    const target = botPickTarget(unit, enemies, objW);
+    // Postura defensiva: já exposta ao alcance de um inimigo sem poder revidar
+    // dali — recua pra fora do alcance dele em vez de avançar, "aguardando
+    // momento mais oportuno" em vez de trocar tiro em desvantagem.
+    if (tuning.holdOutsideRange) {
+      const threatsNow = enemies.filter(e => {
+        const r = rangeAgainst(e.attackRange, unit.category);
+        return r > 0 && hexDist(unit.col, unit.row, e.col, e.row) <= r;
+      });
+      const canHitBackNow = threatsNow.some(e =>
+        rangeAgainst(unit.attackRange, e.category) > 0 &&
+        hexDist(unit.col, unit.row, e.col, e.row) <= rangeAgainst(unit.attackRange, e.category));
+      if (threatsNow.length && !canHitBackNow) {
+        const path = botMoveAway(unit, threatsNow, state);
+        if (path && path.length >= 2) { moves.push({ unitId: unit.id, path }); continue; }
+      }
+    }
+
+    // Formação concentrada: unidade de superfície que não é a âncora.
+    const isFormationMember = !!anchor && unit.id !== anchor.id &&
+      botIsCombatant(unit) && unit.category === 'surface';
+
+    // Ainda longe do porta-estandarte: prioriza se reunir a ele antes de
+    // perseguir o alvo — reunir-se nunca conta como exposição arriscada,
+    // avançar junto da força é sempre a opção mais segura disponível.
+    if (isFormationMember && hexDist(unit.col, unit.row, anchorDest.col, anchorDest.row) > 1) {
+      const path = botMoveToward(unit, anchorDest, state);
+      if (path && path.length >= 2) moves.push({ unitId: unit.id, path });
+      continue;
+    }
+
+    // Âncora, membro de formação já próximo, ou formação dividida (cada
+    // unidade escolhe seu próprio alvo, como sempre).
+    const target = (isFormationMember || unit.id === anchor?.id)
+      ? sharedTarget
+      : botPickTarget(unit, enemies, objW, tuning);
     if (!target) continue;
     const dist = hexDist(unit.col, unit.row, target.col, target.row);
     const atkR = rangeAgainst(unit.attackRange, target.category);
@@ -1338,7 +1453,10 @@ function computeBotMoves(state, botTeam) {
         dist - atkR > airMovementRange(unit)) continue;
 
     const path = botMoveToward(unit, target, state);
-    if (path && path.length >= 2) moves.push({ unitId: unit.id, path });
+    if (!path || path.length < 2) continue;
+    if (exposedWithoutReturn(unit, path[path.length - 1])) continue; // segura a posição
+
+    moves.push({ unitId: unit.id, path });
   }
   return moves;
 }
@@ -1365,7 +1483,8 @@ function computeBotAttacks(state, botTeam) {
 }
 
 // Decisão CONTINUAR/PARAR do bot após a 1ª rodada de um engajamento.
-function botBattleRoundDecision(state, engagement, botTeam) {
+function botBattleRoundDecision(state, engagement, botTeam, doctrine) {
+  const tuning = resolveBotTuning(doctrine);
   const att = state.units.find(u => u.id === engagement.attackerId);
   const def = state.units.find(u => u.id === engagement.targetId);
   const attAlive = att && att.hp > 0;
@@ -1373,10 +1492,11 @@ function botBattleRoundDecision(state, engagement, botTeam) {
 
   if (att && att.team === botTeam) {
     // Atacante: recua sem munição, ou ferido demais com o alvo longe de cair
+    // (postura defensiva recua mais cedo e exige o alvo mais perto de cair).
     if (!attAlive || !defAlive) return 'stop';
     if (getWeaponQuantity(att, engagement.weaponType) <= 0) return 'stop';
-    const wounded  = att.hp / att.maxHp < BOT_TUNING.stopHpFrac;
-    const nearKill = def.hp <= BOT_TUNING.finishHpThreshold;
+    const wounded  = att.hp / att.maxHp < tuning.stopHpFrac;
+    const nearKill = def.hp <= tuning.finishHpThreshold;
     return (wounded && !nearKill) ? 'stop' : 'continue';
   }
 
@@ -1426,7 +1546,7 @@ function applyBotMoves(room) {
   const key = bt === 'blue' ? 'blueDone' : 'redDone';
   if (state[key]) return;
 
-  const moves = computeBotMoves(state, bt);
+  const moves = computeBotMoves(state, bt, room.botDoctrine);
   gameLogger.logMoves(room.id, state.turn, state.period, bt, moves, state);
   applyBotMovesToState(state, bt, moves);
 
@@ -1539,11 +1659,15 @@ io.on('connection', socket => {
     socket.emit('room_created',{roomId:id,team:'blue'});
   });
 
-  socket.on('create_solo_room', ({ team } = {}) => {
+  socket.on('create_solo_room', ({ team, formation, posture } = {}) => {
     if (!['blue','red'].includes(team)) { socket.emit('join_error','ERR_INVALID_TEAM'); return; }
     const id      = genId();
     const botTeam = team === 'blue' ? 'red' : 'blue';
-    const room    = { id, players: { blue: null, red: null }, state: null, solo: true, botTeam,
+    const botDoctrine = {
+      formation: ['concentrated','divided'].includes(formation) ? formation : DOCTRINE_DEFAULT.formation,
+      posture:   ['offensive','defensive'].includes(posture)    ? posture   : DOCTRINE_DEFAULT.posture,
+    };
+    const room    = { id, players: { blue: null, red: null }, state: null, solo: true, botTeam, botDoctrine,
                       rejoinTokens: { blue: genToken(), red: genToken() } };
     room.players[team] = socket.id;
     rooms.set(id, room);
@@ -1740,7 +1864,7 @@ io.on('connection', socket => {
     if (room.solo) {
       const eng = state.combatQueue[state.currentEngagementIndex];
       state.battleRoundDecisions[room.botTeam] =
-        eng ? botBattleRoundDecision(state, eng, room.botTeam) : 'stop';
+        eng ? botBattleRoundDecision(state, eng, room.botTeam, room.botDoctrine) : 'stop';
     }
     const { blue, red } = state.battleRoundDecisions;
     if (blue && red) processBattleRoundDecision(room);
@@ -1812,8 +1936,9 @@ module.exports = {
   resolveBattleRound, resolveCounterAttacks,
   computeObjectives, OBJECTIVE_IDS, OBJECTIVE_THRESHOLDS, objectiveProgress,
   WEAPON_PRIORITY, BOT_TUNING,
+  DOCTRINE_DEFAULT, POSTURE_TUNING, resolveBotTuning,
   computeBotMoves, computeBotAttacks, applyBotMovesToState,
-  botObjectiveWeights, botPickTarget, botNeedsRefuel, botRefuelProvider,
+  botObjectiveWeights, botPickTarget, botNeedsRefuel, botRefuelProvider, botIsCombatant,
   botMoveToward, botMoveAway, botBattleRoundDecision,
   nextTurn, checkWinner, MAX_TURNS,
   applyUnitMovement, MINESWEEPER_IDS, syncEmbarkedForces,

@@ -233,6 +233,35 @@
       <p id="lobby-err" class="lobby-err hidden"></p>
 
       <div class="lobby-or" data-i18n="landing.orSolo">— ou jogue solo —</div>
+      <div class="doctrine-picker">
+        <p class="doctrine-title" data-i18n="landing.doctrineTitle">Doutrina do adversário (IA)</p>
+        <div class="doctrine-group">
+          <span class="doctrine-label" data-i18n="landing.doctrineFormation">Formação</span>
+          <div class="doctrine-toggle">
+            <label class="doctrine-opt">
+              <input type="radio" name="doctrine-formation" value="divided" checked>
+              <span data-i18n="landing.formationDivided">Dividida</span>
+            </label>
+            <label class="doctrine-opt">
+              <input type="radio" name="doctrine-formation" value="concentrated">
+              <span data-i18n="landing.formationConcentrated">Concentrada</span>
+            </label>
+          </div>
+        </div>
+        <div class="doctrine-group">
+          <span class="doctrine-label" data-i18n="landing.doctrinePosture">Postura</span>
+          <div class="doctrine-toggle">
+            <label class="doctrine-opt">
+              <input type="radio" name="doctrine-posture" value="offensive" checked>
+              <span data-i18n="landing.postureOffensive">Ofensiva</span>
+            </label>
+            <label class="doctrine-opt">
+              <input type="radio" name="doctrine-posture" value="defensive">
+              <span data-i18n="landing.postureDefensive">Defensiva</span>
+            </label>
+          </div>
+        </div>
+      </div>
       <div class="lobby-solo">
         <button id="btn-solo-blue" class="btn-action solo-b">
           <span class="btn-icon">⚓</span>
@@ -531,14 +560,26 @@
 
   roomInput.addEventListener('keydown', e => { if (e.key === 'Enter') btnJoin.click(); });
 
+  function selectedDoctrine() {
+    const formation = document.querySelector('input[name="doctrine-formation"]:checked')?.value || 'divided';
+    const posture   = document.querySelector('input[name="doctrine-posture"]:checked')?.value   || 'offensive';
+    return { formation, posture };
+  }
+
   document.getElementById('btn-solo-blue').addEventListener('click', () => {
+    const { formation, posture } = selectedDoctrine();
     sessionStorage.setItem('pendingAction', 'solo');
     sessionStorage.setItem('soloTeam', 'blue');
+    sessionStorage.setItem('soloFormation', formation);
+    sessionStorage.setItem('soloPosture', posture);
     location.href = '/game';
   });
   document.getElementById('btn-solo-red').addEventListener('click', () => {
+    const { formation, posture } = selectedDoctrine();
     sessionStorage.setItem('pendingAction', 'solo');
     sessionStorage.setItem('soloTeam', 'red');
+    sessionStorage.setItem('soloFormation', formation);
+    sessionStorage.setItem('soloPosture', posture);
     location.href = '/game';
   });
 

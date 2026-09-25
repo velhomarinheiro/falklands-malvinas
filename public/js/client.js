@@ -506,10 +506,14 @@ socket.on('connect', () => {
     sessionStorage.removeItem('pendingCode');
     if (code) socket.emit('join_room', { roomId: code });
   } else if (action === 'solo') {
-    const team = sessionStorage.getItem('soloTeam') || 'blue';
+    const team      = sessionStorage.getItem('soloTeam') || 'blue';
+    const formation = sessionStorage.getItem('soloFormation') || 'divided';
+    const posture   = sessionStorage.getItem('soloPosture') || 'offensive';
     sessionStorage.removeItem('pendingAction');
     sessionStorage.removeItem('soloTeam');
-    socket.emit('create_solo_room', { team });
+    sessionStorage.removeItem('soloFormation');
+    sessionStorage.removeItem('soloPosture');
+    socket.emit('create_solo_room', { team, formation, posture });
   } else {
     // Sem ação pendente: se há sessão salva (F5 ou queda de rede), tenta
     // reassumir o assento dentro do período de graça do servidor.

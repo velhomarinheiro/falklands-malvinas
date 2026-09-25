@@ -359,6 +359,42 @@ html[lang="en"] .splash-pt { display: none !important; }
 .btn-icon { font-size: 1.3rem; }
 .lobby-or { margin: 1rem 0; color: var(--text-dim); }
 
+.doctrine-picker {
+  display: flex; flex-direction: column; gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  background: rgba(10,30,50,0.5);
+}
+.doctrine-title {
+  font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-dim); text-align: center; margin: 0 0 0.2rem;
+}
+.doctrine-group { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.doctrine-label {
+  font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim);
+  flex-shrink: 0;
+}
+.doctrine-toggle { display: flex; gap: 0.4rem; flex: 1; }
+.doctrine-opt {
+  flex: 1; position: relative; cursor: pointer;
+  text-align: center;
+  padding: 6px 8px;
+  font-size: 0.68rem; letter-spacing: 0.5px; text-transform: uppercase;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  transition: all 0.15s;
+}
+.doctrine-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.doctrine-opt:hover { border-color: var(--blue-l); color: var(--text); }
+.doctrine-opt input:checked ~ span { color: inherit; }
+.doctrine-opt:has(input:checked) {
+  background: rgba(33,150,243,0.25); border-color: var(--blue-l); color: #fff;
+}
+@media (max-width: 480px) {
+  .doctrine-group { flex-direction: column; align-items: stretch; gap: 0.3rem; }
+}
+
 .join-form { display: flex; flex-direction: column; gap: 0.75rem; }
 input[type=text] {
   background: rgba(10,30,50,0.9);
