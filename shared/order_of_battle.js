@@ -590,7 +590,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":3,"air":0,"submarine":2,"land":0},
         "weapons":{"torpedo":{"quantity":9,"range":2}},
         "capabilities":{},
-        "position":{"col":8,"row":3},
+        "position":{"col":12,"row":1},
         "echelon":"START",
         "notes":"SSN classe Swiftsure. Patrulhou a costa continental argentina em busca do porta-aviões 25 de Mayo."
       },
@@ -700,7 +700,7 @@ const ORDER_OF_BATTLE = {
         "attackRange":{"surface":0,"air":0,"submarine":0,"land":0},
         "weapons":{},
         "capabilities":{},
-        "position":{"col":19,"row":6},
+        "position":{"col":18,"row":0},
         "echelon":"START (força avançada)",
         "notes":"Acompanha a força avançada da Geórgia do Sul; começa com metade da capacidade."
       },
