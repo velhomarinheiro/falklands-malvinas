@@ -295,16 +295,38 @@ function saveMovementSnapshot(state) {
   }
 }
 
+// Fases em que os movimentos do adversário ainda não foram revelados: a própria
+// movimentação e, no modo com facilitador, a espera pela autorização dele.
+const HIDDEN_MOVE_PHASES = ['movement', 'movement_approval'];
+
 function stateFor(state, team) {
   const night = state.period === 'night';
 
   // Strip server-internal combat queue fields — clients don't need them
-  const { combatQueue: _cq, battleRoundDecisions: _brd, ...stateRest } = state;
+  const { combatQueue: _cq, battleRoundDecisions: _brd, fac: _fac, ...stateRest } = state;
+
+  // Facilitador: visão completa, sem névoa de guerra, inclusive os dados de
+  // arbitragem (movimentos pendentes de autorização, relatório de combate).
+  if (team === 'facilitator') {
+    return {
+      ...stateRest,
+      fac:        state.fac,
+      units:      state.units.map(u => ({ ...u, detected: true })),
+      objectives: computeObjectives(state),
+      maxTurns:   MAX_TURNS,
+    };
+  }
+
+  // Unidades neutras são contatos públicos (visíveis a todos, sem detecção).
+  const neutrals = state.units.filter(u => u.team === NEUTRAL_TEAM && u.hp > 0);
 
   // During movement phase, show enemy units at their pre-movement positions
   // so moves are hidden until both sides commit (simultaneous movement reveal).
-  const enemyActual = state.units.filter(u => u.team !== team && u.hp > 0);
-  const enemies = (state.phase === 'movement' && state.movementSnapshot)
+  const enemyActual = state.phase === 'setup'
+    ? []   // configuração do facilitador em andamento: nada do adversário vaza
+    : state.units.filter(u => u.team !== team && u.team !== NEUTRAL_TEAM && u.hp > 0);
+  const hiddenMoves = HIDDEN_MOVE_PHASES.includes(state.phase) && state.movementSnapshot;
+  const enemies = hiddenMoves
     ? enemyActual.map(u => {
         const snap = state.movementSnapshot[u.id];
         return snap ? { ...u, col: snap.col, row: snap.row } : u;
@@ -315,7 +337,7 @@ function stateFor(state, team) {
 
   // Detection during movement uses pre-movement positions for both sides so the
   // first player to commit cannot see enemies they only approached this turn.
-  const mineForDetection = (state.phase === 'movement' && state.movementSnapshot)
+  const mineForDetection = hiddenMoves
     ? mine.map(u => {
         const snap = state.movementSnapshot[u.id];
         return snap ? { ...u, col: snap.col, row: snap.row } : u;
@@ -345,7 +367,8 @@ function stateFor(state, team) {
 
   return {
     ...stateRest,
-    units:       [...state.units.filter(u => u.team === team), ...detected],
+    units:       [...state.units.filter(u => u.team === team), ...detected, ...neutrals],
+    messages:    (state.messages || []).filter(m => m.to === 'all' || m.to === team),
     blueAttacks: team === 'blue' ? state.blueAttacks : (state.blueAttacks !== null ? '✓' : null),
     redAttacks:  team === 'red'  ? state.redAttacks  : (state.redAttacks  !== null ? '✓' : null),
     objectives:  computeObjectives(state),
@@ -427,6 +450,35 @@ function makeUnit(team, spec) {
   return unit;
 }
 
+// ─── Unidades neutras (modo com facilitador) ─────────────────────────────────
+// Criadas e movidas só pelo facilitador. São contatos públicos: todos os
+// jogadores as veem, ninguém pode atacá-las, e não consomem combustível.
+const NEUTRAL_TEAM = 'neutral';
+const NEUTRAL_TEMPLATES = {
+  mercante:  { name: 'Navio Mercante',        category: 'surface', comp: 'navio_logistico', stayingPower: 2, movement: 2 },
+  pesqueiro: { name: 'Pesqueiro',             category: 'surface', comp: 'navio_patrulha',  stayingPower: 1, movement: 2 },
+  hospital:  { name: 'Navio-Hospital (CICV)', category: 'surface', comp: 'navio_logistico', stayingPower: 3, movement: 2 },
+  pesquisa:  { name: 'Navio de Pesquisa',     category: 'surface', comp: 'navio_patoc',     stayingPower: 2, movement: 2 },
+  aeronave:  { name: 'Aeronave Civil',        category: 'air',     comp: 'patrulha_maritima', stayingPower: 1, movement: 8 },
+};
+const ZERO_RANGES = () => ({ surface: 0, air: 0, submarine: 0, land: 0 });
+
+function makeNeutralUnit(id, tpl, name, col, row) {
+  const unit = makeUnit(NEUTRAL_TEAM, {
+    id, name, category: tpl.category,
+    composition:    [{ type: tpl.comp, quantity: 1 }],
+    stayingPower:   tpl.stayingPower,
+    movement:       tpl.movement,
+    detectionRange: ZERO_RANGES(),
+    attackRange:    ZERO_RANGES(),
+    weapons: {}, capabilities: {},
+    position: { col, row },
+  });
+  unit.fuel = { usesFuel: false, fuelType: 'none' };
+  unit.stealthy = false;
+  return unit;
+}
+
 function initialUnits() {
   const units = [];
   for (const spec of ORDER_OF_BATTLE.forces.blue) {
@@ -452,6 +504,19 @@ function newGame() {
     battleRoundDecisions: { blue: null, red: null },
   };
   saveMovementSnapshot(state);
+  return state;
+}
+
+// Partida com facilitador: começa na fase 'setup', em que só o facilitador
+// age (ajusta quantidades/posições, cria neutros) até dar a partida.
+// `state.fac` guarda os dados de arbitragem, que só o facilitador recebe.
+function newFacilitatedGame() {
+  const state = newGame();
+  state.phase       = 'setup';
+  state.facilitated = true;
+  state.log         = [logEntry('FAC_SETUP_STARTED')];
+  state.messages    = [];
+  state.fac         = { pendingMoves: [], combatHpSnapshot: {}, combatReport: [], neutralSeq: 0, cloneSeq: 0 };
   return state;
 }
 
@@ -486,6 +551,8 @@ function buildCombatQueue(state) {
     const att = state.units.find(u => u.id === atk.attackerId && u.hp > 0);
     const def = state.units.find(u => u.id === atk.targetId   && u.hp > 0);
     if (!att || !def) return null;
+    // Neutros não combatem nem podem ser alvo.
+    if (att.team === NEUTRAL_TEAM || def.team === NEUTRAL_TEAM) return null;
     // Força de desembarque embarcada: sem capacidade ofensiva própria, e não
     // é alvo direto — só o navio que a transporta pode atacar/ser atacado.
     if (isEmbarkedAfloat(att) || isEmbarkedAfloat(def)) return null;
@@ -618,6 +685,10 @@ function emitBrResult(room, engagement, result, mustDecide, extra = {}) {
   const payload = { engagement, result, mustDecide, ...extra };
   if (room.players.blue) io.to(room.players.blue).emit('battle_round_result', payload);
   if (room.players.red)  io.to(room.players.red ).emit('battle_round_result', payload);
+  // Facilitador acompanha cada engajamento, mas não decide CONTINUAR/PARAR.
+  if (room.players.facilitator) {
+    io.to(room.players.facilitator).emit('battle_round_result', { ...payload, mustDecide: false, observer: true });
+  }
 }
 
 function startCurrentEngagement(room) {
@@ -735,6 +806,17 @@ function finishCurrentEngagement(room) {
   const eng = state.combatQueue[state.currentEngagementIndex];
   eng.status = 'ended';
   gameLogger.logEngagement(room.id, state.turn, state.period, eng);
+  if (state.fac) {
+    state.fac.combatReport.push({
+      id: eng.id, attackerId: eng.attackerId, targetId: eng.targetId, weaponType: eng.weaponType,
+      rounds: eng.results.map(r => ({
+        battleRound: r.battleRound,
+        ok:          !!r.result?.ok,
+        damage:      r.result?.totalDamage || 0,
+        destroyed:   !!r.result?.destroyed,
+      })),
+    });
+  }
   state.currentEngagementIndex += 1;
 
   if (state.currentEngagementIndex < state.combatQueue.length) {
@@ -768,19 +850,42 @@ function finishCombatPhase(room) {
   state.currentEngagementIndex  = 0;
   state.battleRoundDecisions    = { blue: null, red: null };
 
+  // Com facilitador, os resultados só valem depois de ratificados por ele —
+  // a vitória e a virada de turno esperam por fac_ratify_combat.
+  if (room.facilitated) {
+    state.phase = 'combat_approval';
+    state.log.unshift(logEntry('FAC_AWAITING_COMBAT_RATIFICATION'));
+    broadcast(room);
+    return;
+  }
+  concludeTurn(room);
+}
+
+function emitGameOver(room, payload) {
+  const state = room.state;
+  if (room.players.blue) io.to(room.players.blue).emit('game_over', { ...payload, state: stateFor(state, 'blue') });
+  if (room.players.red)  io.to(room.players.red ).emit('game_over', { ...payload, state: stateFor(state, 'red')  });
+  if (room.players.facilitator) {
+    io.to(room.players.facilitator).emit('game_over', { ...payload, state: facView(room) });
+  }
+}
+
+// Fecha o turno depois do combate: checa vitória, avança o período e aplica o
+// limite operacional de MAX_TURNS.
+function concludeTurn(room) {
+  const state = room.state;
   const winner = checkWinner(state);
   if (winner) {
     state.winner = winner;
     state.log.unshift(logEntry('TEAM_WON', { team: winner === 'blue' ? 'TEAM_BLUE' : 'TEAM_RED' }));
     const obj = computeObjectives(state);
     gameLogger.logGameOver(room.id, state.turn, winner, 'victory', obj, state);
-    const payload = { winner, objectives: obj, reason: 'victory' };
-    if (room.players.blue) io.to(room.players.blue).emit('game_over', { ...payload, state: stateFor(state, 'blue') });
-    if (room.players.red)  io.to(room.players.red ).emit('game_over', { ...payload, state: stateFor(state, 'red')  });
+    emitGameOver(room, { winner, objectives: obj, reason: 'victory' });
     return;
   }
 
   nextTurn(state);
+  if (state.fac) state.fac.pendingMoves = [];
 
   // ── Limite operacional: ao fim do dia MAX_TURNS, vence o maior progresso ────
   if (state.turn > MAX_TURNS) {
@@ -794,9 +899,7 @@ function finishCombatPhase(room) {
     }));
     state.log.unshift(logEntry('TEAM_WON', { team: winner === 'blue' ? 'TEAM_BLUE' : 'TEAM_RED' }));
     gameLogger.logGameOver(room.id, state.turn, winner, 'timeout', obj, state);
-    const payload = { winner, objectives: obj, reason: 'timeout' };
-    if (room.players.blue) io.to(room.players.blue).emit('game_over', { ...payload, state: stateFor(state, 'blue') });
-    if (room.players.red)  io.to(room.players.red ).emit('game_over', { ...payload, state: stateFor(state, 'red')  });
+    emitGameOver(room, { winner, objectives: obj, reason: 'timeout' });
     return;
   }
 
@@ -1643,20 +1746,88 @@ function endRoomByDisconnect(roomId) {
   const room = rooms.get(roomId);
   if (!room) return;
   room.graceTimer = null;
-  if (room.state && !room.state.winner) {
+  if (room.state && !room.state.winner && room.state.phase !== 'setup') {
     const obj = computeObjectives(room.state);
     gameLogger.logGameOver(roomId, room.state.turn, null, 'disconnect', obj, room.state);
   }
-  const other = room.players.blue || room.players.red;
-  if (other) io.to(other).emit('opponent_disconnected', { grace: false });
+  if (room.facilitated) {
+    const gone = ['facilitator', 'blue', 'red'].find(s => !room.players[s]) || 'facilitator';
+    for (const pid of Object.values(room.players)) {
+      if (pid) io.to(pid).emit('participant_disconnected', { role: gone, grace: false });
+    }
+  } else {
+    const other = room.players.blue || room.players.red;
+    if (other) io.to(other).emit('opponent_disconnected', { grace: false });
+  }
   rooms.delete(roomId);
+}
+
+// Sala com facilitador: sem o facilitador a partida não anda; sem um dos
+// jogadores, só importa depois que ela começou (na configuração o assento
+// fica livre para ele voltar pelo código a qualquer momento).
+function facNeedsGrace(room) {
+  if (room.state?.winner) return false;
+  if (!room.players.facilitator) return true;
+  return room.state?.phase !== 'setup' && (!room.players.blue || !room.players.red);
 }
 
 function broadcast(room) {
   if (!room.state) return;
   if (room.players.blue) io.to(room.players.blue).emit('game_update', stateFor(room.state,'blue'));
   if (room.players.red)  io.to(room.players.red ).emit('game_update', stateFor(room.state,'red'));
+  if (room.players.facilitator) io.to(room.players.facilitator).emit('game_update', facView(room));
 }
+
+// Visão do facilitador: estado completo + quais assentos estão ocupados.
+function facView(room) {
+  return { ...stateFor(room.state, 'facilitator'),
+           seats: { blue: !!room.players.blue, red: !!room.players.red } };
+}
+
+// ─── Arbitragem do facilitador ────────────────────────────────────────────────
+const hexName = (col, row) => `${String.fromCharCode(65 + col)}${row + 1}`;
+
+// Unidades que viajam junto com `unit`: forças especiais hospedadas (hostId),
+// tropas ainda embarcadas e aeronaves que não decolaram (baseUnitId).
+function attachedUnits(state, unit) {
+  return state.units.filter(u => (u.hp ?? 0) > 0 && u.id !== unit.id && (
+    u.hostId === unit.id ||
+    (u.baseUnitId === unit.id && (u.category === 'air' ? u.airStatus !== 'airborne' : !isAshore(u)))
+  ));
+}
+
+// Reposiciona uma unidade (e quem viaja com ela). Na configuração inicial a
+// nova posição passa a ser também a "casa" da unidade (baseHex/snapshot).
+function placeUnit(state, unit, col, row) {
+  for (const u of [unit, ...attachedUnits(state, unit)]) {
+    u.col = col; u.row = row;
+    if (state.phase === 'setup') {
+      u.baseHex = { col, row };
+      state.movementSnapshot[u.id] = { col, row };
+    } else if (u !== unit && u.category === 'air') {
+      u.baseHex = { col, row };
+    }
+  }
+}
+
+// Zera uma unidade e tudo o que ela transporta.
+function destroyWithCargo(state, unit) {
+  unit.hp = 0;
+  for (const u of state.units) {
+    if ((u.hp ?? 0) > 0 && (u.baseUnitId === unit.id || u.hostId === unit.id) &&
+        (u.category !== 'air' || u.airStatus !== 'airborne')) {
+      u.hp = 0;
+      state.log.unshift(logEntry('UNIT_LOST_WITH', { u: u.name, def: unit.name }));
+    }
+  }
+}
+
+function canPlaceAt(unit, col, row) {
+  if (col < 0 || col >= GRID_W || row < 0 || row >= GRID_H) return false;
+  return canEnterTerrain(unit.category, getTerrain(col, row));
+}
+
+const TEAM_LOG = { blue: 'TEAM_BLUE', red: 'TEAM_RED', neutral: 'TEAM_NEUTRAL' };
 
 io.on('connection', socket => {
   console.log('+ connect', socket.id);
@@ -1690,10 +1861,41 @@ io.on('connection', socket => {
                                 rejoinToken: room.rejoinTokens[team] });
   });
 
-  socket.on('join_room', ({roomId}) => {
+  // ── Sala com facilitador/instrutor ─────────────────────────────────────────
+  // O facilitador abre a sala e entra direto no tabuleiro (fase 'setup'); os
+  // dois jogadores entram depois pelo código, escolhendo Azul ou Vermelho.
+  socket.on('create_facilitated_room', () => {
+    const id   = genId();
+    const room = { id, facilitated: true,
+                   players: { blue: null, red: null, facilitator: socket.id },
+                   state: newFacilitatedGame(),
+                   rejoinTokens: { blue: genToken(), red: genToken(), facilitator: genToken() } };
+    rooms.set(id, room);
+    socket.data.roomId = id; socket.data.team = 'facilitator';
+    socket.join(id);
+    socket.emit('game_start', { team: 'facilitator', state: facView(room), roomId: id, facilitated: true,
+                                rejoinToken: room.rejoinTokens.facilitator });
+  });
+
+  socket.on('join_room', ({roomId, team} = {}) => {
     const room=rooms.get(roomId?.toUpperCase?.());
     if (!room)           { socket.emit('join_error','ERR_ROOM_NOT_FOUND'); return; }
-    if (room.players.red){ socket.emit('join_error','ERR_ROOM_FULL');      return; }
+    if (room.facilitated) {
+      const free = { blue: !room.players.blue, red: !room.players.red };
+      if (!free.blue && !free.red) { socket.emit('join_error','ERR_ROOM_FULL'); return; }
+      if (!team) { socket.emit('join_choose_team', { roomId: room.id, free }); return; }
+      if (!['blue','red'].includes(team)) { socket.emit('join_error','ERR_INVALID_TEAM'); return; }
+      if (!free[team]) { socket.emit('join_error', team === 'blue' ? 'ERR_BLUE_TAKEN' : 'ERR_RED_TAKEN'); return; }
+      room.players[team] = socket.id;
+      socket.data.roomId = room.id; socket.data.team = team;
+      socket.join(room.id);
+      room.state.log.unshift(logEntry('FAC_PLAYER_JOINED', { team: TEAM_LOG[team] }));
+      socket.emit('game_start', { team, state: stateFor(room.state, team), roomId: room.id, facilitated: true,
+                                  rejoinToken: room.rejoinTokens[team] });
+      broadcast(room);
+      return;
+    }
+    if (room.solo || room.players.red){ socket.emit('join_error','ERR_ROOM_FULL'); return; }
     room.players.red=socket.id; socket.data.roomId=room.id; socket.data.team='red';
     socket.join(room.id);
     room.state=newGame();
@@ -1708,7 +1910,8 @@ io.on('connection', socket => {
   socket.on('rejoin_room', ({ roomId, team, token } = {}) => {
     const room = rooms.get(roomId);
     if (!room || !room.state || room.state.winner)            { socket.emit('rejoin_failed'); return; }
-    if (!['blue','red'].includes(team) || !token
+    const seats = room.facilitated ? ['blue','red','facilitator'] : ['blue','red'];
+    if (!seats.includes(team) || !token
         || room.rejoinTokens?.[team] !== token)               { socket.emit('rejoin_failed'); return; }
     if (room.players[team])                                   { socket.emit('rejoin_failed'); return; }
     room.players[team] = socket.id;
@@ -1716,10 +1919,20 @@ io.on('connection', socket => {
     socket.join(room.id);
     if (room.graceTimer) { clearTimeout(room.graceTimer); room.graceTimer = null; }
     // Em sala 2P, se o outro assento ainda está vago, o relógio continua p/ ele
-    const stillVacant = !room.solo && (!room.players.blue || !room.players.red);
+    const stillVacant = room.facilitated
+      ? facNeedsGrace(room)
+      : !room.solo && (!room.players.blue || !room.players.red);
     if (stillVacant) room.graceTimer = setTimeout(() => endRoomByDisconnect(room.id), REJOIN_GRACE_MS);
-    socket.emit('game_start', { team, state: stateFor(room.state, team), solo: !!room.solo,
+    socket.emit('game_start', { team, state: team === 'facilitator' ? facView(room) : stateFor(room.state, team),
+                                solo: !!room.solo, facilitated: !!room.facilitated,
                                 roomId: room.id, rejoinToken: room.rejoinTokens[team], rejoined: true });
+    if (room.facilitated) {
+      for (const seat of seats) {
+        if (seat !== team && room.players[seat]) io.to(room.players[seat]).emit('participant_reconnected', { role: team });
+      }
+      broadcast(room);
+      if (team === 'facilitator') return;
+    }
 
     // Se caiu no meio de um engajamento aguardando CONTINUAR/PARAR, reapresenta
     // a última rodada ao rejoinante — sem isso a partida trava para sempre
@@ -1734,6 +1947,7 @@ io.on('connection', socket => {
       });
     }
 
+    if (room.facilitated) return;
     const other = team === 'blue' ? room.players.red : room.players.blue;
     if (other) io.to(other).emit('opponent_reconnected');
   });
@@ -1743,6 +1957,7 @@ io.on('connection', socket => {
     const room=rooms.get(socket.data.roomId);
     if (!room?.state) return;
     const {state}=room, {team}=socket.data;
+    if (!['blue','red'].includes(team)) return;
 
     if (state.phase!=='movement')                  { socket.emit('action_error','ERR_NOT_MOVEMENT_PHASE'); return; }
     if (state[team==='blue'?'blueDone':'redDone']) { socket.emit('action_error','ERR_ALREADY_ENDED_MOVEMENT'); return; }
@@ -1773,7 +1988,10 @@ io.on('connection', socket => {
       if (!Array.isArray(path)||path.length<2) continue;
       const unit=state.units.find(u=>u.id===unitId&&u.team===team&&u.hp>0);
       if (!unit) continue;
+      const from = { col: unit.col, row: unit.row };
       applyUnitMovement(unit, path, team, state);
+      // Registro para a autorização do facilitador (origem → destino efetivo).
+      if (state.fac) state.fac.pendingMoves.push({ unitId, team, from, to: { col: unit.col, row: unit.row }, path });
     }
 
     // Fuel for stationary units of this team
@@ -1811,8 +2029,13 @@ io.on('connection', socket => {
         state.log.unshift(logEntry('AIR_LOST_FUEL', { name: u.name, team: u.team }));
       }
 
-      state.phase='combat';
-      state.log.unshift(logEntry('COMBAT_PHASE_STARTED'));
+      if (room.facilitated) {
+        state.phase='movement_approval';
+        state.log.unshift(logEntry('FAC_AWAITING_MOVE_APPROVAL'));
+      } else {
+        state.phase='combat';
+        state.log.unshift(logEntry('COMBAT_PHASE_STARTED'));
+      }
     } else {
       state.log.unshift(logEntry('TEAM_ENDED_MOVEMENT_WAITING', {
         team: team==='blue'?'TEAM_BLUE':'TEAM_RED', waiting: team==='blue'?'TEAM_RED':'TEAM_BLUE',
@@ -1836,6 +2059,7 @@ io.on('connection', socket => {
     const room=rooms.get(socket.data.roomId);
     if (!room?.state) return;
     const {state}=room, {team}=socket.data;
+    if (!['blue','red'].includes(team)) return;
     if (state.phase!=='combat') { socket.emit('action_error','ERR_NOT_COMBAT_PHASE'); return; }
     gameLogger.logAttacks(room.id, state.turn, state.period, team, attacks, state);
     if (team==='blue') state.blueAttacks=attacks||[]; else state.redAttacks=attacks||[];
@@ -1852,6 +2076,11 @@ io.on('connection', socket => {
     }
     if (state.blueAttacks!==null && state.redAttacks!==null) {
       state.log.unshift(logEntry('COMBAT_RESOLUTION'));
+      if (state.fac) {
+        // SP antes do combate — base da ratificação pelo facilitador.
+        state.fac.combatHpSnapshot = Object.fromEntries(state.units.map(u => [u.id, u.hp]));
+        state.fac.combatReport = [];
+      }
       state.combatQueue            = buildCombatQueue(state);
       state.currentEngagementIndex = 0;
       state.battleRoundDecisions   = { blue: null, red: null };
@@ -1870,6 +2099,7 @@ io.on('connection', socket => {
     const room=rooms.get(socket.data.roomId);
     if (!room?.state) return;
     const {state}=room, {team}=socket.data;
+    if (!['blue','red'].includes(team)) return;
     if (state.phase !== 'combat') return;
     state.battleRoundDecisions[team] = decision;
     if (room.solo) {
@@ -1881,12 +2111,249 @@ io.on('connection', socket => {
     if (blue && red) processBattleRoundDecision(room);
   });
 
+  // ══ Facilitador: comandos de arbitragem ═══════════════════════════════════
+  // Só o facilitador da sala, e só com a partida em aberto. Recusas voltam
+  // como 'action_error'; comandos aceitos entram no log e são retransmitidos.
+  function facRoomOf(sock) {
+    const room = rooms.get(sock.data.roomId);
+    if (!room?.facilitated || !room.state || room.players.facilitator !== sock.id) return null;
+    if (room.state.winner) return null;
+    return room;
+  }
+  const facLog = (room, action, details) =>
+    gameLogger.logFacilitator(room.id, room.state.turn, room.state.period, action, details);
+  const clampInt = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(Number(v) || 0)));
+  // Nomes de unidade são exibidos via innerHTML nos clientes (tooltip, log,
+  // listas) — o que o facilitador digita não pode carregar marcação.
+  const cleanName = v => (typeof v === 'string' ? v.replace(/[<>&"'`]/g, '').trim().slice(0, 40) : '');
+  const facErr = (code, params) => socket.emit('action_error', params ? { code, params } : code);
+  // Durante a resolução dos engajamentos o tabuleiro fica congelado.
+  const facBusy = state => state.phase === 'combat' && state.combatQueue.length > 0;
+
+  socket.on('fac_start_game', () => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    if (state.phase !== 'setup') { facErr('ERR_FAC_NOT_SETUP'); return; }
+    if (!room.players.blue || !room.players.red) { facErr('ERR_FAC_PLAYERS_MISSING'); return; }
+    state.phase = 'movement';
+    for (const u of state.units) u.baseHex = { col: u.col, row: u.row };
+    saveMovementSnapshot(state);
+    state.log = [logEntry('MOVEMENT_PHASE_STARTED'),
+                 logEntry('TURN_HEADER', { turn: 1, period: 'PERIOD_DAY' }),
+                 logEntry('FAC_GAME_STARTED')];
+    gameLogger.logStart(room.id, state, { facilitated: true });
+    broadcast(room);
+  });
+
+  socket.on('fac_move_unit', ({ unitId, col, row } = {}) => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    if (facBusy(state)) { facErr('ERR_FAC_BUSY_COMBAT'); return; }
+    const unit = state.units.find(u => u.id === unitId && u.hp > 0);
+    if (!unit) { facErr('ERR_INVALID_UNIT', { unitId }); return; }
+    col = Number(col); row = Number(row);
+    if (!canPlaceAt(unit, col, row)) { facErr('ERR_IMPASSABLE_TERRAIN', { name: unit.name, hex: hexName(col, row) }); return; }
+    placeUnit(state, unit, col, row);
+    const pm = state.fac.pendingMoves.find(m => m.unitId === unit.id);
+    if (pm) pm.to = { col, row };
+    state.log.unshift(logEntry('FAC_UNIT_REPOSITIONED', { name: unit.name, team: TEAM_LOG[unit.team], hex: hexName(col, row) }));
+    facLog(room, 'move_unit', { unitId, col, row });
+    broadcast(room);
+  });
+
+  // Nega um movimento: a unidade volta para onde estava no início do período.
+  socket.on('fac_deny_move', ({ unitId } = {}) => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    if (state.phase !== 'movement_approval') { facErr('ERR_FAC_NOT_MOVE_APPROVAL'); return; }
+    const pm   = state.fac.pendingMoves.find(m => m.unitId === unitId);
+    const unit = state.units.find(u => u.id === unitId && u.hp > 0);
+    if (!pm || !unit) { facErr('ERR_INVALID_UNIT', { unitId }); return; }
+    placeUnit(state, unit, pm.from.col, pm.from.row);
+    pm.to = { ...pm.from }; pm.denied = true;
+    state.log.unshift(logEntry('FAC_MOVE_DENIED', { name: unit.name, team: TEAM_LOG[unit.team] }));
+    facLog(room, 'deny_move', { unitId });
+    broadcast(room);
+  });
+
+  socket.on('fac_approve_movements', () => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    if (state.phase !== 'movement_approval') { facErr('ERR_FAC_NOT_MOVE_APPROVAL'); return; }
+    state.phase = 'combat';
+    state.log.unshift(logEntry('FAC_MOVES_AUTHORIZED'));
+    state.log.unshift(logEntry('COMBAT_PHASE_STARTED'));
+    facLog(room, 'approve_movements', { denied: state.fac.pendingMoves.filter(m => m.denied).map(m => m.unitId) });
+    broadcast(room);
+  });
+
+  // Ratifica o resultado do combate, com os ajustes de SP que o facilitador
+  // julgar necessários (restaurar uma unidade, agravar um dano...).
+  socket.on('fac_ratify_combat', ({ hpChanges } = {}) => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    if (state.phase !== 'combat_approval') { facErr('ERR_FAC_NOT_COMBAT_APPROVAL'); return; }
+    const applied = [];
+    for (const { unitId, hp } of (Array.isArray(hpChanges) ? hpChanges : [])) {
+      const unit = state.units.find(u => u.id === unitId && u.team !== NEUTRAL_TEAM);
+      if (!unit) continue;
+      const before = unit.hp;
+      const after  = clampInt(hp, 0, unit.maxHp);
+      if (after === before) continue;
+      unit.hp = after;
+      if (after === 0) destroyWithCargo(state, unit);
+      state.log.unshift(logEntry('FAC_SP_ADJUSTED', { name: unit.name, team: TEAM_LOG[unit.team], from: before, to: after }));
+      applied.push({ unitId, from: before, to: after });
+    }
+    state.log.unshift(logEntry('FAC_COMBAT_RATIFIED'));
+    facLog(room, 'ratify_combat', { hpChanges: applied });
+    state.fac.combatReport = [];
+    state.fac.combatHpSnapshot = {};
+    concludeTurn(room);
+  });
+
+  // Ajusta quantidades de uma unidade: SP, movimento, munição, nome. Na
+  // configuração inicial o valor novo vira o "cheio" da unidade.
+  socket.on('fac_edit_unit', ({ unitId, changes } = {}) => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    if (facBusy(state)) { facErr('ERR_FAC_BUSY_COMBAT'); return; }
+    const unit = state.units.find(u => u.id === unitId && u.hp > 0);
+    if (!unit) { facErr('ERR_INVALID_UNIT', { unitId }); return; }
+    const c = changes || {};
+    const inSetup = state.phase === 'setup';
+    if (cleanName(c.name)) unit.name = cleanName(c.name);
+    if (c.maxHp != null) {
+      unit.maxHp = clampInt(c.maxHp, 1, 99);
+      unit.hp    = inSetup ? unit.maxHp : Math.min(unit.hp, unit.maxHp);
+    }
+    if (c.hp != null && !inSetup) {
+      unit.hp = clampInt(c.hp, 0, unit.maxHp);
+      if (unit.hp === 0) destroyWithCargo(state, unit);
+    }
+    if (c.movement != null) {
+      unit.movement = unit.initMovement = clampInt(c.movement, 0, 20);
+      if (unit.fuel?.fuelType === 'air') {
+        unit.fuel.max = unit.initFuelMax = unit.movement * 2;
+        if (inSetup || unit.fuel.current > unit.fuel.max) unit.fuel.current = unit.fuel.max;
+      }
+    }
+    if (c.weapons && typeof c.weapons === 'object') {
+      for (const [k, q] of Object.entries(c.weapons)) {
+        if (!unit.weapons[k]) continue;
+        const qty = clampInt(q, 0, 99);
+        unit.weapons[k].quantity = qty;
+        if (inSetup || qty > (unit.initWeapons[k]?.quantity ?? 0)) {
+          unit.initWeapons[k] = { ...unit.weapons[k] };
+        }
+      }
+    }
+    state.log.unshift(logEntry('FAC_UNIT_EDITED', { name: unit.name, team: TEAM_LOG[unit.team] }));
+    facLog(room, 'edit_unit', { unitId, changes: c });
+    broadcast(room);
+  });
+
+  // Duplica uma unidade (aumenta a quantidade daquele meio na força).
+  socket.on('fac_clone_unit', ({ unitId } = {}) => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    if (facBusy(state)) { facErr('ERR_FAC_BUSY_COMBAT'); return; }
+    const src = state.units.find(u => u.id === unitId && u.hp > 0);
+    if (!src) { facErr('ERR_INVALID_UNIT', { unitId }); return; }
+    const n    = ++state.fac.cloneSeq;
+    const copy = JSON.parse(JSON.stringify(src));
+    copy.id    = `${src.id}-F${n}`;
+    copy.name  = `${src.name} (${state.units.filter(u => u.id === src.id || u.id.startsWith(`${src.id}-F`)).length + 1})`;
+    copy.hp    = copy.maxHp;
+    copy.moved = false;
+    copy.movement       = copy.initMovement;
+    copy.detectionRange = JSON.parse(JSON.stringify(copy.initDetectionRange || copy.detectionRange));
+    copy.capabilities   = JSON.parse(JSON.stringify(copy.initCapabilities   || copy.capabilities));
+    copy.weapons        = JSON.parse(JSON.stringify(copy.initWeapons        || {}));
+    if (copy.fuel?.usesFuel) copy.fuel.current = copy.fuel.max;
+    if (copy.category === 'air') { copy.airStatus = 'ready'; if (copy.fuel) copy.fuel.wasAtRefuelLocation = false; }
+    state.units.push(copy);
+    state.movementSnapshot[copy.id] = { col: copy.col, row: copy.row };
+    state.log.unshift(logEntry('FAC_UNIT_CLONED', { name: copy.name, team: TEAM_LOG[copy.team] }));
+    facLog(room, 'clone_unit', { unitId, newId: copy.id });
+    broadcast(room);
+  });
+
+  // Retira uma unidade (e o que ela transporta). Na configuração ela some da
+  // ordem de batalha; com a partida em andamento, conta como perdida.
+  socket.on('fac_remove_unit', ({ unitId } = {}) => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    if (facBusy(state)) { facErr('ERR_FAC_BUSY_COMBAT'); return; }
+    const unit = state.units.find(u => u.id === unitId && u.hp > 0);
+    if (!unit) { facErr('ERR_INVALID_UNIT', { unitId }); return; }
+    if (state.phase === 'setup') {
+      const gone = new Set([unit.id, ...state.units
+        .filter(u => u.baseUnitId === unit.id || u.hostId === unit.id).map(u => u.id)]);
+      state.units = state.units.filter(u => !gone.has(u.id));
+      for (const id of gone) delete state.movementSnapshot[id];
+    } else {
+      destroyWithCargo(state, unit);
+    }
+    state.fac.pendingMoves = state.fac.pendingMoves.filter(m => m.unitId !== unit.id);
+    state.log.unshift(logEntry('FAC_UNIT_REMOVED', { name: unit.name, team: TEAM_LOG[unit.team] }));
+    facLog(room, 'remove_unit', { unitId });
+    broadcast(room);
+  });
+
+  socket.on('fac_add_neutral', ({ template, name, col, row } = {}) => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    if (facBusy(state)) { facErr('ERR_FAC_BUSY_COMBAT'); return; }
+    const tpl = NEUTRAL_TEMPLATES[template];
+    if (!tpl) { facErr('ERR_FAC_BAD_TEMPLATE'); return; }
+    col = Number(col); row = Number(row);
+    if (!canPlaceAt({ category: tpl.category }, col, row)) {
+      facErr('ERR_IMPASSABLE_TERRAIN', { name: tpl.name, hex: hexName(col, row) }); return;
+    }
+    const n    = ++state.fac.neutralSeq;
+    const nm   = cleanName(name) || `${tpl.name} ${n}`;
+    const unit = makeNeutralUnit(`NEU-${n}`, tpl, nm, col, row);
+    state.units.push(unit);
+    state.movementSnapshot[unit.id] = { col, row };
+    state.log.unshift(logEntry('FAC_NEUTRAL_ADDED', { name: unit.name, hex: hexName(col, row) }));
+    facLog(room, 'add_neutral', { template, id: unit.id, col, row });
+    broadcast(room);
+  });
+
+  socket.on('fac_message', ({ to, text } = {}) => {
+    const room = facRoomOf(socket); if (!room) return;
+    const state = room.state;
+    const body = typeof text === 'string' ? text.trim().slice(0, 300) : '';
+    if (!body || !['all', 'blue', 'red'].includes(to)) return;
+    const msg = { id: `MSG-${state.messages.length + 1}`, to, text: body,
+                  turn: state.turn, period: state.period, ts: new Date().toISOString() };
+    state.messages.push(msg);
+    for (const team of ['blue', 'red']) {
+      if ((to === 'all' || to === team) && room.players[team]) io.to(room.players[team]).emit('facilitator_message', msg);
+    }
+    facLog(room, 'message', { to, text: body });
+    broadcast(room);
+  });
+
   socket.on('restart', () => {
     const room=rooms.get(socket.data.roomId);
     if (!room) return;
-    if (room.state && !room.state.winner) {
+    if (room.state && !room.state.winner && room.state.phase !== 'setup') {
       const obj = computeObjectives(room.state);
       gameLogger.logGameOver(room.id, room.state.turn, null, 'restart', obj, room.state);
+    }
+    // Com facilitador, só ele reinicia — e a sala volta para a configuração.
+    if (room.facilitated) {
+      if (socket.data.team !== 'facilitator') return;
+      room.state = newFacilitatedGame();
+      for (const team of ['blue', 'red']) {
+        if (room.players[team]) io.to(room.players[team]).emit('game_start', { team, state: stateFor(room.state, team),
+          roomId: room.id, facilitated: true, rejoinToken: room.rejoinTokens[team] });
+      }
+      socket.emit('game_start', { team: 'facilitator', state: facView(room), roomId: room.id, facilitated: true,
+                                  rejoinToken: room.rejoinTokens.facilitator });
+      return;
     }
     room.state=newGame();
     gameLogger.logStart(room.id, room.state, room.solo ? { solo: true, botTeam: room.botTeam, botDoctrine: room.botDoctrine } : undefined);
@@ -1896,8 +2363,9 @@ io.on('connection', socket => {
 
   socket.on('abandon_game', () => {
     const room=rooms.get(socket.data.roomId); if (!room?.state) return;
-    if (room.state.winner) return;
+    if (room.state.winner || room.state.phase === 'setup') return;
     const myTeam    = socket.data.team;
+    if (!['blue','red'].includes(myTeam)) return;
     const otherTeam = myTeam === 'blue' ? 'red' : 'blue';
     room.state.winner = otherTeam;
     room.state.log.unshift(logEntry('TEAM_ABANDONED', {
@@ -1906,9 +2374,7 @@ io.on('connection', socket => {
     }));
     const obj = computeObjectives(room.state);
     gameLogger.logGameOver(room.id, room.state.turn, otherTeam, 'abandon', obj, room.state);
-    const payload = { winner: otherTeam, objectives: obj, reason: 'abandon' };
-    if (room.players.blue) io.to(room.players.blue).emit('game_over', { ...payload, state: stateFor(room.state, 'blue') });
-    if (room.players.red)  io.to(room.players.red ).emit('game_over', { ...payload, state: stateFor(room.state, 'red')  });
+    emitGameOver(room, { winner: otherTeam, objectives: obj, reason: 'abandon' });
     if (room.graceTimer) { clearTimeout(room.graceTimer); room.graceTimer = null; }
   });
 
@@ -1916,6 +2382,28 @@ io.on('connection', socket => {
     const {roomId,team}=socket.data; if (!roomId) return;
     const room=rooms.get(roomId); if (!room) return;
     if (room.players[team] !== socket.id) return; // assento já reocupado por rejoin
+
+    if (room.facilitated) {
+      room.players[team] = null;
+      // Todo mundo saiu: a sala deixa de existir.
+      if (!Object.values(room.players).some(Boolean)) {
+        if (room.graceTimer) clearTimeout(room.graceTimer);
+        endRoomByDisconnect(roomId);
+        return;
+      }
+      if (room.state.phase === 'setup' && team !== 'facilitator') {
+        room.state.log.unshift(logEntry('FAC_PLAYER_LEFT', { team: TEAM_LOG[team] }));
+      }
+      const grace = facNeedsGrace(room);
+      for (const pid of Object.values(room.players)) {
+        if (pid) io.to(pid).emit('participant_disconnected',
+          { role: team, grace, seconds: Math.round(REJOIN_GRACE_MS / 1000) });
+      }
+      if (room.graceTimer) { clearTimeout(room.graceTimer); room.graceTimer = null; }
+      if (grace) room.graceTimer = setTimeout(() => endRoomByDisconnect(roomId), REJOIN_GRACE_MS);
+      broadcast(room);
+      return;
+    }
 
     // Sem partida em andamento (lobby) ou já encerrada: encerra na hora
     if (!room.state || room.state.winner) {
@@ -1955,4 +2443,5 @@ module.exports = {
   applyUnitMovement, MINESWEEPER_IDS, syncEmbarkedForces,
   stateFor, isAshore, isEmbarkedAfloat,
   TANKER_AIR_IDS, applyAirEscortRefuel,
+  newFacilitatedGame, NEUTRAL_TEAM, NEUTRAL_TEMPLATES, makeNeutralUnit,
 };

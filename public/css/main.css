@@ -354,6 +354,8 @@ html[lang="en"] .splash-pt { display: none !important; }
 .btn-action.solo-b:hover { background: rgba(13,71,161,0.8); box-shadow: 0 0 18px rgba(33,150,243,0.25); }
 .btn-action.solo-r { background: rgba(183,28,28,0.55); border-color: var(--red-l); color: #ffe1de; }
 .btn-action.solo-r:hover { background: rgba(183,28,28,0.8); box-shadow: 0 0 18px rgba(229,57,53,0.25); }
+.btn-action.facilitator { background: rgba(74,56,0,0.6); border-color: var(--gold); color: var(--gold-l); }
+.btn-action.facilitator:hover { background: rgba(106,80,0,0.85); box-shadow: 0 0 18px rgba(201,168,76,0.25); }
 .lobby-solo { display: flex; gap: 0.75rem; }
 .lobby-solo .btn-action { flex: 1; padding: 12px 10px; font-size: 0.72rem; }
 .btn-icon { font-size: 1.3rem; }

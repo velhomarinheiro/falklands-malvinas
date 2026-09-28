@@ -1255,3 +1255,106 @@ input[type=text]:focus-visible {
   .sidebar { transition: none !important; }
 }
 
+
+/* ═══ SALA COM FACILITADOR ═══════════════════════════════════════════════════ */
+:root { --neutral-l: #a5d6a7; }
+
+.team-badge.facilitator { background: #4a3800; color: var(--gold-l); border: 1px solid var(--gold-l); }
+.fleet-row.neutral, .u-name.neutral, .ut-name.neutral, .cm-neutral { color: var(--neutral-l); }
+
+@media (min-width: 861px) {
+  body.facilitator-mode .sidebar { width: 330px; }
+}
+
+.fac-panel { border-left: 3px solid var(--gold); }
+.fac-status { margin-top: 8px; display: flex; flex-direction: column; gap: 3px; font-size: var(--fs-sm); }
+.fac-room-line { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.fac-room-code {
+  font-size: 1.15rem; font-weight: bold; letter-spacing: 4px; color: var(--gold-l);
+  font-variant-numeric: tabular-nums;
+}
+.fac-seat { font-size: var(--fs-xs); letter-spacing: 0.5px; }
+.fac-dim { color: var(--dim); }
+.fac-ok  { color: var(--green); font-weight: bold; }
+.fac-denied { color: var(--red-l); font-weight: bold; }
+.fac-phase { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.fac-hint { color: var(--dim); font-size: var(--fs-xs); line-height: 1.55; }
+.fac-sub  { font-size: var(--fs-xs); letter-spacing: 2px; color: var(--gold); margin-top: 2px; }
+.fac-progress { font-size: var(--fs-sm); line-height: 1.7; }
+.fac-list { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
+
+.fac-move-row, .fac-hp-row, .fac-eng-row {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  font-size: var(--fs-xs); padding: 4px 6px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 2px;
+}
+.fac-move-row > span:first-child, .fac-hp-row > span:first-child { font-weight: bold; }
+.fac-row-btns { margin-left: auto; display: flex; gap: 4px; }
+.fac-eng-row b { margin-left: auto; color: var(--text); }
+.fac-hp-input { width: 48px; }
+
+.fac-mini-btn {
+  font-family: inherit; font-size: var(--fs-xs); letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 2px; cursor: pointer;
+  background: #1a2a38; border: 1px solid #3a5068; color: var(--text);
+}
+.fac-mini-btn:hover { border-color: var(--gold-l); color: var(--gold-l); }
+.fac-mini-btn:focus-visible { outline: 2px solid var(--gold-l); outline-offset: 1px; }
+
+.fac-field { display: flex; flex-direction: column; gap: 3px; font-size: var(--fs-xs); color: var(--dim); margin-top: 6px; }
+.fac-field input, .fac-field select, .fac-msg-text, .fac-hp-input {
+  font-family: inherit; font-size: var(--fs-sm); color: var(--text);
+  background: rgba(10,30,50,0.9); border: 1px solid var(--border); border-radius: 2px; padding: 4px 6px;
+  text-transform: none; letter-spacing: normal; text-align: left;
+}
+.fac-list p { font-size: var(--fs-xs); color: var(--dim); margin: 0; }
+body.facilitator-mode .phase-legend { display: none; }
+.fac-field input:focus, .fac-field select:focus, .fac-msg-text:focus, .fac-hp-input:focus {
+  outline: none; border-color: var(--gold-l);
+}
+.fac-field-inline input { width: 100%; }
+.fac-edit-head { display: flex; justify-content: space-between; font-size: var(--fs-sm); font-weight: bold; margin-top: 6px; }
+.fac-edit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 8px; }
+.fac-edit-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+.fac-edit-actions .act-btn { padding: 7px 6px; font-size: var(--fs-xs); letter-spacing: 1px; }
+.fac-edit-actions .act-btn.yellow { grid-column: 1 / -1; }
+#fac-neutral-panel .act-btn, #fac-msg-panel .act-btn { margin-top: 8px; }
+.fac-msg-text { width: 100%; margin-top: 6px; resize: vertical; }
+
+.fac-msg-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 180px; overflow-y: auto; }
+.fac-msg-item { border-left: 2px solid var(--gold); padding: 2px 0 2px 8px; }
+.fac-msg-meta { font-size: var(--fs-xs); color: var(--dim); }
+.fac-msg-body { font-size: var(--fs-sm); line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+
+/* Jogador: o que a partida está esperando do facilitador */
+.phase-hint {
+  font-size: var(--fs-xs); line-height: 1.5; color: var(--gold-l);
+  border: 1px dashed var(--gold); border-radius: 2px; padding: 6px 8px;
+}
+
+/* Mensagem recebida do facilitador */
+.fac-toast {
+  position: absolute; top: 56px; left: 50%; transform: translateX(-50%);
+  width: min(460px, 86%); z-index: 45;
+  background: rgba(40,30,4,0.96); border: 1px solid var(--gold-l); border-radius: 3px;
+  padding: 10px 34px 10px 14px; box-shadow: 0 6px 22px rgba(0,0,0,0.55);
+  animation: errFlashIn 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fac-toast-title { font-size: var(--fs-xs); letter-spacing: 2px; color: var(--gold-l); margin-bottom: 4px; }
+.fac-toast-text  { font-size: var(--fs-base); line-height: 1.45; color: #fff4d6; white-space: pre-wrap; word-break: break-word; }
+.fac-toast-close {
+  position: absolute; top: 6px; right: 8px; background: none; border: none;
+  color: var(--gold-l); font-size: 0.9rem; cursor: pointer;
+}
+
+/* Modo "posicionar no mapa" do facilitador */
+.fac-place-hint {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  background: rgba(74,56,0,0.94); color: var(--gold-l); border: 1px solid var(--gold-l);
+  padding: 7px 16px; font-size: var(--fs-sm); letter-spacing: 1px; border-radius: 3px;
+  pointer-events: none; white-space: nowrap; z-index: 41;
+}
+
+/* Lobby: escolha de equipe numa sala com facilitador */
+#lobby-team-choice p { margin-bottom: 1rem; }
+.team-choice-row { display: flex; flex-direction: column; gap: 10px; }

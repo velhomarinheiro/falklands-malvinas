@@ -55,6 +55,12 @@
       <div id="terrain-tip" class="terrain-tip"></div>
       <div id="error-flash" class="error-flash hidden" role="alert"></div>
       <div id="reconnect-banner" class="reconnect-banner hidden" role="status"></div>
+      <div id="fac-place-hint" class="fac-place-hint hidden" role="status"></div>
+      <div id="fac-toast" class="fac-toast hidden" role="status">
+        <div class="fac-toast-title" data-i18n="fac.messageFromFacilitator">📢 MENSAGEM DO FACILITADOR</div>
+        <div id="fac-toast-text" class="fac-toast-text"></div>
+        <button type="button" id="fac-toast-close" class="fac-toast-close" data-i18n-title="game.close" title="Fechar">✕</button>
+      </div>
       <div id="stack-picker" class="stack-picker hidden">
         <div class="sp-title" data-i18n="game.stackedUnits">UNIDADES EMPILHADAS</div>
         <div id="sp-list"></div>
@@ -69,10 +75,24 @@
       <button class="sidebar-close-btn" data-i18n-title="game.sidebarClose" data-i18n-aria-label="game.sidebarCloseAria" title="Fechar painel" aria-label="Fechar painel lateral"
         onclick="document.querySelector('.game-body').classList.remove('sidebar-open')">✕</button>
 
+      <!-- Facilitador: status da sala + arbitragem da fase atual -->
+      <div id="fac-panel" class="panel fac-panel hidden">
+        <div class="panel-title" data-i18n="fac.panelTitle">FACILITADOR</div>
+        <div id="fac-status" class="fac-status"></div>
+        <div id="fac-phase" class="fac-phase"></div>
+      </div>
+
       <div class="panel fleet-panel">
         <div class="panel-title" data-i18n="game.fleets">FROTAS</div>
         <div class="fleet-row blue"><span id="fleet-blue">Azul: 9</span></div>
         <div class="fleet-row red" ><span id="fleet-red" >Verm: 9</span></div>
+        <div class="fleet-row neutral hidden" id="fleet-neutral-row"><span id="fleet-neutral"></span></div>
+      </div>
+
+      <!-- Jogador em sala com facilitador: mensagens recebidas -->
+      <div id="player-msg-panel" class="panel hidden">
+        <div class="panel-title" data-i18n="fac.messagesTitle">MENSAGENS DO FACILITADOR</div>
+        <div id="player-msg-list" class="fac-msg-list"></div>
       </div>
 
       <div class="panel unit-info-panel">
@@ -80,8 +100,53 @@
         <div id="unit-panel"><p class="no-sel" data-i18n="ui.clickYourUnit">Clique em uma unidade sua</p></div>
       </div>
 
+      <!-- Facilitador: ajustes da unidade selecionada -->
+      <div id="fac-edit-panel" class="panel fac-edit-panel hidden">
+        <div class="panel-title" data-i18n="fac.editTitle">AJUSTAR UNIDADE</div>
+        <div id="fac-edit-body"></div>
+      </div>
+
+      <!-- Facilitador: criar unidade neutra -->
+      <div id="fac-neutral-panel" class="panel hidden">
+        <div class="panel-title" data-i18n="fac.neutralTitle">UNIDADES NEUTRAS</div>
+        <label class="fac-field">
+          <span data-i18n="fac.neutralType">Tipo</span>
+          <select id="fac-neutral-tpl">
+            <option value="mercante"  data-i18n="fac.tplMercante">Navio mercante</option>
+            <option value="pesqueiro" data-i18n="fac.tplPesqueiro">Pesqueiro</option>
+            <option value="hospital"  data-i18n="fac.tplHospital">Navio-hospital (CICV)</option>
+            <option value="pesquisa"  data-i18n="fac.tplPesquisa">Navio de pesquisa</option>
+            <option value="aeronave"  data-i18n="fac.tplAeronave">Aeronave civil</option>
+          </select>
+        </label>
+        <label class="fac-field">
+          <span data-i18n="fac.neutralName">Nome (opcional)</span>
+          <input id="fac-neutral-name" type="text" maxlength="40" autocomplete="off">
+        </label>
+        <button id="fac-neutral-add" class="act-btn gray" data-i18n="fac.neutralPlace">➕ Posicionar no mapa</button>
+        <p class="fac-hint" data-i18n="fac.neutralHint">Neutros são visíveis a todos e não podem ser atacados. Selecione um no mapa para movê-lo.</p>
+      </div>
+
+      <!-- Facilitador: mensagens às equipes -->
+      <div id="fac-msg-panel" class="panel hidden">
+        <div class="panel-title" data-i18n="fac.sendTitle">MENSAGEM ÀS EQUIPES</div>
+        <label class="fac-field">
+          <span data-i18n="fac.msgTo">Para</span>
+          <select id="fac-msg-to">
+            <option value="all"  data-i18n="fac.toAll">Ambas as equipes</option>
+            <option value="blue" data-i18n="fac.toBlue">Força Azul</option>
+            <option value="red"  data-i18n="fac.toRed">Força Vermelha</option>
+          </select>
+        </label>
+        <textarea id="fac-msg-text" class="fac-msg-text" maxlength="300" rows="3"
+          data-i18n-placeholder="fac.msgPlaceholder" placeholder="Ex.: inteligência indica atividade submarina ao sul."></textarea>
+        <button id="fac-msg-send" class="act-btn gray" data-i18n="fac.msgSend">📢 Enviar</button>
+        <div id="fac-msg-list" class="fac-msg-list"></div>
+      </div>
+
       <div class="panel actions-panel">
         <div class="panel-title" data-i18n="game.actions">AÇÕES</div>
+        <div id="phase-hint" class="phase-hint hidden"></div>
         <button id="end-phase-btn"  class="act-btn yellow hidden" data-i18n="ui.endMovement">Encerrar Movimentação</button>
         <button id="combat-btn"     class="act-btn orange hidden" data-i18n="game.confirmAttacksZero">Confirmar Ataques (0)</button>
         <button id="undo-step-btn"  class="act-btn gray   hidden" data-i18n="game.undoStep">↩ Desfazer Passo</button>
@@ -134,6 +199,13 @@
         <button id="btn-join" class="act-btn red" data-i18n="game.enter">Entrar</button>
       </div>
       <p id="lobby-err" class="lobby-err hidden"></p>
+    </div>
+    <div id="lobby-team-choice" class="hidden">
+      <p data-i18n="fac.chooseTeamTitle">Sala com facilitador — escolha sua equipe:</p>
+      <div class="team-choice-row">
+        <button id="btn-choose-blue" class="act-btn blue" data-i18n="fac.chooseBlue">⚓ Argentina (Azul)</button>
+        <button id="btn-choose-red"  class="act-btn red"  data-i18n="fac.chooseRed">⚔ Reino Unido (Vermelha)</button>
+      </div>
     </div>
     <div id="lobby-waiting" class="hidden">
       <p data-i18n="game.roomCreated">Sala criada! Compartilhe o código:</p>
@@ -243,5 +315,6 @@
 <script src="js/units.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/client.js"></script>
+<script src="js/facilitator.js"></script>
 </body>
 </html>

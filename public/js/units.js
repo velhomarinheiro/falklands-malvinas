@@ -175,9 +175,11 @@ function cutCornerRect(ctx, x, y, w, h, cut) {
 }
 
 function drawUnitCounter(ctx, unit, cx, cy, selected) {
-  const isBlue = unit.team === 'blue';
-  const bg     = isBlue ? '#0c2d5a' : '#5a0c0c';
-  const border = isBlue ? '#82b1ff' : '#ff8a80';
+  const isBlue    = unit.team === 'blue';
+  const isNeutral = unit.team === 'neutral';
+  // Neutros: verde e contorno quadrado (convenção de contato neutro).
+  const bg     = isNeutral ? '#0f2e1a' : isBlue ? '#0c2d5a' : '#5a0c0c';
+  const border = isNeutral ? '#a5d6a7' : isBlue ? '#82b1ff' : '#ff8a80';
   const R      = HEX_R * 0.50;
   const top    = cy - R * 0.72;
 
@@ -186,8 +188,9 @@ function drawUnitCounter(ctx, unit, cx, cy, selected) {
   ctx.fillStyle   = bg;
   ctx.strokeStyle = selected ? '#ffd700' : border;
   ctx.lineWidth   = selected ? 2.5 : 1.5;
-  if (isBlue) roundRect(ctx, cx - R, top, R * 2, R * 1.44, 4);
-  else        cutCornerRect(ctx, cx - R, top, R * 2, R * 1.44, 7);
+  if (isNeutral)   { ctx.beginPath(); ctx.rect(cx - R, top, R * 2, R * 1.44); }
+  else if (isBlue) roundRect(ctx, cx - R, top, R * 2, R * 1.44, 4);
+  else             cutCornerRect(ctx, cx - R, top, R * 2, R * 1.44, 7);
   ctx.fill(); ctx.stroke();
   ctx.shadowBlur = 0;
 

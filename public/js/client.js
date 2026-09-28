@@ -217,6 +217,8 @@ mapImg.src = '/mapa.png';
 let myTeam      = null;
 let gameState   = null;
 let isSolo      = false;
+let isFacilitator = false;   // este cliente é o facilitador/instrutor da sala
+let isFacilitated = false;   // sala com facilitador (jogador ou facilitador)
 let currentRoomId = null;
 let prevUnitPos = new Map(); // unitId → {col, row} — for movement flash detection
 let selUnitId   = null;
@@ -500,6 +502,9 @@ socket.on('connect', () => {
   if (action === 'create') {
     sessionStorage.removeItem('pendingAction');
     socket.emit('create_room');
+  } else if (action === 'facilitate') {
+    sessionStorage.removeItem('pendingAction');
+    socket.emit('create_facilitated_room');
   } else if (action === 'join') {
     const code = sessionStorage.getItem('pendingCode');
     sessionStorage.removeItem('pendingAction');
@@ -574,8 +579,56 @@ socket.on('join_error', err => {
   showLobbyErr(t('server.' + code, params));
 });
 
-socket.on('game_start', ({team, state, solo, roomId, rejoinToken, rejoined}) => {
+// Sala com facilitador: o jogador escolhe Azul ou Vermelho antes de entrar.
+socket.on('join_choose_team', ({ roomId, free }) => {
+  lobbyMenu.classList.add('hidden');
+  $('lobby-team-choice').classList.remove('hidden');
+  for (const team of ['blue', 'red']) {
+    const btn = $(`btn-choose-${team}`);
+    btn.disabled = !free[team];
+    btn.onclick = () => { SFX.init(); socket.emit('join_room', { roomId, team }); };
+  }
+});
+
+const roleLabel = role => role === 'facilitator' ? t('fac.roleFacilitator')
+  : role === 'blue' ? t('team.blueTitle') : t('team.redTitle');
+
+// Presença dos participantes numa sala com facilitador.
+socket.on('participant_disconnected', ({ role, grace, seconds } = {}) => {
+  if (grace) {
+    showReconnectBanner(t('fac.participantLeftGrace', { role: roleLabel(role) }), seconds || 75);
+    return;
+  }
+  // Jogador saiu durante a configuração: o assento só fica livre de novo.
+  if (gameState?.phase === 'setup' && role !== 'facilitator') return;
+  hideReconnectBanner();
+  localStorage.removeItem('oas_session');
+  if (!gameOver.classList.contains('hidden')) return;
+  $('disconnect-msg').textContent = t('fac.participantLeftEnded', { role: roleLabel(role) });
+  disconnected.classList.remove('hidden');
+});
+socket.on('participant_reconnected', ({ role } = {}) => {
+  hideReconnectBanner();
+  if (gameState) { gameState.log?.unshift(t('fac.participantBack', { role: roleLabel(role) })); updateUI(); }
+});
+
+let facToastTimer = null;
+socket.on('facilitator_message', msg => {
+  $('fac-toast-text').textContent = msg.text;
+  $('fac-toast').classList.remove('hidden');
+  SFX.play('turnChange');
+  clearTimeout(facToastTimer);
+  facToastTimer = setTimeout(() => $('fac-toast').classList.add('hidden'), 12000);
+});
+$('fac-toast-close').addEventListener('click', () => $('fac-toast').classList.add('hidden'));
+
+socket.on('game_start', ({team, state, solo, facilitated, roomId, rejoinToken, rejoined}) => {
   myTeam = team; gameState = state; isSolo = !!solo;
+  isFacilitator = team === 'facilitator';
+  isFacilitated = !!facilitated;
+  document.body.classList.toggle('facilitator-mode', isFacilitator);
+  document.body.classList.toggle('facilitated-game', isFacilitated);
+  $('lobby-team-choice').classList.add('hidden');
   if (roomId) currentRoomId = roomId;
   if (roomId && rejoinToken) {
     localStorage.setItem('oas_session', JSON.stringify({ roomId, team, token: rejoinToken }));
@@ -608,7 +661,7 @@ socket.on('game_update', state => {
     if (u.hp <= 0) continue;
     const prev = prevUnitPos.get(u.id);
     if (prev && (prev.col !== u.col || prev.row !== u.row)) {
-      const color = u.team === 'blue' ? '#82b1ff' : '#ff8a80';
+      const color = u.team === 'blue' ? '#82b1ff' : u.team === 'red' ? '#ff8a80' : '#a5d6a7';
       flashUnit(u.id, color, 900);
     }
   }
@@ -618,7 +671,7 @@ socket.on('game_update', state => {
   const myDoneNow = myTeam === 'blue' ? state.blueDone : state.redDone;
   // Reset on: new turn, combat→movement, or my done flag was reset (new round)
   if (state.turn !== prevTurn
-      || (prevPhase === 'combat' && state.phase === 'movement')
+      || ((prevPhase === 'combat' || prevPhase === 'combat_approval') && state.phase === 'movement')
       || (state.phase === 'movement' && prevMyDone && !myDoneNow)) {
     activePath = []; plannedMoves.clear(); selGroupIds = [];
     selUnitId = null; moveHexes = []; atkHexes = []; reachableHexes = new Map();
@@ -667,6 +720,12 @@ socket.on('game_over', ({winner, state, objectives, reason}) => {
     $('winner-sub').textContent = t('ui.objectivesReached', {team: winnerTeamLabel});
   }
   winnerMsg.className = mine ? 'victory' : 'defeat';
+  if (isFacilitator) {   // o facilitador não vence nem perde: só anuncia
+    winnerMsg.textContent = t('fac.teamWon', { team: winnerTeamLabel });
+    winnerMsg.className = 'victory';
+  }
+  // Com facilitador, só ele reinicia (a sala volta para a configuração).
+  $('btn-restart').classList.toggle('hidden', isFacilitated && !isFacilitator);
   renderOverObjectives(objectives, winner, reason);
   gameOver.classList.remove('hidden');
 });
@@ -696,13 +755,14 @@ socket.on('action_error', err => {
   SFX.play('error');
   flashError(t('server.' + code, params));
   // Reverse optimistic done flag so the button becomes available again
-  if (gameState?.phase === 'movement') {
+  if (gameState?.phase === 'movement' && !isFacilitator) {
     if (myTeam === 'blue') gameState.blueDone = false; else gameState.redDone = false;
     updateUI();
   }
 });
 socket.on('battle_round_result', data => {
-  handleBrResult(data);
+  // Facilitador só observa: destaca no mapa, sem abrir o painel de decisão.
+  if (!data.observer) handleBrResult(data);
   const eng = data.engagement;
   if (eng) {
     flashUnit(eng.attackerId, '#ffd700', 900);
@@ -1100,6 +1160,8 @@ function handleClick(col, row) {
   if (!targetPicker.classList.contains('hidden')) { hideTargetPicker();  return; }
   if (!weaponPicker.classList.contains('hidden')) { closeWeaponPicker(); return; }
 
+  if (isFacilitator) { facHandleClick(col, row); return; }
+
   // ── Combat phase ──
   if (phase === 'combat') {
     if (isMyTurn() && selUnitId !== null) {
@@ -1257,14 +1319,15 @@ function pickableUnits(units) {
 
 function showStackPicker(col, row, units) {
   spList.innerHTML = '';
-  const actionable = units.filter(u => !isEmbarkedCargo(u));
-  const cargo      = units.filter(u => isEmbarkedCargo(u));
+  // O facilitador pode selecionar qualquer unidade, inclusive tropa embarcada.
+  const actionable = isFacilitator ? units : units.filter(u => !isEmbarkedCargo(u));
+  const cargo      = isFacilitator ? []    : units.filter(u => isEmbarkedCargo(u));
   for (const u of actionable) {
     const btn = document.createElement('button');
     btn.className = 'sp-unit-btn';
-    const c = u.team === 'blue' ? 'var(--blue-l)' : 'var(--red-l)';
+    const c = u.team === 'blue' ? 'var(--blue-l)' : u.team === 'red' ? 'var(--red-l)' : 'var(--neutral-l)';
     btn.innerHTML = `<span style="color:${c}">${u.name}</span> · ${u.hp}/${u.maxHp}SP`;
-    btn.addEventListener('click', () => { hideStackPicker(); _selectUnit(u); });
+    btn.addEventListener('click', () => { hideStackPicker(); isFacilitator ? facSelect(u.id) : _selectUnit(u); });
     spList.appendChild(btn);
   }
   for (const u of cargo) {
@@ -1274,7 +1337,7 @@ function showStackPicker(col, row, units) {
     note.textContent = `⚓ ${u.name} — ${t('game.followsHost', { host: host ? host.name : '?' })}`;
     spList.appendChild(note);
   }
-  if (actionable.length > 1) {
+  if (actionable.length > 1 && !isFacilitator) {
     spGroupBtn.classList.remove('hidden');
     spGroupBtn.onclick = () => { hideStackPicker(); _selectGroup(actionable); };
   } else {
@@ -1532,7 +1595,7 @@ function recalcHighlights(unit) {
 }
 
 function isMyTurn() {
-  if (!gameState) return false;
+  if (!gameState || isFacilitator) return false;
   const {phase, blueDone, redDone} = gameState;
   if (phase === 'movement') return myTeam === 'blue' ? !blueDone : !redDone;
   if (phase === 'combat')   return myTeam === 'blue' ? gameState.blueAttacks === null : gameState.redAttacks === null;
@@ -1588,13 +1651,20 @@ function updateUI() {
   if (!gameState) return;
   const {turn, period, phase, units, log, winner} = gameState;
 
-  teamBadge.textContent  = myTeam === 'blue' ? t('team.blue') : t('team.red');
+  teamBadge.textContent  = isFacilitator ? t('fac.badge') : myTeam === 'blue' ? t('team.blue') : t('team.red');
   teamBadge.className    = `team-badge ${myTeam}`;
   turnLabel.textContent  = gameState.maxTurns ? t('ui.turnLabelMax', {turn, max: gameState.maxTurns}) : t('ui.turnLabel', {turn});
   periodLabel.textContent= period === 'day' ? t('period.day') : t('period.night');
-  phaseLabel.textContent = phase === 'movement' ? t('ui.movementPhase') : t('ui.combatPhase');
+  phaseLabel.textContent = PHASE_LABEL[phase] ? t(PHASE_LABEL[phase]) : t('ui.combatPhase');
 
-  myTurnBanner.classList.toggle('visible', isMyTurn() && !winner);
+  const facilitatorTurn = isFacilitator && typeof facNeedsAction === 'function' && facNeedsAction();
+  myTurnBanner.classList.toggle('visible', (isMyTurn() || facilitatorTurn) && !winner);
+
+  // Jogador em sala com facilitador: o que está travando a partida agora.
+  const hintKey = !isFacilitated || isFacilitator || winner ? null : PHASE_WAIT_HINT[phase];
+  $('phase-hint').textContent = hintKey ? t(hintKey) : '';
+  $('phase-hint').classList.toggle('hidden', !hintKey);
+  renderPlayerMessages();
 
   endPhaseBtn.classList.add('hidden');
   combatBtn.classList.add('hidden');
@@ -1616,8 +1686,11 @@ function updateUI() {
 
   const b = units.filter(u => u.team === 'blue' && u.hp > 0).length;
   const r = units.filter(u => u.team === 'red'  && u.hp > 0).length;
+  const n = units.filter(u => u.team === 'neutral' && u.hp > 0).length;
   fleetBlue.textContent = t('ui.fleetBlue', {count: b});
   fleetRed.textContent  = t('ui.fleetRed', {count: r});
+  $('fleet-neutral').textContent = t('fac.fleetNeutral', {count: n});
+  $('fleet-neutral-row').classList.toggle('hidden', n === 0);
 
   const sel = selUnitId ? gameState.units.find(u => u.id === selUnitId && u.hp > 0) : null;
   if (sel) {
@@ -1680,7 +1753,7 @@ function updateUI() {
       ${cardThumb}
     `;
   } else {
-    unitPanel.innerHTML = `<p class="no-sel">${t('ui.clickYourUnit')}</p>`;
+    unitPanel.innerHTML = `<p class="no-sel">${t(isFacilitator ? 'fac.clickAnyUnit' : 'ui.clickYourUnit')}</p>`;
   }
   logEl.innerHTML = (log && log.length)
     ? log.map(l=>`<p>${logText(l)}</p>`).join('')
@@ -1689,10 +1762,38 @@ function updateUI() {
   // Show/hide game-level buttons
   const inGame = !winner;
   exportLogBtn.classList.toggle('hidden', !gameState);
-  exportFullLogBtn.classList.toggle('hidden', !gameState || !currentRoomId);
-  abandonBtn.classList.toggle('hidden', !inGame);
+  exportFullLogBtn.classList.toggle('hidden', !gameState || !currentRoomId || phase === 'setup');
+  abandonBtn.classList.toggle('hidden', !inGame || isFacilitator || phase === 'setup');
 
   updateObjectives();
+  if (isFacilitator) facRenderPanels();
+}
+
+const PHASE_LABEL = {
+  setup:             'fac.phaseSetup',
+  movement:          'ui.movementPhase',
+  movement_approval: 'fac.phaseMoveApproval',
+  combat:            'ui.combatPhase',
+  combat_approval:   'fac.phaseCombatApproval',
+};
+const PHASE_WAIT_HINT = {
+  setup:             'fac.waitSetup',
+  movement_approval: 'fac.waitMoveApproval',
+  combat_approval:   'fac.waitCombatApproval',
+};
+
+function renderPlayerMessages() {
+  const msgs = (!isFacilitator && gameState?.messages) || [];
+  $('player-msg-panel').classList.toggle('hidden', msgs.length === 0);
+  $('player-msg-list').innerHTML = msgs.slice().reverse().map(m => `
+    <div class="fac-msg-item">
+      <div class="fac-msg-meta">${t('ui.turnLabel', { turn: m.turn })} · ${m.period === 'day' ? t('period.dayPlain') : t('period.nightPlain')}</div>
+      <div class="fac-msg-body">${escapeHtml(m.text)}</div>
+    </div>`).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ─── Objectives panel ─────────────────────────────────────────────────────────
@@ -1702,7 +1803,7 @@ function updateObjectives() {
     return;
   }
   const obj    = gameState.objectives;
-  const isBlue = myTeam === 'blue';
+  const isBlue = myTeam === 'blue' || isFacilitator;
   const mine   = isBlue ? obj.blue : obj.red;
   const theirs = isBlue ? obj.red  : obj.blue;
   const myColor  = isBlue ? '#82b1ff' : '#ff8a80';
@@ -1727,9 +1828,12 @@ function updateObjectives() {
   const oppNeeded = theirs.needed;
   const oppAch    = theirs.achieved;
 
+  const myTitle  = isFacilitator ? t('fac.objBlue') : t('ui.yourObjectives');
+  const oppTitle = isFacilitator ? t('fac.objRed')  : t('ui.opponentObjectives');
+  const oppMet   = isFacilitator ? t('ui.conditionMet') : t('ui.opponentMetObjective');
   objectivesContent.innerHTML = `
     <div class="obj-section">
-      <div class="obj-section-title" style="color:${myColor}">${t('ui.yourObjectives')}</div>
+      <div class="obj-section-title" style="color:${myColor}">${myTitle}</div>
       <div class="obj-summary ${myAch >= myNeeded ? 'obj-complete' : ''}">
         ${myAch >= myNeeded
           ? t('ui.conditionMet')
@@ -1739,10 +1843,10 @@ function updateObjectives() {
     </div>
     <div class="obj-divider"></div>
     <div class="obj-section">
-      <div class="obj-section-title" style="color:${oppColor}">${t('ui.opponentObjectives')}</div>
+      <div class="obj-section-title" style="color:${oppColor}">${oppTitle}</div>
       <div class="obj-summary ${oppAch >= oppNeeded ? 'obj-complete' : ''}">
         ${oppAch >= oppNeeded
-          ? t('ui.opponentMetObjective')
+          ? oppMet
           : t('ui.conditionsProgress', {achieved: oppAch, total: theirs.conditions.length, needed: oppNeeded})}
       </div>
       ${oppRows}
@@ -1768,7 +1872,7 @@ function renderOverObjectives(objectives, winner, reason) {
 // ─── Export log ───────────────────────────────────────────────────────────────
 function exportLog() {
   if (!gameState) return;
-  const teamLabel = myTeam === 'blue' ? t('team.blueTitle') : t('team.redTitle');
+  const teamLabel = roleLabel(myTeam);
   const localeTag = i18nGetLocale() === 'en' ? 'en-US' : 'pt-BR';
   const lines = [
     '══════════════════════════════════════════════',
@@ -1935,6 +2039,7 @@ function drawHighlights() {
       declared ? 'rgba(255,120,120,1.0)' : 'rgba(255,80,80,0.75)', 2.0);
     drawHexHatch(x, y, declared ? 'rgba(255,150,150,0.55)' : 'rgba(255,90,90,0.35)');
   }
+  if (isFacilitator) facDrawOverlays();
 }
 
 // Hachura diagonal recortada ao hex — alvos de ataque distinguem-se dos hexes
@@ -2030,7 +2135,7 @@ function computeDetectionCoverage() {
 }
 
 function drawFogOfWar() {
-  if (!gameState || !fogOfWarOn) return;
+  if (!gameState || !fogOfWarOn || isFacilitator) return;   // o facilitador vê tudo
   const covered = computeDetectionCoverage();
   const misted = [];
   for (let r = 0; r < GRID_H; r++) {

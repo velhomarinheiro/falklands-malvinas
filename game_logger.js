@@ -72,7 +72,8 @@ function _ts() { return new Date().toISOString(); }
  * Deve ser chamado logo após newGame() no join_room.
  * @param {object} [solo]  Em partidas solo: { solo: true, botTeam, botDoctrine }
  *   — a doutrina (formação/postura) já resolvida (sem 'random') com que o
- *   bot foi configurado para esta partida.
+ *   bot foi configurado para esta partida. Em partidas com facilitador:
+ *   { facilitated: true } — o estado inicial já reflete os ajustes dele.
  */
 function logStart(roomId, state, solo) {
   const ts   = _ts();
@@ -85,7 +86,25 @@ function logStart(roomId, state, solo) {
     ts,
     room:  roomId,
     solo:  solo?.solo ? { botTeam: solo.botTeam, botDoctrine: solo.botDoctrine } : null,
+    facilitated: !!solo?.facilitated,
     state: snapshotState(state),
+  });
+}
+
+/**
+ * Registra uma ação do facilitador (partidas com facilitador): autorização ou
+ * negação de movimentos, ratificação de combate, ajustes de unidades, neutros
+ * e mensagens.
+ */
+function logFacilitator(roomId, turn, period, action, details) {
+  _append(roomId, {
+    event:   'facilitator_action',
+    ts:      _ts(),
+    room:    roomId,
+    turn,
+    period,
+    action,
+    details: details || {},
   });
 }
 
@@ -171,4 +190,4 @@ function logGameOver(roomId, turn, winner, reason, objectives, state) {
   _handles.delete(roomId);
 }
 
-module.exports = { logStart, logMoves, logAttacks, logEngagement, logGameOver };
+module.exports = { logStart, logMoves, logAttacks, logEngagement, logGameOver, logFacilitator };

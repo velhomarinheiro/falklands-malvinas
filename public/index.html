@@ -282,6 +282,13 @@
           <small data-i18n="landing.vsComputer">vs Computador</small>
         </button>
       </div>
+
+      <div class="lobby-or" data-i18n="landing.orFacilitated">— ou conduza uma partida —</div>
+      <button id="btn-facilitate" class="btn-action facilitator">
+        <span class="btn-icon">🎓</span>
+        <span data-i18n="landing.facilitatedRoom">Sala com Facilitador</span>
+        <small data-i18n="landing.facilitatedHint">Você arbitra · dois jogadores entram pelo código e escolhem a equipe</small>
+      </button>
     </div>
 
     <div id="lobby-waiting" class="lobby-box waiting hidden">
@@ -567,6 +574,11 @@
   });
 
   roomInput.addEventListener('keydown', e => { if (e.key === 'Enter') btnJoin.click(); });
+
+  document.getElementById('btn-facilitate').addEventListener('click', () => {
+    sessionStorage.setItem('pendingAction', 'facilitate');
+    location.href = '/game';
+  });
 
   function selectedDoctrine() {
     const formation = document.querySelector('input[name="doctrine-formation"]:checked')?.value || 'divided';
