@@ -360,7 +360,6 @@ html[lang="en"] .logo-pt { display: none !important; }
 .lobby-box p  { color: var(--dim); font-size: 0.8rem; margin-bottom: 1.5rem; }
 .lobby-logo { margin-bottom: 0.5rem; }
 .lobby-logo-img { max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto; }
-.lobby-box .lang-switch { justify-content: center; margin-bottom: 1.2rem; }
 
 .or-sep { margin: 1rem 0; color: var(--dim); font-size: 0.8rem; }
 .join-row { display: flex; gap: 8px; }
@@ -1028,24 +1027,69 @@ input[type=text]:focus-visible {
 .sfx-toggle:hover { border-color: var(--gold); color: var(--gold-l); }
 .sfx-toggle.muted { color: #444; border-color: rgba(80,80,80,0.3); }
 
-/* ═══ LANGUAGE SWITCH ═══════════════════════════════════════════════════════ */
-.lang-switch { display: flex; gap: 2px; }
-.lang-btn {
-  background: none;
-  border: 1px solid rgba(80,140,200,0.3);
-  color: var(--dim);
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 3px;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: 0.5px;
-  transition: border-color 0.12s, color 0.12s, background 0.12s;
-  line-height: 1.4;
+/* ═══ SELETOR DE IDIOMA ═════════════════════════════════════════════════════
+   Rótulo sempre bilíngue ("Selecione o idioma" / "Select language") para que
+   quem não lê o idioma atual encontre o seletor. */
+.lang-picker {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Courier New', Courier, monospace;
 }
-.lang-btn:hover { border-color: var(--gold); color: var(--gold-l); }
-.lang-btn.active { color: var(--gold); border-color: var(--gold); background: rgba(255,200,0,0.08); }
+.lang-picker-label { display: flex; align-items: center; gap: 7px; color: var(--gold-l); }
+.lang-globe { width: 22px; height: 22px; flex-shrink: 0; }
+.lang-picker-text {
+  display: flex; flex-direction: column; line-height: 1.2;
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  white-space: nowrap;
+}
+.lang-picker-text span + span { color: var(--text); opacity: 0.85; }
+.lang-picker-btns { display: flex; gap: 4px; }
+.lang-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 34px; padding: 5px 12px;
+  background: rgba(7,25,41,0.6);
+  border: 1px solid rgba(201,168,76,0.55); border-radius: 3px;
+  color: var(--text);
+  font-family: inherit; font-size: 0.78rem; letter-spacing: 1px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.lang-btn b { color: var(--gold-l); }
+.lang-btn:hover { border-color: var(--gold-l); background: rgba(201,168,76,0.12); }
+.lang-btn.active { background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 700; }
+.lang-btn.active b { color: var(--navy); }
+.lang-btn:focus-visible { outline: 2px solid var(--gold-l); outline-offset: 2px; }
+
+/* Canto superior direito, sempre visível (landing e lobby). */
+.lang-picker-corner {
+  position: fixed; top: 14px; right: 16px; z-index: 1000;
+  padding: 8px 10px 8px 12px;
+  background: rgba(7,25,41,0.93);
+  border: 1px solid var(--gold); border-radius: 4px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.55), 0 0 14px rgba(201,168,76,0.18);
+}
+@media (max-width: 600px) {
+  .lang-picker-corner { top: 8px; right: 8px; padding: 6px 8px; gap: 8px; }
+  .lang-picker-corner .lang-name { display: none; }
+  .lang-picker-text { font-size: 0.58rem; letter-spacing: 1px; }
+  .lang-btn { min-height: 32px; padding: 4px 10px; }
+}
+/* Versão compacta no cabeçalho do jogo, no canto superior direito. */
+.lang-picker-header {
+  gap: 8px; padding: 3px 5px 3px 8px;
+  border: 1px solid rgba(201,168,76,0.6); border-radius: 4px;
+  background: rgba(201,168,76,0.07);
+}
+.lang-picker-header .lang-globe { width: 18px; height: 18px; }
+.lang-picker-header .lang-picker-text { font-size: 0.55rem; letter-spacing: 1px; }
+.lang-picker-header .lang-name { display: none; }
+.lang-picker-header .lang-btn { min-height: 26px; padding: 2px 9px; font-size: 0.74rem; }
+@media (max-width: 860px) {
+  /* Em telas estreitas os itens do cabeçalho quebram linha, e o seletor
+     fica no canto direito — nunca fora da tela. */
+  .header-meta { flex-wrap: wrap; row-gap: 6px; }
+  .lang-picker-header { margin-left: auto; }
+  .lang-picker-header .lang-btn { min-height: 34px; }
+}
 
 /* ═══ AJUDA EM JOGO ══════════════════════════════════════════════════════════ */
 .help-box {

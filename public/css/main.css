@@ -20,7 +20,7 @@
   --green:   #00e676;
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
 
 body {
   font-family: 'Courier New', Courier, monospace;
@@ -67,26 +67,72 @@ html[lang="en"] .splash-pt { display: none !important; }
 
 .hero-controls { position: absolute; inset: 0; pointer-events: none; }
 
-/* ═══ LANGUAGE SWITCH ═══════════════════════════════════════════════════════ */
-.lang-switch { display: flex; gap: 4px; justify-content: center; }
-.hero-lang-switch {
-  position: absolute; left: 6.7%; top: 75%;
-  pointer-events: auto;
+/* ═══ SELETOR DE IDIOMA ═════════════════════════════════════════════════════
+   Rótulo sempre bilíngue ("Selecione o idioma" / "Select language") para que
+   quem não lê o idioma atual encontre o seletor. */
+.lang-picker {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Courier New', Courier, monospace;
 }
+.lang-picker-label { display: flex; align-items: center; gap: 7px; color: var(--gold-l); }
+.lang-globe { width: 22px; height: 22px; flex-shrink: 0; }
+.lang-picker-text {
+  display: flex; flex-direction: column; line-height: 1.2;
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  white-space: nowrap;
+}
+.lang-picker-text span + span { color: var(--text); opacity: 0.85; }
+.lang-picker-btns { display: flex; gap: 4px; }
 .lang-btn {
-  background: none;
-  border: 1px solid rgba(201,168,76,0.35);
-  color: var(--text-dim);
-  font-family: 'Courier New', monospace;
-  font-size: clamp(0.5rem, 1.1vw, 0.72rem);
-  font-weight: 700;
-  padding: 3px 10px;
-  letter-spacing: 1px;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 34px; padding: 5px 12px;
+  background: rgba(7,25,41,0.6);
+  border: 1px solid rgba(201,168,76,0.55); border-radius: 3px;
+  color: var(--text);
+  font-family: inherit; font-size: 0.78rem; letter-spacing: 1px;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
-.lang-btn:hover { border-color: var(--gold); color: var(--gold); }
-.lang-btn.active { color: var(--navy); background: var(--gold); border-color: var(--gold); }
+.lang-btn b { color: var(--gold-l); }
+.lang-btn:hover { border-color: var(--gold-l); background: rgba(201,168,76,0.12); }
+.lang-btn.active { background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 700; }
+.lang-btn.active b { color: var(--navy); }
+.lang-btn:focus-visible { outline: 2px solid var(--gold-l); outline-offset: 2px; }
+
+/* Canto superior direito, sempre visível (landing e lobby). */
+.lang-picker-corner {
+  position: fixed; top: 14px; right: 16px; z-index: 1000;
+  padding: 8px 10px 8px 12px;
+  background: rgba(7,25,41,0.93);
+  border: 1px solid var(--gold); border-radius: 4px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.55), 0 0 14px rgba(201,168,76,0.18);
+}
+@media (max-width: 600px) {
+  .lang-picker-corner { top: 8px; right: 8px; padding: 6px 8px; gap: 8px; }
+  .lang-picker-corner .lang-name { display: none; }
+  .lang-picker-text { font-size: 0.58rem; letter-spacing: 1px; }
+  .lang-btn { min-height: 32px; padding: 4px 10px; }
+}
+/* Landing: barra fixa no topo, com o seletor no canto direito, sem cobrir a
+   arte da capa. */
+.lang-bar {
+  position: sticky; top: 0; z-index: 1000;
+  display: flex; justify-content: flex-end;
+  padding: 8px 16px;
+  background: rgba(7,25,41,0.96);
+  border-bottom: 1px solid rgba(201,168,76,0.45);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.45);
+}
+.lang-picker-boxed {
+  padding: 6px 8px 6px 12px;
+  border: 1px solid var(--gold); border-radius: 4px;
+  background: rgba(201,168,76,0.06);
+}
+@media (max-width: 600px) {
+  .lang-bar { padding: 6px 8px; }
+  .lang-picker-boxed { padding: 5px 6px 5px 8px; gap: 8px; }
+  .lang-picker-boxed .lang-name { display: none; }
+}
 
 .btn-primary {
   display: inline-block;
@@ -483,7 +529,7 @@ footer a:hover { text-decoration: underline; }
     padding: 1.25rem 1rem 1.5rem;
     background: var(--navy);
   }
-  .hero-lang-switch, .hero-cta {
+  .hero-cta {
     position: static;
     width: auto; min-width: 0;
     height: auto; min-height: 0;
