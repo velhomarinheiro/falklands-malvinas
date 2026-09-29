@@ -1691,6 +1691,8 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, { cors: { origin: '*' } });
 
+// Antes do static: public/estudo-de-caso/ (figuras e PDF) faria o static redirecionar para a pasta.
+app.get('/estudo-de-caso', (_, res) => res.sendFile(path.join(__dirname, 'public', 'estudo-de-caso.html')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/',     (_, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/game', (_, res) => res.sendFile(path.join(__dirname, 'public', 'game.html')));
