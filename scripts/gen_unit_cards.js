@@ -18,21 +18,14 @@ const OUT_DIR    = path.join(ROOT, 'public', 'cards');
 const TMP_DIR    = path.join(ROOT, '.card_render_tmp');
 const CARD_W = 700, CARD_H = 1000;
 
-// ── FP (combustível) — espelha fuel_model.js ──────────────────────────────────
-const NAVAL_FP_SURFACE = 12, NAVAL_FP_SUB = 20;
-const UNIT_FP = {
-  'BLUE-VM':14,'BLUE-VE':10,'BLUE-BV':10,'BLUE-B':10,'BLUE-BS':10,
-  'BLUE-LOG-1':30,'BLUE-LOG-2':34,'BLUE-PAT':8,'BLUE-MCM':8,'BLUE-ISR':10,
-  'BLUE-LG':8,'BLUE-CARGO':30,
-  'RED-HERMES':14,'RED-INVINCIBLE':14,'RED-SCR-1':10,'RED-SCR-2':10,
-  'RED-ESC-1':10,'RED-ESC-2':10,'RED-TRAIL':10,'RED-LAND-SCR':10,'RED-SG-SCR':10,
-  'RED-SG-ICE':10,'RED-LPD':10,'RED-TROOP':10,'RED-LOG-1':30,'RED-LOG-2':34,
-  'RED-LOG-3':34,'RED-TANK':40,'RED-MCM':8,'RED-HOSP':12,
-};
+// ── FP (combustível) — lido do próprio motor (newGame + fuel_model.js), para
+// que a carta nunca divirja do valor em jogo. Só navios e submarinos
+// convencionais têm FP naval; nucleares e demais categorias não exibem a barra.
+const { newGame } = require('../server.js');
+const ENGINE_FUEL = Object.fromEntries(newGame().units.map(u => [u.id, u.fuel]));
 function fpFor(u) {
-  if (u.category === 'submarine') return NAVAL_FP_SUB;
-  if (u.category !== 'surface') return null;
-  return UNIT_FP[u.id] ?? NAVAL_FP_SURFACE;
+  const f = ENGINE_FUEL[u.id];
+  return f && f.fuelType === 'naval' ? f.max : null;
 }
 
 // ── Ícone de plataforma por tipo de composição → arquivo em public/icons/ ─────
@@ -115,7 +108,7 @@ function cardHtml(unit, side) {
   const wpnRows = Object.entries(unit.weapons || {}).map(([k,w]) =>
     `<div class="wpnItem"><span class="wpnIcon">${WEAPON_ICON[k] || '•'}</span>
        <span class="wpnLabel">${(COMBAT_CONFIG.weaponProfiles[k] || {}).label || k.toUpperCase()}</span>
-       <span class="wpnVal">×${w.quantity} <small>(alc. ${w.range})</small></span></div>`).join('')
+       <span class="wpnVal">×${w.quantity}${w.range != null ? ` <small>(alc. ${w.range})</small>` : ''}</span></div>`).join('')
     || '<div class="wpnItem dim">— sem armamento dedicado —</div>';
 
   const statRows = [
@@ -125,7 +118,7 @@ function cardHtml(unit, side) {
     ['Alcance Ataque (melhor)', atkMax,        6, '#66bb6a'],
     ['Armamento (total)',  wpnTotal,          30, '#42a5f5'],
   ];
-  if (fp !== null) statRows.push(['Combustível (FP)', fp, 40, '#26c6da']);
+  if (fp !== null) statRows.push(['Combustível (FP)', fp, 60, '#26c6da']);
 
   const statHtml = statRows.map(([label, val, max, color]) => `
     <div class="statRow">

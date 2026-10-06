@@ -164,7 +164,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{},
         "position":{"col":1,"row":5},
         "echelon":"START",
-        "notes":"Grupos M1/M2. M1 inicia atracado em Río Gallegos e M2 nas imediações do porto, conforme o caderno. Cada um pode lançar um campo minado adicional (turnos 3 e 4 no jogo original)."
+        "notes":"Grupos M1/M2, baseados em Río Gallegos. Carregam 2 cargas de minas — um navio inimigo que entre no seu hex é atingido — e são a única unidade argentina capaz de varrer campos minados britânicos."
       },
       {
         "id":"BLUE-CAMPO-MIN","name":"Campo Minado de Porto Argentino","category":"land",
@@ -213,7 +213,7 @@ const ORDER_OF_BATTLE = {
         "position":{"col":1,"row":5},
         "echelon":"START",
         "logisticsPoints":12,
-        "notes":"Formosa/Río Carcarañá, Río Cincel/Mar del Norte, Lago Argentino/Puerto Rosales. 4 LP por navio; atracados em Río Gallegos no início."
+        "notes":"Formosa/Río Carcarañá, Río Cincel/Mar del Norte, Lago Argentino/Puerto Rosales. Atracados em Río Gallegos no início; reabastecem de combustível os navios que terminam o período no mesmo hex."
       },
       {
         "id":"BLUE-SOF","name":"Comandos Anfíbios","category":"specops",
@@ -263,7 +263,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{"airAttack":2},
         "position":{"col":2,"row":7},
         "echelon":"START",
-        "notes":"2ª Esquadrilha Aeronaval de Caça e Ataque, Río Grande. 5× AM39 Exocet disponíveis em toda a guerra, sem reposição (o caderno original cita 4)."
+        "notes":"2ª Esquadrilha Aeronaval de Caça e Ataque, Río Grande. Historicamente, só 5 AM39 Exocet em toda a guerra, sem reposição (o caderno original cita 4); no jogo, os mísseis são recompletados quando a esquadrilha volta à base."
       },
       {
         "id":"BLUE-BOM-CANB","name":"Canberra","category":"air",
@@ -324,7 +324,7 @@ const ORDER_OF_BATTLE = {
         "position":{"col":7,"row":4},
         "echelon":"START",
         "logisticsPoints":4,
-        "notes":"10ª Brigada de Infantería (3º, 6º, 7º, 25º RI) + 5º Batalhão de Infantaria de Marinha. ~5.000 efetivos. Consome 1 LP por turno; a zero, perde um dado de capacidade por turno."
+        "notes":"10ª Brigada de Infantería (3º, 6º, 7º, 25º RI) + 5º Batalhão de Infantaria de Marinha. ~5.000 efetivos. Principal alvo da campanha terrestre britânica."
       },
       {
         "id":"BLUE-EXOCET-STANLEY","name":"Bateria Exocet MM38","category":"land",
@@ -336,7 +336,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{},
         "position":{"col":7,"row":4},
         "echelon":"START",
-        "notes":"2× lançadores MM38 Exocet improvisados por técnicos navais. Atingiu o HMS Glamorgan em 12 jun 1982 — sem reabastecimento possível."
+        "notes":"2× lançadores MM38 Exocet improvisados por técnicos navais. Atingiu o HMS Glamorgan em 12 jun 1982. No jogo, como unidade terrestre, volta a ter seus 2 mísseis a cada período."
       },
       {
         "id":"BLUE-GARR-GOOSE","name":"Guarnição de Ganso Verde","category":"land",
@@ -408,7 +408,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{},
         "position":{"col":0,"row":1},
         "echelon":"START",
-        "notes":"2× KC-130H do Grupo 1 de Transporte Aéreo. Reabastecimento em voo de A-4 e Super Étendard — sem eles, os ataques continentais perdem tempo útil sobre o alvo."
+        "notes":"2× KC-130H do Grupo 1 de Transporte Aéreo. Aeronave pronta que começa o período no mesmo hex recebe +50% de combustível — sem ele, os ataques a partir do continente têm pouco tempo sobre o alvo."
       },
       {
         "id":"BLUE-AERO-SJ","name":"BAM San Julián","category":"land",
@@ -444,7 +444,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{},
         "position":{"col":1,"row":5},
         "echelon":"START",
-        "notes":"Hub logístico continental. Reabastece navios argentinos em operação."
+        "notes":"Hub logístico continental. Reabastece de combustível os navios no mesmo hex e recompleta a munição de navios e submarinos que passam o período parados no porto."
       },
       {
         "id":"BLUE-AERO-RGR","name":"BAM Río Grande","category":"land",
@@ -495,7 +495,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{"airDefense":1,"asw":2},
         "position":{"col":16,"row":1},
         "echelon":"START",
-        "notes":"Porta-aviões leve (\"through-deck cruiser\"), mais moderno e resistente que o Hermes, grupo aéreo menor."
+        "notes":"Porta-aviões leve (\"through-deck cruiser\"), mais moderno que o Hermes, porém com grupo aéreo menor e menor capacidade de absorver dano."
       },
       {
         "id":"RED-HAR-2","name":"801 NAS Sea Harrier","category":"air",
@@ -640,7 +640,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{},
         "position":{"col":19,"row":0},
         "echelon":"START",
-        "notes":"Avro Vulcan B.2, Operação Black Buck — 6 aeronaves disponíveis, 1 surtida por turno, partindo de Ascensão e dependente da cadeia de Victor. Proibido atacar o continente argentino."
+        "notes":"Avro Vulcan B.2, Operação Black Buck: partindo de Ascensão, cada surtida histórica dependia de uma cadeia de Victor. As regras de engajamento vedavam ataques ao continente argentino."
       },
       {
         "id":"RED-TANKER-AIR","name":"Victor K.2","category":"air",
@@ -652,7 +652,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{},
         "position":{"col":19,"row":0},
         "echelon":"START",
-        "notes":"Handley Page Victor K.2. Cada missão Black Buck exigiu até 11 petroleiros em cadeia; sustenta uma única missão de Vulcan ou Nimrod por turno."
+        "notes":"Handley Page Victor K.2. Cada missão Black Buck exigiu até 11 aviões-tanque em cadeia. No jogo, aeronave pronta que começa o período no mesmo hex recebe +50% de combustível."
       },
       {
         "id":"RED-SG-SCR","name":"South Georgia Screen","category":"surface",
@@ -738,7 +738,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{},
         "position":{"col":17,"row":1},
         "echelon":"TURNO 2",
-        "notes":"Ponte logística com Ascensão. Só reabastece outros petroleiros, nunca navios de combate."
+        "notes":"Ponte logística com Ascensão, com grande reserva de combustível. Reabastece os navios que terminam o período no mesmo hex."
       },
       {
         "id":"RED-LAND-SCR","name":"Landing Screen","category":"surface",
@@ -762,7 +762,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{"airDefense":2},
         "position":{"col":18,"row":0},
         "echelon":"TURNO 3",
-        "notes":"HMS Fearless + HMS Intrepid (LPD), com 8 helicópteros e embarcações de desembarque. Únicos meios de pôr tropas e viaturas em terra em San Carlos — vulnerabilidade crítica."
+        "notes":"HMS Fearless + HMS Intrepid (LPD), com 8 helicópteros e embarcações de desembarque. Historicamente, únicos meios de pôr tropas e viaturas em terra em San Carlos — perdê-los cumpre um objetivo argentino."
       },
       {
         "id":"RED-TROOP","name":"SS Canberra / RMS Queen Elizabeth 2","category":"surface",
@@ -774,7 +774,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{"airDefense":1},
         "position":{"col":18,"row":2},
         "echelon":"TURNO 3",
-        "notes":"Transatlânticos requisitados que levam a 3ª Brigada de Comandos. As tropas só chegam à praia via Fearless/Intrepid."
+        "notes":"Transatlânticos requisitados que levam a 3ª Brigada de Comandos. A brigada desembarca quando o navio chega ao litoral das ilhas; se ele for afundado antes, a tropa a bordo é perdida."
       },
       {
         "id":"RED-AC","name":"SS Atlantic Conveyor","category":"surface",
@@ -799,7 +799,7 @@ const ORDER_OF_BATTLE = {
         "position":{"col":19,"row":2},
         "embarked":"RED-AC",
         "echelon":"TURNO 3",
-        "notes":"8× Sea Harrier/Harrier GR.3 transportados como reposição. Não operam do Atlantic Conveyor: só podem transferir-se para o Hermes ou o Invincible."
+        "notes":"8× Sea Harrier/Harrier GR.3 transportados como reposição. Sem armamento próprio no jogo; acompanham o Atlantic Conveyor e são perdidos se ele for afundado."
       },
       {
         "id":"RED-3CDO","name":"3ª Brigada de Comandos","category":"land",
@@ -848,7 +848,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{},
         "position":{"col":19,"row":3},
         "echelon":"TURNO 3",
-        "notes":"SS Uganda + navios-ambulância Hecla/Hydra/Herald. Protegido pela Convenção de Genebra — não combate e não pode ser atacado nem usado como escudo."
+        "notes":"SS Uganda + navios-ambulância Hecla/Hydra/Herald, protegidos pela Convenção de Genebra. No jogo é uma unidade comum — pode ser atacado e reabastece navios no mesmo hex; respeitar a Convenção cabe aos jogadores."
       },
       {
         "id":"RED-LR","name":"SS Norland / Atlantic Causeway","category":"surface",
@@ -860,7 +860,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{"airDefense":1},
         "position":{"col":19,"row":4},
         "echelon":"TURNO 4",
-        "notes":"Transportes do escalão de reforço, com a 5ª Brigada de Infantaria. Também dependem dos LPD para desembarcar."
+        "notes":"Transportes do escalão de reforço, com a 5ª Brigada de Infantaria. A brigada desembarca quando o navio chega ao litoral; se ele for afundado antes, a tropa a bordo é perdida."
       },
       {
         "id":"RED-5BDE","name":"5ª Brigada de Infantaria","category":"land",
@@ -885,7 +885,7 @@ const ORDER_OF_BATTLE = {
         "capabilities":{},
         "position":{"col":19,"row":4},
         "echelon":"TURNO 4",
-        "notes":"Segundo par de petroleiros-lançadeira. Só reabastecem outros petroleiros."
+        "notes":"Segundo par de petroleiros-lançadeira, com grande reserva de combustível. Reabastecem os navios que terminam o período no mesmo hex."
       }
     ]
   }
