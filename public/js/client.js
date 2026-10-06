@@ -308,66 +308,12 @@ document.addEventListener('keydown', e => {
 });
 
 // ─── Ajuda em jogo (manual rápido) ────────────────────────────────────────────
-// Conteúdo vem de locales/{pt,en}.json (help.fases/combate/logistica); os
-// blocos abaixo são só o fallback em português antes do i18n carregar.
+// Conteúdo vem de locales/{pt,en}.json (help.partida/fases/combate/logistica).
+// O texto de exportação (docs/guia-rapido.md) é gerado desses mesmos campos por
+// scripts/export_quick_guide.js — edite o manual só nos arquivos de locale.
 const helpModal = $('help-modal');
-const HELP_SECTIONS_FALLBACK = {
-  fases: `
-    <h4>ESTRUTURA DO TURNO</h4>
-    <p>Cada <b>turno</b> é um dia de operação com dois períodos: <b>☀ Diurno</b> e
-    <b>🌙 Noturno</b>. Cada período tem uma fase de <b>Movimentação</b> e uma de
-    <b>Combate</b>.</p>
-    <h4>MOVIMENTAÇÃO SIMULTÂNEA</h4>
-    <p>Os dois lados planejam ao mesmo tempo. O inimigo aparece na posição
-    anterior até ambos confirmarem — encerre com <b>Encerrar Movimentação</b>.
-    Hexágonos <b>verdes</b> são os passos possíveis da unidade selecionada.</p>
-    <h4>DETECÇÃO E NOITE</h4>
-    <p>Você só vê inimigos dentro do alcance de detecção das suas unidades
-    (névoa de guerra). À noite a detecção cai (−2), <b>exceto submarinos</b>,
-    que usam sonar. Submarinos em águas profundas são mais difíceis de detectar.</p>
-    <h4>PRAZO OPERACIONAL</h4>
-    <p>A operação dura no máximo <b>12 dias</b>. Ao fim do prazo, vence quem
-    tiver maior progresso nos seus objetivos.</p>`,
-  combate: `
-    <h4>DECLARAR ATAQUES</h4>
-    <p>Na fase de combate, selecione uma unidade e clique em alvos
-    <b>vermelhos</b> (detectados e no alcance). Escolha a arma e o tamanho da
-    salva, e confirme com <b>Confirmar Ataques</b>. A resolução é simultânea.</p>
-    <h4>RODADAS DE COMBATE</h4>
-    <p>Cada engajamento tem até <b>2 rodadas</b>. Após a primeira, ambos decidem
-    <b>CONTINUAR</b> ou <b>PARAR</b>. Quem continua sozinho ganha
-    <b>vantagem de iniciativa</b> (rola 2d6 e usa o maior). Na segunda rodada o
-    grupo defensor <b>contra-ataca</b> com armas de curto alcance.</p>
-    <h4>INTERCEPTAÇÃO E GRUPO</h4>
-    <p>Mísseis podem ser interceptados pela defesa antiaérea do alvo — navios
-    <b>empilhados no mesmo hexágono</b> somam suas defesas e se defendem como
-    grupo. Torpedos não são interceptáveis; ASBM só é parado por BMD.</p>
-    <h4>DANO E DEGRADAÇÃO</h4>
-    <p>O dano reduz o <b>SP</b> (poder de permanência). Golpes não fatais também
-    <b>degradam</b> um subsistema aleatório: detecção, movimento, capacidade de
-    combate ou combustível máximo.</p>`,
-  logistica: `
-    <h4>PONTOS DE COMBUSTÍVEL (FP)</h4>
-    <p>Navios e submarinos convencionais têm FP limitados. Custo por período:
-    parado = 1 FP, mover 1 hex = 1, 2 hexes = 2, 3+ = 3 (máx. 4 FP/turno).
-    Atacar e absorver dano custam +1 FP cada.</p>
-    <p><b>0 FP = unidade inoperante</b>: não move, não ataca e não se defende
-    até reabastecer.</p>
-    <h4>REABASTECIMENTO</h4>
-    <p>Termine o período <b>empilhado</b> com um navio-tanque, navio logístico
-    ou porto aliado: os FP voltam ao máximo. Unidades nucleares e FPSOs não
-    consomem FP.</p>
-    <h4>AERONAVES</h4>
-    <p>Aeronaves têm FP = 2× movimento e retornam à base após o combate.
-    Aeronave no ar com 0 FP e sem base ao alcance é <b>perdida</b>. Em base ou
-    porta-aviões, reabastece e fica pronta no turno seguinte.</p>
-    <h4>MUNIÇÃO</h4>
-    <p>Mísseis e torpedos são <b>finitos</b> (veja N/N no painel). Recompletamento:
-    unidades Azuis paradas em porto, aeronaves em base e unidades terrestres.
-    A força Vermelha <b>não recompleta armas navais em mar</b> — economize salvas.</p>`,
-};
 function helpSectionHtml(tab) {
-  return (typeof tRaw === 'function' && tRaw(`help.${tab}`)) || HELP_SECTIONS_FALLBACK[tab] || '';
+  return t(`help.${tab}`, { days: gameState?.maxTurns ?? 8 });
 }
 
 // A aba "Vitória" é gerada a partir dos objetivos que o servidor envia (cujos
@@ -381,9 +327,13 @@ function buildVictoryHtml() {
   const listas = obj
     ? side(obj.blue, t('team.blue')) + side(obj.red, t('team.red'))
     : `<p>${t('help.victoryFallback')}</p>`;
-  const prazo = gameState?.maxTurns ?? 12;
+  const prazo = gameState?.maxTurns ?? 8;
   return `${listas}${t('help.victoryDeadline', {days: prazo})}`;
 }
+
+// Armas do motor de combate genérico que nenhuma unidade da ordem de batalha de
+// 1982 carrega — ficam fora do glossário para não confundir o jogador.
+const GLOSSARY_HIDDEN = ['asbm', 'bmd'];
 
 function buildGlossaryHtml() {
   const general = (typeof tRaw === 'function' && tRaw('glossary.general')) || [
@@ -394,7 +344,8 @@ function buildGlossaryHtml() {
   ];
   const rows = [
     ...general,
-    ...Object.keys(WEAPON_GLOSSARY).map(k => [weaponLabel(k), weaponGlossary(k)]),
+    ...Object.keys(WEAPON_GLOSSARY).filter(k => !GLOSSARY_HIDDEN.includes(k))
+      .map(k => [weaponLabel(k), weaponGlossary(k)]),
   ];
   return `<h4>${t('glossary.termsTitle')}</h4><ul>` +
     rows.map(([term, d]) => `<li><span class="help-gloss-term">${term}</span> — ${d}</li>`).join('') +
@@ -408,7 +359,7 @@ function showHelpTab(tab) {
     tab === 'glossario' ? buildGlossaryHtml() :
     tab === 'vitoria'   ? buildVictoryHtml()  : helpSectionHtml(tab);
 }
-function showHelpModal() { showHelpTab('fases'); helpModal.classList.remove('hidden'); }
+function showHelpModal() { showHelpTab('partida'); helpModal.classList.remove('hidden'); }
 function hideHelpModal() { helpModal.classList.add('hidden'); }
 
 $('help-toggle').addEventListener('click', () => { SFX.play('click'); showHelpModal(); });
@@ -823,7 +774,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('i18n:changed', () => {
   if (gameState) { updateUI(); render(); }
   if (!helpModal.classList.contains('hidden')) {
-    const activeTab = document.querySelector('.help-tab.active')?.dataset.tab || 'fases';
+    const activeTab = document.querySelector('.help-tab.active')?.dataset.tab || 'partida';
     showHelpTab(activeTab);
   }
 });
