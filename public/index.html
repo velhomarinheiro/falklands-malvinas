@@ -328,248 +328,274 @@
 </footer>
 
 <!-- ── TUTORIAL OVERLAY ───────────────────────────────────────────────────── -->
-<div id="tutorial-overlay" class="tut-overlay hidden">
+<div id="tutorial-overlay" class="tut-overlay hidden" role="dialog" aria-modal="true" aria-label="Tutorial">
   <div class="tut-box">
 
     <div class="tut-topbar">
-      <div class="tut-dots">
-        <span class="tut-dot" data-s="0"></span>
-        <span class="tut-dot" data-s="1"></span>
-        <span class="tut-dot" data-s="2"></span>
-        <span class="tut-dot" data-s="3"></span>
-        <span class="tut-dot" data-s="4"></span>
-        <span class="tut-dot" data-s="5"></span>
-      </div>
+      <img class="tut-logo logo-pt" src="/img/brand/logo_horizontal_pt.png" alt="">
+      <img class="tut-logo logo-en" src="/img/brand/logo_horizontal_en.png" alt="">
+      <div class="tut-dots" id="tut-dots"></div>
       <button class="tut-skip-btn" data-i18n="landing.skipTutorial">PULAR TUTORIAL</button>
     </div>
 
-    <!-- Step 0 — O Jogo -->
-    <div class="tut-step" data-s="0">
-      <div class="tut-visual">
-        <div class="tvi-map-bg"></div>
-        <div class="tvi-cards">
-          <div class="tvi-team blue">
-            <img class="tvi-card-img" src="/cards/Blue_VM.jpg" alt="Força Azul — Argentina" data-i18n-alt="landing.tut0CardBlueAlt">
-            <div class="tvi-team-label" data-i18n="landing.tut0TeamBlue">ARGENTINA · AZUL</div>
+    <!-- 0 — Briefing -->
+    <section class="tut-step" data-s="0">
+      <header class="tut-head"><span class="tut-kicker" data-i18n="landing.tutIntroKicker">BRIEFING</span><h2 class="tut-title" data-i18n="landing.tutIntroTitle">Zona de Exclusão — Atlântico Sul, 1982</h2></header>
+      <div class="tut-grid">
+        <div class="tut-stage tut-intro">
+          <div class="tut-intro-bg"></div>
+          <div class="tut-intro-team blue">
+            <img src="/cards/Blue_VM.jpg" alt="">
+            <div class="tut-intro-name" data-i18n="landing.tutTeamBlue">FORÇA AZUL · ARGENTINA</div>
+            <div class="tut-intro-role" data-i18n="landing.tutIntroBlueRole">Defende as ilhas já ocupadas</div>
           </div>
-          <div class="tvi-vs" data-i18n="landing.tut0VS">VS</div>
-          <div class="tvi-team red">
-            <img class="tvi-card-img" src="/cards/Red_HERMES.jpg" alt="Força Vermelha — Reino Unido" data-i18n-alt="landing.tut0CardRedAlt">
-            <div class="tvi-team-label" data-i18n="landing.tut0TeamRed">REINO UNIDO · VERMELHA</div>
+          <div class="tut-intro-vs">VS</div>
+          <div class="tut-intro-team red">
+            <img src="/cards/Red_HERMES.jpg" alt="">
+            <div class="tut-intro-name" data-i18n="landing.tutTeamRed">FORÇA VERMELHA · REINO UNIDO</div>
+            <div class="tut-intro-role" data-i18n="landing.tutIntroRedRole">Chega de Ascensão para retomá-las</div>
           </div>
         </div>
+        <aside class="tut-side">
+          <div class="tpanel"><div class="tpanel-title" data-i18n="landing.tutIntroKicker">BRIEFING</div>
+            <ul class="tut-rules">
+              <li data-i18n-html="landing.tutIntro1"></li><li data-i18n-html="landing.tutIntro2"></li>
+              <li data-i18n-html="landing.tutIntro3"></li><li data-i18n-html="landing.tutIntro4"></li>
+            </ul></div>
+        </aside>
       </div>
-      <div class="tut-title" data-i18n="landing.tut0Title">ZONA DE EXCLUSÃO — ATLÂNTICO SUL, 1982</div>
-      <div class="tut-text" data-i18n-html="landing.tut0Body">
-        Wargame naval histórico operacional para 2 jogadores.<br>
-        Comande frotas de navios e aeronaves no conflito real de 1982 no Atlântico Sul.<br>
-        <b>Argentina vs. Reino Unido</b> — destrua, controle e negue áreas estratégicas ao adversário.
-      </div>
-    </div>
+    </section>
 
-    <!-- Step 1 — O Tabuleiro -->
-    <div class="tut-step" data-s="1">
-      <div class="tut-visual">
-        <div class="tvm-container">
-          <img src="/mapa.png" class="tvm-bg-img" alt="Mapa">
-          <div class="tvm-hex-layer">
-            <!-- Flat-top hexagons (odd-q offset) matching the game engine.
-                 r=22, h=19 (≈r·sin60°). Each hex: cx+22,cy cx+11,cy-19 cx-11,cy-19 cx-22,cy cx-11,cy+19 cx+11,cy+19
-                 Even cols: y=30,68,106,144 | Odd cols (offset+19): y=49,87,125
-                 Selected unit: col4-row1 center(160,68) | Movement: 6 neighbors | Attack target: col6-row1 center(226,68) -->
-            <svg viewBox="0 0 340 180" xmlns="http://www.w3.org/2000/svg" class="tvm-svg">
-              <!-- Background hexes -->
-              <polygon points="50,30 39,11 17,11 6,30 17,49 39,49"     fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="50,68 39,49 17,49 6,68 17,87 39,87"     fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="50,106 39,87 17,87 6,106 17,125 39,125" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="50,144 39,125 17,125 6,144 17,163 39,163" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="83,49 72,30 50,30 39,49 50,68 72,68"     fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="83,87 72,68 50,68 39,87 50,106 72,106"   fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="83,125 72,106 50,106 39,125 50,144 72,144" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="116,30 105,11 83,11 72,30 83,49 105,49"   fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="116,68 105,49 83,49 72,68 83,87 105,87"   fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="116,106 105,87 83,87 72,106 83,125 105,125" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="116,144 105,125 83,125 72,144 83,163 105,163" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="149,125 138,106 116,106 105,125 116,144 138,144" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="182,144 171,125 149,125 138,144 149,163 171,163" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="215,125 204,106 182,106 171,125 182,144 204,144" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="248,30 237,11 215,11 204,30 215,49 237,49"   fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="248,106 237,87 215,87 204,106 215,125 237,125" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="248,144 237,125 215,125 204,144 215,163 237,163" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="281,49 270,30 248,30 237,49 248,68 270,68"   fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="281,87 270,68 248,68 237,87 248,106 270,106" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="281,125 270,106 248,106 237,125 248,144 270,144" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="314,30 303,11 281,11 270,30 281,49 303,49"   fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="314,68 303,49 281,49 270,68 281,87 303,87"   fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="314,106 303,87 281,87 270,106 281,125 303,125" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <polygon points="314,144 303,125 281,125 270,144 281,163 303,163" fill="rgba(10,30,60,0.5)" stroke="rgba(80,140,200,0.3)" stroke-width="1"/>
-              <!-- Movement hexes — 6 neighbors of selected unit (green) -->
-              <polygon points="149,49 138,30 116,30 105,49 116,68 138,68"   fill="rgba(0,200,80,0.2)" stroke="rgba(0,230,118,0.75)" stroke-width="1.5"/>
-              <polygon points="149,87 138,68 116,68 105,87 116,106 138,106" fill="rgba(0,200,80,0.2)" stroke="rgba(0,230,118,0.75)" stroke-width="1.5"/>
-              <polygon points="182,30 171,11 149,11 138,30 149,49 171,49"   fill="rgba(0,200,80,0.2)" stroke="rgba(0,230,118,0.75)" stroke-width="1.5"/>
-              <polygon points="182,106 171,87 149,87 138,106 149,125 171,125" fill="rgba(0,200,80,0.2)" stroke="rgba(0,230,118,0.75)" stroke-width="1.5"/>
-              <polygon points="215,49 204,30 182,30 171,49 182,68 204,68"   fill="rgba(0,200,80,0.2)" stroke="rgba(0,230,118,0.75)" stroke-width="1.5"/>
-              <polygon points="215,87 204,68 182,68 171,87 182,106 204,106" fill="rgba(0,200,80,0.2)" stroke="rgba(0,230,118,0.75)" stroke-width="1.5"/>
-              <!-- Selected unit (blue) -->
-              <polygon points="182,68 171,49 149,49 138,68 149,87 171,87"   fill="rgba(21,101,192,0.65)" stroke="#82b1ff" stroke-width="2"/>
-              <image href="/icons/porta-avioes.png" x="148" y="56" width="24" height="24" style="filter:brightness(10)"/>
-              <!-- Attack target (red dashed) -->
-              <polygon points="248,68 237,49 215,49 204,68 215,87 237,87"   fill="rgba(180,20,20,0.25)" stroke="rgba(255,100,80,0.75)" stroke-width="1.5" stroke-dasharray="4,2"/>
-              <text x="226" y="73" text-anchor="middle" fill="rgba(255,120,100,0.9)" font-size="14">⚓</text>
-            </svg>
+    <!-- 1 — O turno -->
+    <section class="tut-step" data-s="1">
+      <header class="tut-head"><span class="tut-kicker" data-i18n="landing.tutTurnKicker">SEQUÊNCIA</span><h2 class="tut-title" data-i18n="landing.tutTurnTitle">O turno</h2></header>
+      <div class="tut-grid">
+        <div class="tut-stage tut-turn">
+          <div class="tut-turn-day" data-i18n="landing.tutTurnDay">TURNO = 1 DIA DE OPERAÇÃO</div>
+          <div class="tut-turn-period day">
+            <div class="tut-turn-plabel" data-i18n="period.day">☀ Diurno</div>
+            <div class="tut-turn-phases">
+              <div class="tphase mov"><b>1</b><span data-i18n="landing.tutTurnP1">Movimentação</span><small data-i18n="landing.tutTurnP1d"></small></div>
+              <div class="tphase eng"><b>2</b><span data-i18n="landing.tutTurnP2">Engajamentos</span><small data-i18n="landing.tutTurnP2d"></small></div>
+              <div class="tphase end"><b>3</b><span data-i18n="landing.tutTurnP3">Fim do período</span><small data-i18n="landing.tutTurnP3d"></small></div>
+            </div>
           </div>
-          <div class="tvm-caption" data-i18n-html="landing.tut1Caption">▣ verde = movimentação &nbsp;·&nbsp; ▣ vermelho = alvo no alcance</div>
-        </div>
-      </div>
-      <div class="tut-title" data-i18n="landing.tut1Title">GRADE HEXAGONAL</div>
-      <div class="tut-text" data-i18n-html="landing.tut1Body">
-        Selecione uma unidade sua — hexágonos verdes mostram onde pode se mover.<br>
-        Na fase de combate, hexágonos vermelhos indicam alvos dentro do alcance de tiro.<br>
-        Cada unidade tem <b>MOV</b> pontos de deslocamento por turno.
-      </div>
-    </div>
-
-    <!-- Step 2 — Unidades -->
-    <div class="tut-step" data-s="2">
-      <div class="tut-visual">
-        <div class="tvu-wrap">
-          <div class="tvu-card-panel">
-            <img src="/cards/Blue_VM.jpg" alt="Card GT Porta-Aviões" data-i18n-alt="landing.tut2CardAlt">
-          </div>
-          <div class="tvu-legend">
-            <div class="tvu-row">
-              <span class="tvu-key">SP</span>
-              <span class="tvu-val" data-i18n-html="landing.tut2SPCombined">Pontos de sobrevivência<br><small>Chega a zero → unidade destruída</small></span>
-            </div>
-            <div class="tvu-row">
-              <span class="tvu-key">MOV</span>
-              <span class="tvu-val" data-i18n-html="landing.tut2MOVCombined">Hexágonos de movimento<br><small>Por turno, na fase de movimentação</small></span>
-            </div>
-            <div class="tvu-row">
-              <span class="tvu-key">🚀</span>
-              <span class="tvu-val" data-i18n-html="landing.tut2WeaponsCombined">Armamentos e munição<br><small>Quantidade limitada — não regenera</small></span>
-            </div>
-            <div class="tvu-row">
-              <span class="tvu-key">Det</span>
-              <span class="tvu-val" data-i18n-html="landing.tut2DetCombined">Alcance de detecção<br><small>S = superfície · Aé = aéreo · Sb = submarino</small></span>
+          <div class="tut-turn-arrow">▼</div>
+          <div class="tut-turn-period night">
+            <div class="tut-turn-plabel" data-i18n="period.night">🌙 Noturno</div>
+            <div class="tut-turn-phases">
+              <div class="tphase mov"><b>1</b><span data-i18n="landing.tutTurnP1">Movimentação</span></div>
+              <div class="tphase eng"><b>2</b><span data-i18n="landing.tutTurnP2">Engajamentos</span></div>
+              <div class="tphase end"><b>3</b><span data-i18n="landing.tutTurnP3">Fim do período</span></div>
             </div>
           </div>
         </div>
+        <aside class="tut-side">
+          <div class="tpanel"><div class="tpanel-title" data-i18n="landing.tutTurnTitle">O turno</div>
+            <ul class="tut-rules">
+              <li data-i18n-html="landing.tutTurn1"></li><li data-i18n-html="landing.tutTurn2"></li>
+              <li data-i18n-html="landing.tutTurn3"></li><li data-i18n-html="landing.tutTurn4"></li>
+              <li data-i18n-html="landing.tutTurn5"></li>
+            </ul></div>
+        </aside>
       </div>
-      <div class="tut-title" data-i18n="landing.tut2Title">UNIDADES DE COMBATE</div>
-      <div class="tut-text" data-i18n-html="landing.tut2Body">
-        Cada unidade tem tipo, alcance e capacidades distintos — conheça sua frota.<br>
-        Hover sobre uma unidade no mapa exibe estatísticas. <b>Clique direito</b> abre o card completo.<br>
-        Clique em uma unidade selecionada na barra lateral para ver o card completo.
-      </div>
-    </div>
+    </section>
 
-    <!-- Step 3 — Fases -->
-    <div class="tut-step" data-s="3">
-      <div class="tut-visual">
-        <div class="tvph-wrap">
-          <div class="tvph-phase mov">
-            <div class="tvph-content">
-              <div class="tvph-icon-row">
-                <img class="tvph-icon" src="/icons/porta-avioes.png" alt="">
-                <span class="tvph-num" data-i18n="landing.tut3Phase1">FASE 1</span>
+    <!-- 2 — Unidades -->
+    <section class="tut-step" data-s="2">
+      <header class="tut-head"><span class="tut-kicker" data-i18n="landing.tutUnitKicker">FORÇAS</span><h2 class="tut-title" data-i18n="landing.tutUnitTitle">As unidades</h2></header>
+      <div class="tut-grid">
+        <div class="tut-stage tut-units">
+          <img class="tut-unit-card" src="/cards/Blue_VE.jpg" alt="">
+          <div class="tut-unit-legend">
+            <canvas id="tut-unit-canvas" width="300" height="110"></canvas>
+            <div class="tleg"><span class="tleg-k">SP</span><span data-i18n="landing.tutUnitSP"></span></div>
+            <div class="tleg"><span class="tleg-k">MOV</span><span data-i18n="landing.tutUnitMOV"></span></div>
+            <div class="tleg"><span class="tleg-k">FP</span><span data-i18n="landing.tutUnitFP"></span></div>
+            <div class="tleg"><span class="tleg-k">Det</span><span data-i18n="landing.tutUnitDet"></span></div>
+            <div class="tleg"><span class="tleg-k">Alc.</span><span data-i18n="landing.tutUnitAtk"></span></div>
+            <div class="tleg"><span class="tleg-k">🚀</span><span data-i18n="landing.tutUnitWpn"></span></div>
+            <div class="tleg"><span class="tleg-k">⚙</span><span data-i18n="landing.tutUnitCaps"></span></div>
+          </div>
+        </div>
+        <aside class="tut-side">
+          <div class="tpanel"><div class="tpanel-title" data-i18n="landing.tutUnitTitle">As unidades</div>
+            <ul class="tut-rules">
+              <li data-i18n-html="landing.tutUnit1"></li><li data-i18n-html="landing.tutUnit2"></li>
+              <li data-i18n-html="landing.tutUnit3"></li>
+            </ul></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 3 — Movimentação (interativo) -->
+    <section class="tut-step" data-s="3">
+      <header class="tut-head"><span class="tut-kicker" data-i18n="landing.tutMovKicker">FASE 1</span><h2 class="tut-title" data-i18n="landing.tutMovTitle">Movimentação</h2></header>
+      <div class="tut-grid">
+        <div class="tut-stage tut-sim">
+          <div class="sim-hud" data-hud="movement"></div>
+          <div class="sim-canvas-wrap"><canvas id="tut-mov-canvas" class="sim-canvas" width="700" height="430"></canvas></div>
+          <div class="sim-status" id="tut-mov-status"></div>
+        </div>
+        <aside class="tut-side">
+          <div class="tpanel"><div class="tpanel-title" data-i18n="game.selectedUnit">UNIDADE SELECIONADA</div><div id="tut-mov-unit"></div></div>
+          <div class="tpanel"><div class="tpanel-title" data-i18n="game.actions">AÇÕES</div>
+            <button id="tut-mov-end" class="act-btn yellow"></button>
+            <button id="tut-mov-undo" class="act-btn gray" data-i18n="game.undoStep">↩ Desfazer Passo</button>
+            <button id="tut-mov-reset" class="act-btn gray hidden" data-i18n="landing.tutRestart">↺ Recomeçar</button>
+            <div class="phase-legend">
+              <div class="leg-row"><span class="leg-swatch green"></span><span data-i18n="game.legendMovement">Hexágonos de movimento</span></div>
+              <div class="leg-row"><span class="leg-swatch amber"></span><span data-i18n="game.legendFuel2">Movimento com consumo de 2 FP</span></div>
+              <div class="leg-row"><span class="leg-swatch orange"></span><span data-i18n="game.legendFuel3">Alta velocidade: consumo de 3 FP</span></div>
+            </div>
+          </div>
+        </aside>
+        <ul class="tut-rules tut-rules-wide">
+          <li data-i18n-html="landing.tutMov1"></li><li data-i18n-html="landing.tutMov2"></li>
+          <li data-i18n-html="landing.tutMov3"></li><li data-i18n-html="landing.tutMov4"></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 4 — Detecção (interativo) -->
+    <section class="tut-step" data-s="4">
+      <header class="tut-head"><span class="tut-kicker" data-i18n="landing.tutDetKicker">INTELIGÊNCIA</span><h2 class="tut-title" data-i18n="landing.tutDetTitle">Detecção e névoa de guerra</h2></header>
+      <div class="tut-grid">
+        <div class="tut-stage tut-sim">
+          <div class="sim-hud" data-hud="detection"></div>
+          <div class="sim-canvas-wrap"><canvas id="tut-det-canvas" class="sim-canvas" width="700" height="430"></canvas></div>
+          <div class="sim-status" id="tut-det-status"></div>
+        </div>
+        <aside class="tut-side">
+          <div class="tpanel"><div class="tpanel-title" data-i18n="landing.tutDetTitle">Detecção</div>
+            <p class="tut-small" data-i18n="landing.tutDetToggle">Alterne o período:</p>
+            <div class="tut-toggle">
+              <button id="tut-det-day" class="act-btn yellow" data-i18n="period.day">☀ Diurno</button>
+              <button id="tut-det-night" class="act-btn gray" data-i18n="period.night">🌙 Noturno</button>
+            </div>
+          </div>
+          <div class="tpanel">
+            <ul class="tut-rules">
+              <li data-i18n-html="landing.tutDet1"></li><li data-i18n-html="landing.tutDet2"></li>
+              <li data-i18n-html="landing.tutDet3"></li><li data-i18n-html="landing.tutDet4"></li>
+            </ul></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 5 — Engajamentos (interativo) -->
+    <section class="tut-step" data-s="5">
+      <header class="tut-head"><span class="tut-kicker" data-i18n="landing.tutEngKicker">FASE 2</span><h2 class="tut-title" data-i18n="landing.tutEngTitle">Engajamentos</h2></header>
+      <div class="tut-grid">
+        <div class="tut-stage tut-sim">
+          <div class="sim-hud" data-hud="combat"></div>
+          <div class="sim-canvas-wrap">
+            <canvas id="tut-eng-canvas" class="sim-canvas" width="700" height="430"></canvas>
+            <div id="tut-wp" class="weapon-picker tut-wp hidden">
+              <div class="wp-title" data-i18n="game.selectWeapon">SELECIONAR ARMAMENTO</div>
+              <div class="wp-subtitle" id="tut-wp-target"></div>
+              <div id="tut-wp-body" class="wp-list"></div>
+              <div class="wp-footer">
+                <button id="tut-wp-cancel" class="act-btn gray" data-i18n="game.cancel">Cancelar</button>
+                <button id="tut-wp-confirm" class="act-btn green" data-i18n="game.confirm">Confirmar ▶</button>
               </div>
-              <div class="tvph-title" data-i18n="landing.tut3MovTitle">MOVIMENTAÇÃO</div>
-              <ul class="tvph-steps">
-                <li data-i18n="landing.tut3MovStep1">Selecione uma unidade sua</li>
-                <li data-i18n-html="landing.tut3MovStep2">Clique hexágonos <em>verdes</em></li>
-                <li data-i18n="landing.tut3MovStep3">Desfaça com ↩ se quiser</li>
-                <li data-i18n-html="landing.tut3MovStep4">Confirme: <em>Encerrar Movimentação</em></li>
-              </ul>
             </div>
           </div>
-          <div class="tvph-divider"></div>
-          <div class="tvph-phase atk">
-            <div class="tvph-content">
-              <div class="tvph-icon-row">
-                <img class="tvph-icon" src="/icons/navio-de-guerra.png" alt="">
-                <span class="tvph-num" data-i18n="landing.tut3Phase2">FASE 2</span>
+          <div class="sim-status" id="tut-eng-status"></div>
+        </div>
+        <aside class="tut-side">
+          <div class="tpanel"><div class="tpanel-title" data-i18n="game.actions">AÇÕES</div>
+            <div class="eng-panel"><div class="eng-title" id="tut-eng-title"></div><div class="eng-list" id="tut-eng-list"></div></div>
+            <button id="tut-eng-end" class="act-btn orange"></button>
+            <button id="tut-eng-reset" class="act-btn gray hidden" data-i18n="landing.tutRestart">↺ Recomeçar</button>
+          </div>
+        </aside>
+        <ul class="tut-rules tut-rules-wide">
+          <li data-i18n-html="landing.tutEng1"></li><li data-i18n-html="landing.tutEng2"></li>
+          <li data-i18n-html="landing.tutEng3"></li><li data-i18n-html="landing.tutEng4"></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 6 — Resolução -->
+    <section class="tut-step" data-s="6">
+      <header class="tut-head"><span class="tut-kicker" data-i18n="landing.tutResKicker">RESOLUÇÃO</span><h2 class="tut-title" data-i18n="landing.tutResTitle">Como o combate é resolvido</h2></header>
+      <div class="tut-grid">
+        <div class="tut-stage tut-res">
+          <div class="br-box tut-br">
+            <div class="br-header" data-i18n="landing.tutBrHeader"></div>
+            <div class="br-combatants"><span class="cm-blue">Escolta GT-PA</span><span class="br-arrow"> → </span><span class="cm-red">Screen 1</span><span class="br-wpn-tag">ASCM ×2</span></div>
+            <div class="br-row br-miss"><span data-i18n="landing.tutBrLaunch"></span></div>
+            <div class="br-row br-miss"><span class="br-int" data-i18n="landing.tutBrIntercept"></span></div>
+            <div class="br-row br-hit"><span data-i18n="landing.tutBrHit"></span>
+              <div class="br-detail" data-i18n="landing.tutBrResult"></div>
+              <div class="br-degrad" data-i18n="landing.tutBrDegrade"></div></div>
+            <div class="br-decision">
+              <div class="br-question" data-i18n="game.continueQuestion">Continuar o combate neste engajamento?</div>
+              <div class="br-btns">
+                <button id="tut-br-continue" class="act-btn green" data-i18n="game.continueBtn">▶ CONTINUAR</button>
+                <button id="tut-br-stop" class="act-btn red" data-i18n="game.stopBtn">■ PARAR</button>
               </div>
-              <div class="tvph-title" data-i18n="landing.tut3AtkTitle">COMBATE</div>
-              <ul class="tvph-steps">
-                <li data-i18n="landing.tut3AtkStep1">Selecione seu atacante</li>
-                <li data-i18n-html="landing.tut3AtkStep2">Clique alvos <em>vermelhos</em></li>
-                <li data-i18n="landing.tut3AtkStep3">Ajuste quantidade de armas</li>
-                <li data-i18n-html="landing.tut3AtkStep4">Encerre: <em>Encerrar Fase de Engajamentos</em></li>
-              </ul>
+              <div id="tut-br-info" class="tut-br-info"></div>
             </div>
           </div>
         </div>
+        <aside class="tut-side">
+          <div class="tpanel"><div class="tpanel-title" data-i18n="landing.tutResKicker">RESOLUÇÃO</div>
+            <ul class="tut-rules">
+              <li data-i18n-html="landing.tutRes1"></li><li data-i18n-html="landing.tutRes2"></li>
+              <li data-i18n-html="landing.tutRes3"></li><li data-i18n-html="landing.tutRes4"></li>
+            </ul></div>
+        </aside>
       </div>
-      <div class="tut-title" data-i18n="landing.tut3Title">FASES DO TURNO</div>
-      <div class="tut-text" data-i18n-html="landing.tut3Body">
-        Todo turno tem 2 fases — ambos os jogadores agem <b>simultaneamente</b>.<br>
-        Movimentação primeiro: planeje as rotas e confirme. Depois, o combate resolve os ataques.<br>
-        O resultado de cada engajamento é exibido com dados e danos em tempo real.
-      </div>
-    </div>
+    </section>
 
-    <!-- Step 4 — Vitória -->
-    <div class="tut-step" data-s="4">
-      <div class="tut-visual">
-        <div class="tvw-wrap">
-          <div class="tvw-cards">
-            <div class="tvw-thumb"><img src="/cards/Blue_PAT.jpg" alt=""></div>
-            <div class="tvw-thumb"><img src="/cards/Blue_AERO_RG.jpg" alt=""></div>
-            <div class="tvw-thumb"><img src="/cards/Red_HERMES.jpg" alt=""></div>
+    <!-- 7 — Logística -->
+    <section class="tut-step" data-s="7">
+      <header class="tut-head"><span class="tut-kicker" data-i18n="landing.tutLogKicker">LOGÍSTICA</span><h2 class="tut-title" data-i18n="landing.tutLogTitle">Combustível e munição</h2></header>
+      <div class="tut-grid">
+        <div class="tut-stage tut-log">
+          <div class="tut-log-title" data-i18n="landing.tutLogTiers">CONSUMO DO PERÍODO (NAVIOS)</div>
+          <div class="tut-tiers">
+            <div class="ttier t1"><div class="thex">0</div><b>1 FP</b><small data-i18n="landing.tutLogStill">parado</small></div>
+            <div class="ttier t1"><div class="thex">1</div><b>1 FP</b><small>1 hex</small></div>
+            <div class="ttier t2"><div class="thex">2</div><b>2 FP</b><small>2 hex</small></div>
+            <div class="ttier t3"><div class="thex">3</div><b>3 FP ⚡</b><small data-i18n="landing.tutLogHigh">alta velocidade</small></div>
+            <div class="ttier t3"><div class="thex">4</div><b>3 FP ⚡</b><small data-i18n="landing.tutLogHigh">alta velocidade</small></div>
           </div>
-          <div class="tvw-objs">
-            <div class="tvw-obj-title" data-i18n="landing.tut4ObjTitle">OBJETIVOS DE VITÓRIA</div>
-            <div class="tvw-obj-row met" data-i18n="landing.tut4Obj1">✓ Destruir Porta-Aviões</div>
-            <div class="tvw-obj-row met" data-i18n="landing.tut4Obj2">✓ Neutralizar 2 de 3 Logísticos</div>
-            <div class="tvw-obj-row met" data-i18n="landing.tut4Obj3">✓ Neutralizar GT Anfíbio</div>
-            <div class="tvw-obj-row unmet" data-i18n="landing.tut4Obj4">○ Destruir Submarino Nuclear</div>
-            <div class="tvw-obj-row warn" data-i18n="landing.tut4Obj5">⚠ Adversário atingiu 1 objetivo</div>
-            <div class="tvw-prog" data-i18n="landing.tut4Prog">3 / 5 condições · precisa de 3 → 🏆 VITÓRIA</div>
+          <div class="tut-log-cards">
+            <div class="tut-log-card"><span class="tut-log-ico">⛽</span><span data-i18n-html="landing.tutLogRefuel"></span></div>
+            <div class="tut-log-card"><span class="tut-log-ico">✈</span><span data-i18n-html="landing.tutLogAir"></span></div>
           </div>
         </div>
+        <aside class="tut-side">
+          <div class="tpanel"><div class="tpanel-title" data-i18n="landing.tutLogKicker">LOGÍSTICA</div>
+            <ul class="tut-rules">
+              <li data-i18n-html="landing.tutMov2"></li><li data-i18n-html="landing.tutLog1"></li>
+              <li data-i18n-html="landing.tutLog2"></li><li data-i18n-html="landing.tutLog3"></li>
+            </ul></div>
+        </aside>
       </div>
-      <div class="tut-title" data-i18n="landing.tut4Title">OBJETIVOS E VITÓRIA</div>
-      <div class="tut-text" data-i18n-html="landing.tut4Body">
-        Cumpra condições táticas: neutralize alvos, controle infraestrutura, proteja ativos.<br>
-        <b>Munição e combustível são limitados</b> — gerencie com inteligência.<br>
-        O painel lateral mostra seus objetivos e os do adversário em tempo real.
-      </div>
-    </div>
+    </section>
 
-    <!-- Step 5 — Simulação Interativa -->
-    <div class="tut-step" data-s="5">
-      <div class="tut-visual tut-demo-visual">
-        <canvas id="tut-demo-canvas" width="340" height="160"></canvas>
-        <!-- Weapon selection dialog — absolute overlay on the canvas -->
-        <div id="tut-wd" class="tut-wd hidden">
-          <div class="tut-wd-title" data-i18n="landing.tut5Engagement">⚔ ENGAJAMENTO</div>
-          <div class="tut-wd-row">
-            <span data-i18n="landing.tut5Weapon">🚀 Míssil Antinavio</span>
-            <span class="tut-wd-stock" data-i18n-html="landing.tut5Stock">&nbsp;×3 disp.</span>
-          </div>
-          <div class="tut-wd-qty">
-            <button id="tut-wd-minus" class="tut-wd-btn">−</button>
-            <span id="tut-wd-num">1</span>
-            <button id="tut-wd-plus" class="tut-wd-btn">+</button>
-          </div>
-          <button id="tut-wd-confirm" class="tut-wd-confirm" data-i18n="landing.tut5Confirm">CONFIRMAR ATAQUE</button>
-          <button id="tut-wd-cancel" class="tut-wd-cancel" data-i18n="landing.tut5Cancel">Cancelar</button>
-        </div>
-        <div id="tut-demo-bar" class="tut-demo-bar" data-i18n="landing.tut5BarInitial">▣ MOVIMENTAÇÃO — clique no porta-aviões azul para selecioná-lo</div>
+    <!-- 8 — Vitória -->
+    <section class="tut-step" data-s="8">
+      <header class="tut-head"><span class="tut-kicker" data-i18n="landing.tutWinKicker">OBJETIVOS</span><h2 class="tut-title" data-i18n="landing.tutWinTitle">Condições de vitória</h2></header>
+      <div class="tut-grid">
+        <div class="tut-stage tut-win" id="tut-win-objs"></div>
+        <aside class="tut-side">
+          <div class="tpanel"><div class="tpanel-title" data-i18n="landing.tutWinKicker">OBJETIVOS</div>
+            <ul class="tut-rules">
+              <li data-i18n-html="landing.tutWin1"></li><li data-i18n-html="landing.tutWin2"></li>
+              <li data-i18n-html="landing.tutWin3"></li><li data-i18n-html="landing.tutWin4"></li>
+            </ul></div>
+        </aside>
       </div>
-      <div class="tut-title" data-i18n="landing.tut5Title">SIMULAÇÃO TÁTICA</div>
-      <div class="tut-text" data-i18n-html="landing.tut5Body">
-        <b>1.</b> Clique no porta-aviões <b>Azul</b> para selecioná-lo<br>
-        <b>2.</b> Clique em um hexágono vizinho verde para avançar<br>
-        <b>3.</b> Clique no porta-aviões azul para declarar ataque<br>
-        <b>4.</b> Clique no navio inimigo → selecione armamento → confirme
-      </div>
-    </div>
+    </section>
 
     <div class="tut-footer">
       <button id="tut-prev" class="act-btn gray" data-i18n="landing.tutPrev">← Anterior</button>
-      <span class="tut-counter">1 / 6</span>
+      <span class="tut-counter" aria-live="polite">1 / 9</span>
       <button id="tut-next" class="act-btn blue" data-i18n="landing.tutNext">Próximo →</button>
     </div>
 
@@ -577,6 +603,10 @@
 </div>
 
 <script src="js/i18n.js"></script>
+<script src="js/hex.js"></script>
+<script src="js/terrain.js"></script>
+<script src="js/units.js"></script>
+<script src="js/tutorial.js"></script>
 <script>
   const btnCreate = document.getElementById('btn-create');
   const btnJoin   = document.getElementById('btn-join');
@@ -637,286 +667,6 @@
     setTimeout(() => lobbyErr.classList.add('hidden'), 4000);
   }
 
-  // ── Tutorial wizard ──────────────────────────────────────────────────────
-  const TUT_STEPS  = 6;
-  let   tutStep    = 0;
-  const tutOverlay = document.getElementById('tutorial-overlay');
-  const tutPrev    = document.getElementById('tut-prev');
-  const tutNext    = document.getElementById('tut-next');
-  const tutCounter = tutOverlay.querySelector('.tut-counter');
-
-  function _tutRender() {
-    tutOverlay.querySelectorAll('.tut-step').forEach(el =>
-      el.classList.toggle('active', +el.dataset.s === tutStep));
-    tutOverlay.querySelectorAll('.tut-dot').forEach(el => {
-      const s = +el.dataset.s;
-      el.classList.toggle('active', s === tutStep);
-      el.classList.toggle('done',   s < tutStep);
-    });
-    tutCounter.textContent = t('landing.tutCounter', {n: tutStep + 1, total: TUT_STEPS});
-    tutPrev.classList.toggle('hidden', tutStep === 0);
-    tutNext.textContent = tutStep === TUT_STEPS - 1 ? t('landing.tutEnterGame') : t('landing.tutNext');
-    tutNext.className   = tutStep === TUT_STEPS - 1 ? 'act-btn green' : 'act-btn blue';
-    if (tutStep === 5) demoReset();
-  }
-
-  function tutShow()  { tutStep = 0; _tutRender(); tutOverlay.classList.remove('hidden'); }
-  function tutClose() { tutOverlay.classList.add('hidden'); }
-
-  tutNext.addEventListener('click', () => {
-    if (tutStep < TUT_STEPS - 1) { tutStep++; _tutRender(); } else tutClose();
-  });
-  tutPrev.addEventListener('click', () => {
-    if (tutStep > 0) { tutStep--; _tutRender(); }
-  });
-  tutOverlay.querySelectorAll('.tut-skip-btn').forEach(btn =>
-    btn.addEventListener('click', () => tutClose()));
-  document.getElementById('btn-tutorial').addEventListener('click', () => tutShow());
-
-  // Re-render imperative (non data-i18n) text when the language switches
-  document.addEventListener('i18n:changed', () => {
-    if (!tutOverlay.classList.contains('hidden')) _tutRender();
-  });
-
-  // ── Interactive demo (step 5) ────────────────────────────────────────────
-  // Phases: 0=idle  1=moving  2=combat-idle  3=attacker-sel  4=weapon-dlg  5=result
-  const demoCanvas = document.getElementById('tut-demo-canvas');
-  const demoBar    = document.getElementById('tut-demo-bar');
-  const dCtx       = demoCanvas.getContext('2d');
-
-  // Grid geometry — flat-top odd-q, identical to game engine
-  const DR=22, DH=19, DOX=26, DOY=22, DCOLS=9, DROWS=3;
-  const DEMO_RANGE=2;
-  const IS=26; // icon draw size
-
-  // State — Red at (5,1) so 1 step puts blue in attack range
-  let dPhase=0, dBlue={col:2,row:1}, dRed={col:5,row:1}, dAnimating=false;
-
-  // ── Weapon dialog ────────────────────────────────────────────────────────
-  const wdPanel   = document.getElementById('tut-wd');
-  const wdMinus   = document.getElementById('tut-wd-minus');
-  const wdPlus    = document.getElementById('tut-wd-plus');
-  const wdNum     = document.getElementById('tut-wd-num');
-  const wdConfirm = document.getElementById('tut-wd-confirm');
-  const wdCancel  = document.getElementById('tut-wd-cancel');
-  const WD_MAX=3; let wdAmt=1;
-
-  function wdShow(){
-    wdAmt=1; wdNum.textContent='1'; wdPanel.classList.remove('hidden');
-    demoBar.className='tut-demo-bar atk';
-    demoBar.textContent=t('landing.demoSelectQty');
-  }
-  function wdHide(){ wdPanel.classList.add('hidden'); }
-
-  wdMinus.addEventListener('click',()=>{ if(wdAmt>1){ wdAmt--; wdNum.textContent=wdAmt; } });
-  wdPlus.addEventListener('click', ()=>{ if(wdAmt<WD_MAX){ wdAmt++; wdNum.textContent=wdAmt; } });
-  wdConfirm.addEventListener('click',()=>{
-    wdHide(); dPhase=5;
-    demoBar.className='tut-demo-bar result';
-    demoBar.textContent=t('landing.demoImpact');
-    demoDraw();
-    setTimeout(()=>{ demoBar.textContent=t('landing.demoMissionDone'); },1500);
-  });
-  wdCancel.addEventListener('click',()=>{
-    wdHide(); dPhase=3;
-    demoBar.className='tut-demo-bar atk';
-    demoBar.textContent=t('landing.demoAttackPrompt');
-    demoDraw();
-  });
-
-  // Preload game icons and cache tinted versions
-  let dIconBlue=null, dIconRed=null;
-  const dImgBlue=new Image(), dImgRed=new Image();
-
-  function dMkIcon(img, tint){
-    const oc=document.createElement('canvas'); oc.width=oc.height=IS;
-    const ot=oc.getContext('2d');
-    ot.drawImage(img,0,0,IS,IS);
-    ot.globalCompositeOperation='source-in';
-    ot.fillStyle=tint; ot.fillRect(0,0,IS,IS);
-    return oc;
-  }
-  dImgBlue.onload=()=>{ dIconBlue=dMkIcon(dImgBlue,'#82b1ff'); demoDraw(); };
-  dImgRed.onload =()=>{ dIconRed =dMkIcon(dImgRed, '#ff8a80'); demoDraw(); };
-  dImgBlue.src='/icons/porta-avioes.png';
-  dImgRed.src ='/icons/navio-de-guerra.png';
-
-  // Hex helpers
-  function dCenter(c,r){ return {x:DOX+DR*1.5*c, y:DOY+DR*Math.sqrt(3)*(r+0.5*(c&1))}; }
-
-  function dDist(c1,r1,c2,r2){
-    const tC=(c,r)=>{const z=r-(c-(c&1))/2;return{x:c,z,y:-c-z};};
-    const a=tC(c1,r1),b=tC(c2,r2);
-    return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y),Math.abs(a.z-b.z));
-  }
-
-  // Cube-lerp shortest path (same algorithm as game engine)
-  function dPath(c1,r1,c2,r2){
-    const tC=(c,r)=>{const z=r-(c-(c&1))/2;return{x:c,z,y:-c-z};};
-    const a=tC(c1,r1),b=tC(c2,r2);
-    const n=Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y),Math.abs(a.z-b.z));
-    const path=[];
-    for(let i=1;i<=n;i++){
-      const t=i/n;
-      let lx=a.x+(b.x-a.x)*t, ly=a.y+(b.y-a.y)*t, lz=a.z+(b.z-a.z)*t;
-      let rx=Math.round(lx),ry=Math.round(ly),rz=Math.round(lz);
-      const dx=Math.abs(rx-lx),dy=Math.abs(ry-ly),dz=Math.abs(rz-lz);
-      if(dx>dy&&dx>dz) rx=-ry-rz;
-      else if(dy>dz)   ry=-rx-rz;
-      else             rz=-rx-ry;
-      path.push({col:rx, row:rz+(rx-(rx&1))/2});
-    }
-    return path;
-  }
-
-  function dPickHex(mx,my){
-    let best=null,bestD=DR*DR;
-    for(let c=0;c<DCOLS;c++) for(let r=0;r<DROWS;r++){
-      const {x,y}=dCenter(c,r),d=(mx-x)**2+(my-y)**2;
-      if(d<bestD){bestD=d;best={col:c,row:r};}
-    }
-    return best;
-  }
-
-  function dHex(cx,cy,fill,stroke,lw,dash){
-    dCtx.beginPath();
-    dCtx.moveTo(cx+DR,cy);
-    dCtx.lineTo(cx+DR/2,cy-DH); dCtx.lineTo(cx-DR/2,cy-DH);
-    dCtx.lineTo(cx-DR,cy);
-    dCtx.lineTo(cx-DR/2,cy+DH); dCtx.lineTo(cx+DR/2,cy+DH);
-    dCtx.closePath();
-    if(fill){dCtx.fillStyle=fill;dCtx.fill();}
-    if(stroke){dCtx.strokeStyle=stroke;dCtx.lineWidth=lw||1;dCtx.setLineDash(dash||[]);dCtx.stroke();dCtx.setLineDash([]);}
-  }
-
-  function demoDraw(){
-    dCtx.clearRect(0,0,340,160);
-    dCtx.fillStyle='rgba(4,14,28,1)'; dCtx.fillRect(0,0,340,160);
-
-    const blueSelected = dPhase===1 || dPhase===3;
-    const inRange = dDist(dBlue.col,dBlue.row,dRed.col,dRed.row)<=DEMO_RANGE;
-
-    for(let c=0;c<DCOLS;c++) for(let r=0;r<DROWS;r++){
-      const {x,y}=dCenter(c,r);
-      const isB=c===dBlue.col&&r===dBlue.row;
-      const isR=c===dRed.col&&r===dRed.row;
-      const inMov=dPhase===1&&!dAnimating&&!isR&&!isB&&dDist(dBlue.col,dBlue.row,c,r)===1;
-      const isTarget=dPhase===3&&isR&&inRange;
-
-      if(isB&&blueSelected)             dHex(x,y,'rgba(21,101,192,0.70)','#82b1ff',2);
-      else if(isB)                       dHex(x,y,'rgba(21,101,192,0.40)','rgba(130,177,255,0.50)',1.5);
-      else if(isTarget)                  dHex(x,y,'rgba(100,8,8,0.55)','rgba(255,80,50,0.4)',1.5);
-      else if(isR&&dPhase===2&&inRange)  dHex(x,y,'rgba(180,20,20,0.38)','rgba(255,100,80,0.95)',2,[4,2]);
-      else if(isR&&dPhase===5)           dHex(x,y,'rgba(40,10,10,0.55)','rgba(100,50,50,0.5)',1);
-      else if(isR)                       dHex(x,y,'rgba(183,28,28,0.55)','rgba(255,138,128,0.65)',1.5);
-      else if(inMov)                     dHex(x,y,'rgba(0,200,80,0.18)','rgba(0,230,118,0.8)',1.5);
-      else                               dHex(x,y,'rgba(10,30,60,0.55)','rgba(80,140,200,0.28)',1);
-
-      dCtx.textAlign='center'; dCtx.textBaseline='middle';
-      if(isB){
-        if(dIconBlue) dCtx.drawImage(dIconBlue,x-IS/2,y-IS/2,IS,IS);
-        else{ dCtx.fillStyle='#c8e0ff';dCtx.font='bold 9px "Courier New"';dCtx.fillText('AZL',x,y); }
-      }
-      if(isR&&dPhase<5){
-        if(dIconRed) dCtx.drawImage(dIconRed,x-IS/2,y-IS/2,IS,IS);
-        else{ dCtx.fillStyle='#ffb3ae';dCtx.font='bold 9px "Courier New"';dCtx.fillText('VRM',x,y); }
-      }
-      if(isR&&dPhase===5){
-        dCtx.font='18px serif'; dCtx.fillStyle='rgba(255,150,50,0.95)';
-        dCtx.fillText('\u{1F4A5}',x,y);
-      }
-    }
-
-    if(dPhase>=3){
-      const {x:bx,y:by}=dCenter(dBlue.col,dBlue.row);
-      const {x:rx,y:ry}=dCenter(dRed.col,dRed.row);
-      dCtx.strokeStyle='rgba(255,220,80,0.55)';dCtx.lineWidth=1.5;
-      dCtx.setLineDash([3,3]);dCtx.beginPath();dCtx.moveTo(bx,by);dCtx.lineTo(rx,ry);
-      dCtx.stroke();dCtx.setLineDash([]);
-    }
-  }
-
-  // Step the unit along path one hex at a time (340 ms/step)
-  function dAnimatePath(path, onDone){
-    dAnimating=true; demoDraw();
-    let step=0;
-    const tick=()=>{
-      if(step>=path.length){ dAnimating=false; onDone(); return; }
-      dBlue=path[step++]; demoDraw();
-      setTimeout(tick,340);
-    };
-    setTimeout(tick,340);
-  }
-
-  function demoReset(){
-    wdHide(); dAnimating=false; dPhase=0;
-    dBlue={col:2,row:1}; dRed={col:5,row:1};
-    demoBar.className='tut-demo-bar';
-    demoBar.textContent=t('landing.demoMoveSelect');
-    demoDraw();
-  }
-
-  demoCanvas.addEventListener('click', e=>{
-    if(dAnimating||dPhase===4) return;
-    const rect=demoCanvas.getBoundingClientRect();
-    const mx=(e.clientX-rect.left)*(340/rect.width);
-    const my=(e.clientY-rect.top)*(160/rect.height);
-    const hex=dPickHex(mx,my); if(!hex) return;
-
-    if(dPhase===5){ demoReset(); return; }
-
-    if(dPhase===0){
-      // Click 1: select own unit
-      if(hex.col===dBlue.col&&hex.row===dBlue.row){
-        dPhase=1;
-        demoBar.className='tut-demo-bar';
-        demoBar.textContent=t('landing.demoMoveGo');
-        demoDraw();
-      }
-      return;
-    }
-
-    if(dPhase===1){
-      // Click 2: move one step to a neighbor
-      if(hex.col===dBlue.col&&hex.row===dBlue.row) return;
-      if(hex.col===dRed.col&&hex.row===dRed.row) return;
-      if(dDist(dBlue.col,dBlue.row,hex.col,hex.row)!==1) return;
-      const path=dPath(dBlue.col,dBlue.row,hex.col,hex.row);
-      dAnimatePath(path,()=>{
-        const ok=dDist(dBlue.col,dBlue.row,dRed.col,dRed.row)<=DEMO_RANGE;
-        if(ok){
-          dPhase=2;
-          demoBar.className='tut-demo-bar atk';
-          demoBar.textContent=t('landing.demoCombatSelect');
-        } else {
-          demoBar.className='tut-demo-bar';
-          demoBar.textContent=t('landing.demoMoveContinue');
-        }
-        demoDraw();
-      });
-      return;
-    }
-
-    if(dPhase===2){
-      // Click 3: select own unit as attacker
-      if(hex.col===dBlue.col&&hex.row===dBlue.row){
-        dPhase=3;
-        demoBar.className='tut-demo-bar atk';
-        demoBar.textContent=t('landing.demoAttackPrompt');
-        demoDraw();
-      }
-      return;
-    }
-
-    if(dPhase===3){
-      // Click 4: select enemy target
-      const ok=dDist(dBlue.col,dBlue.row,dRed.col,dRed.row)<=DEMO_RANGE;
-      if(ok&&hex.col===dRed.col&&hex.row===dRed.row){
-        dPhase=4;
-        wdShow(); demoDraw();
-      }
-    }
-  });
 </script>
 </body>
 </html>

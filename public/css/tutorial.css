@@ -1,422 +1,338 @@
-/* ═══ TUTORIAL OVERLAY ═══════════════════════════════════════════════════════ */
+/* ═══ TUTORIAL "COMO JOGAR" ══════════════════════════════════════════════════
+   Mesma identidade da tela de jogo (game.css): painéis com título dourado,
+   botões act-btn, lista de engajamentos, janela de armamento e painel de
+   combate. Os estilos ficam restritos a .tut-box para não vazar na landing. */
 .tut-overlay {
   position: fixed; inset: 0;
   background: rgba(4,10,22,0.93);
   display: flex; align-items: center; justify-content: center;
-  z-index: 200;
+  z-index: 1100;
   backdrop-filter: blur(4px);
+  padding: 12px;
 }
+.tut-overlay.hidden { display: none; }
 .tut-box {
+  --fs-xs: 0.68rem; --fs-sm: 0.78rem;
+  --panel: rgba(8,28,48,0.98);
   background: var(--panel);
   border: 1px solid rgba(80,140,200,0.45);
   box-shadow: 0 0 80px rgba(21,101,192,0.3), 0 0 0 1px rgba(0,0,0,0.5);
-  width: min(660px, 96vw);
-  max-height: 94vh;
-  overflow-y: auto;
+  width: min(1120px, 100%);
+  max-height: calc(100vh - 24px);
   display: flex; flex-direction: column;
   font-family: 'Courier New', Courier, monospace;
+  color: var(--text);
 }
 
-/* Top bar */
+/* ── Barra superior: logo, progresso, pular ── */
 .tut-topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 18px;
+  display: flex; align-items: center; gap: 16px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--border);
+  background: rgba(7,25,41,0.9);
   flex-shrink: 0;
 }
-.tut-dots { display: flex; gap: 9px; align-items: center; }
+.tut-logo { height: 26px; width: auto; }
+.tut-logo.logo-en { display: none; }
+html[lang="en"] .tut-logo.logo-pt { display: none; }
+html[lang="en"] .tut-logo.logo-en { display: block; }
+.tut-dots { display: flex; gap: 8px; align-items: center; margin: 0 auto; }
 .tut-dot {
-  width: 9px; height: 9px; border-radius: 50%;
+  width: 10px; height: 10px; border-radius: 50%; padding: 0;
   background: rgba(80,140,200,0.18);
-  border: 1px solid rgba(80,140,200,0.35);
-  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-  cursor: pointer;
+  border: 1px solid rgba(80,140,200,0.4);
+  cursor: pointer; transition: background 0.2s, box-shadow 0.2s;
 }
-.tut-dot.active {
-  background: var(--blue-l);
-  border-color: var(--blue-l);
-  box-shadow: 0 0 7px rgba(130,177,255,0.65);
-}
-.tut-dot.done {
-  background: rgba(130,177,255,0.35);
-  border-color: rgba(130,177,255,0.45);
-}
+.tut-dot.active { background: var(--gold-l); border-color: var(--gold-l); box-shadow: 0 0 8px rgba(255,213,79,0.6); }
+.tut-dot.done   { background: rgba(201,168,76,0.45); border-color: rgba(201,168,76,0.6); }
+.tut-dot:focus-visible { outline: 2px solid var(--gold-l); outline-offset: 2px; }
 .tut-skip-btn {
-  background: none; border: none; cursor: pointer;
-  color: var(--dim); font-family: inherit;
-  font-size: 0.65rem; letter-spacing: 1.5px;
-  padding: 2px 0; transition: color 0.15s;
+  background: none; border: 1px solid transparent; cursor: pointer;
+  color: var(--dim); font-family: inherit; font-size: 0.68rem; letter-spacing: 1.5px;
+  padding: 4px 6px;
 }
-.tut-skip-btn:hover { color: var(--red-l); }
+.tut-skip-btn:hover { color: var(--red-l); border-color: rgba(255,138,128,0.4); }
 
-/* Step panels */
-.tut-step { display: none; flex-direction: column; }
+/* ── Passo ── */
+.tut-step { display: none; flex-direction: column; min-height: 0; overflow-y: auto; }
 .tut-step.active { display: flex; }
-
-/* ── Visual container ── */
-.tut-visual {
-  display: flex; align-items: stretch; justify-content: center;
-  height: 200px; flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
-  overflow: hidden;
-  position: relative;
-  background: #040e1a;
-}
-
-/* ── Step 0: O Jogo — cards on map bg ── */
-.tvi-map-bg {
-  position: absolute; inset: 0;
-  background-image: url('/mapa.png');
-  background-size: cover; background-position: center 30%;
-  filter: brightness(0.28) saturate(0.6);
-}
-.tvi-cards {
-  position: relative; z-index: 1;
-  display: flex; align-items: center; justify-content: center;
-  width: 100%; gap: 0;
-}
-.tvi-team {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  flex: 1; padding: 14px 10px; gap: 8px;
-}
-.tvi-team.blue { background: rgba(21,101,192,0.18); }
-.tvi-team.red  { background: rgba(183,28,28,0.18); }
-.tvi-card-img {
-  height: 148px;
-  border-radius: 5px;
-  object-fit: cover;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
-  transition: transform 0.2s;
-}
-.tvi-team.blue .tvi-card-img { border: 2px solid rgba(130,177,255,0.55); }
-.tvi-team.red  .tvi-card-img { border: 2px solid rgba(255,138,128,0.55); }
-.tvi-team-label {
-  font-size: 0.58rem; letter-spacing: 2.5px;
-  font-weight: bold;
-}
-.tvi-team.blue .tvi-team-label { color: var(--blue-l); }
-.tvi-team.red  .tvi-team-label { color: var(--red-l); }
-.tvi-vs {
-  display: flex; align-items: center; padding: 0 10px;
-  font-size: 1.1rem; font-weight: bold; color: var(--gold);
-  letter-spacing: 3px; flex-shrink: 0;
-}
-
-/* ── Step 1: Tabuleiro — map + hex overlay ── */
-.tvm-container {
-  position: relative; width: 100%; height: 100%;
-  overflow: hidden;
-}
-.tvm-bg-img {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover; object-position: center 40%;
-  filter: brightness(0.35) saturate(0.5);
-}
-.tvm-hex-layer {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-.tvm-svg { width: 340px; height: 180px; }
-.tvm-caption {
-  position: absolute; bottom: 8px; left: 0; right: 0;
-  text-align: center;
-  font-size: 0.62rem; letter-spacing: 1.5px; color: rgba(0,230,118,0.8);
-}
-
-/* ── Step 2: Unidades — real card + legend ── */
-.tvu-wrap {
-  display: flex; width: 100%; height: 100%;
-  align-items: stretch;
-}
-.tvu-card-panel {
-  flex: 0 0 auto; width: 52%;
-  overflow: hidden; position: relative;
-}
-.tvu-card-panel img {
-  width: 100%; height: 100%;
-  object-fit: cover; object-position: top;
-  display: block;
-}
-.tvu-legend {
-  flex: 1; display: flex; flex-direction: column;
-  justify-content: center; gap: 8px;
-  padding: 12px 14px;
-  background: rgba(4,12,24,0.92);
-  border-left: 1px solid var(--border);
-  font-size: 0.72rem;
-}
-.tvu-row {
-  display: flex; gap: 8px; align-items: baseline;
-}
-.tvu-key {
-  color: var(--gold); font-weight: bold; font-size: 0.78rem;
-  min-width: 32px; flex-shrink: 0;
-}
-.tvu-val { color: var(--text); line-height: 1.3; }
-.tvu-val small { color: var(--dim); font-size: 0.65rem; }
-
-/* ── Step 3: Fases — two-panel with map bg ── */
-.tvph-wrap {
-  display: flex; width: 100%; height: 100%;
-}
-.tvph-phase {
-  flex: 1; display: flex; flex-direction: column;
-  padding: 14px 16px; gap: 6px;
-  position: relative; overflow: hidden;
-}
-.tvph-phase::before {
-  content: ''; position: absolute; inset: 0;
-  background-image: url('/mapa.png');
-  background-size: cover; background-position: center;
-  filter: brightness(0.18) saturate(0.5);
-}
-.tvph-phase.mov::after {
-  content: ''; position: absolute; inset: 0;
-  background: rgba(0,100,50,0.22);
-}
-.tvph-phase.atk::after {
-  content: ''; position: absolute; inset: 0;
-  background: rgba(120,20,20,0.22);
-}
-.tvph-content {
-  position: relative; z-index: 1;
-  display: flex; flex-direction: column; gap: 6px; height: 100%;
-}
-.tvph-icon-row {
-  display: flex; align-items: center; gap: 8px;
-}
-.tvph-icon {
-  width: 32px; height: 32px;
-  object-fit: contain;
-  filter: brightness(0) saturate(100%) invert(60%) sepia(80%) saturate(400%);
-}
-.tvph-phase.atk .tvph-icon {
-  filter: brightness(0) saturate(100%) invert(60%) sepia(80%) saturate(400%) hue-rotate(300deg);
-}
-.tvph-num {
-  font-size: 0.6rem; letter-spacing: 2px;
-  font-weight: bold; padding: 2px 6px;
-  border-radius: 2px;
-}
-.tvph-phase.mov .tvph-num { background: rgba(0,200,80,0.25); color: var(--green); border: 1px solid rgba(0,200,80,0.4); }
-.tvph-phase.atk .tvph-num { background: rgba(200,30,30,0.25); color: var(--red-l);  border: 1px solid rgba(200,30,30,0.4); }
-.tvph-title {
-  font-size: 0.68rem; letter-spacing: 2px;
-  color: var(--dim); margin-bottom: 2px;
-}
-.tvph-steps {
-  list-style: none; font-size: 0.65rem; color: var(--text);
-  display: flex; flex-direction: column; gap: 3px;
-  margin-top: auto;
-}
-.tvph-steps li { padding-left: 10px; position: relative; line-height: 1.35; }
-.tvph-steps li::before { content: '›'; position: absolute; left: 0; color: var(--dim); }
-.tvph-steps em { font-style: normal; }
-.tvph-phase.mov .tvph-steps em { color: var(--green); }
-.tvph-phase.atk .tvph-steps em { color: var(--red-l); }
-.tvph-divider {
-  width: 1px; background: var(--border); flex-shrink: 0;
-}
-
-/* ── Step 4: Vitória — card thumbnails + objectives ── */
-.tvw-wrap {
-  display: flex; width: 100%; height: 100%;
-  align-items: stretch;
-}
-.tvw-cards {
-  flex: 0 0 auto; width: 48%;
-  display: flex; gap: 4px; padding: 8px;
-  background: rgba(4,12,24,0.7);
-  align-items: flex-start;
-  overflow: hidden;
-}
-.tvw-thumb {
-  flex: 1; min-width: 0;
-  border-radius: 4px; overflow: hidden;
-  border: 1px solid rgba(80,140,200,0.2);
-}
-.tvw-thumb img {
-  width: 100%; height: 100%;
-  object-fit: cover; object-position: top;
-  display: block;
-}
-.tvw-objs {
-  flex: 1; display: flex; flex-direction: column;
-  padding: 12px 14px; gap: 5px;
-  background: rgba(4,12,24,0.92);
-  border-left: 1px solid var(--border);
-  font-size: 0.68rem;
-}
-.tvw-obj-title {
-  font-size: 0.6rem; letter-spacing: 2px; color: var(--dim);
-  margin-bottom: 4px; text-transform: uppercase;
-}
-.tvw-obj-row { padding: 2px 0; display: flex; gap: 6px; line-height: 1.35; }
-.tvw-obj-row.met { color: var(--green); }
-.tvw-obj-row.unmet { color: var(--dim); }
-.tvw-obj-row.warn { color: var(--red-l); }
-.tvw-prog {
-  margin-top: 6px; padding-top: 6px;
-  border-top: 1px solid var(--border);
-  font-size: 0.62rem; color: var(--gold);
-}
-
-/* Text area */
+.tut-head { padding: 14px 20px 10px; border-bottom: 1px solid var(--border); }
+.tut-kicker { font-size: 0.66rem; letter-spacing: 3px; color: var(--gold); }
 .tut-title {
-  font-size: 0.68rem; letter-spacing: 3px; color: var(--gold);
-  padding: 14px 20px 2px; text-align: center;
-  flex-shrink: 0;
+  margin: 2px 0 0; font-size: 1.15rem; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold-l); font-weight: bold; text-align: left; border: none; padding: 0;
 }
-.tut-text {
-  font-size: 0.74rem; color: var(--text); line-height: 1.8;
-  padding: 6px 22px 14px; text-align: center;
+.tut-grid {
+  display: grid; grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 0; flex-shrink: 0;
 }
-.tut-text b { color: var(--gold-l); }
+.tut-stage {
+  position: relative; background: #040e1a;
+  border-right: 1px solid var(--border);
+  min-height: 330px; overflow: hidden;
+}
+.tut-side { display: flex; flex-direction: column; min-width: 0; }
 
-/* Footer nav */
+/* Painéis laterais = .panel do jogo */
+.tpanel { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 7px; }
+.tpanel-title {
+  font-size: 0.7rem; letter-spacing: 3px; color: var(--gold);
+  padding-left: 8px; border-left: 2px solid var(--gold); text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.tut-rules { margin: 0; padding: 0 0 0 1.1em; display: flex; flex-direction: column; gap: 7px; font-size: 0.76rem; line-height: 1.55; color: var(--text); }
+.tut-rules li::marker { color: var(--gold); }
+.tut-rules b { color: var(--gold-l); }
+.tut-rules-wide {
+  grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 26px;
+  padding: 12px 20px 12px 34px; border-top: 1px solid var(--border); background: rgba(255,255,255,0.015);
+}
+.tut-small { font-size: 0.72rem; color: var(--dim); margin: 0; }
+.tut-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+/* ── Rodapé ── */
 .tut-footer {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 18px;
-  border-top: 1px solid var(--border);
-  background: rgba(5,16,32,0.6);
-  flex-shrink: 0;
+  padding: 10px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
+  background: rgba(7,25,41,0.9);
 }
-.tut-counter {
-  font-size: 0.65rem; letter-spacing: 2px; color: var(--dim);
-}
-.tut-footer .act-btn { width: auto; padding: 8px 18px; font-size: 0.72rem; }
+.tut-counter { font-size: 0.7rem; letter-spacing: 2px; color: var(--dim); white-space: nowrap; padding: 0 12px; }
+.tut-box .tut-footer .act-btn { width: auto; min-width: 170px; padding: 8px 20px; }
+.invisible { visibility: hidden; }
 
-/* Lobby tutorial CTA button (first action) */
+/* ── Botões (act-btn do jogo) ── */
+.tut-box .act-btn {
+  width: 100%; padding: 9px 12px;
+  font-family: 'Courier New', monospace; font-size: var(--fs-sm);
+  letter-spacing: 1.5px; font-weight: bold; text-transform: uppercase;
+  border: 1px solid; border-radius: 3px; cursor: pointer; transition: all 0.15s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.tut-box .act-btn:focus-visible { outline: 2px solid var(--gold-l); outline-offset: 1px; }
+.tut-box .act-btn.yellow { background: #4a3800; border-color: var(--gold-l); color: var(--gold-l); }
+.tut-box .act-btn.yellow:hover:not(:disabled) { background: #6a5000; }
+.tut-box .act-btn.orange { background: #4a1f00; border-color: #ff8c00; color: #ffb74d; }
+.tut-box .act-btn.orange:hover:not(:disabled) { background: #6a3000; }
+.tut-box .act-btn.gray   { background: #1a2a38; border-color: #3a5068; color: var(--text-dim); }
+.tut-box .act-btn.gray:hover:not(:disabled) { background: #243444; }
+.tut-box .act-btn.blue   { background: #0d2e6a; border-color: var(--blue-l); color: var(--blue-l); }
+.tut-box .act-btn.blue:hover { background: #1565c0; color: #fff; }
+.tut-box .act-btn.green  { background: #0a3a1e; border-color: var(--green); color: #69f0ae; }
+.tut-box .act-btn.green:hover { background: #0f5a2c; }
+.tut-box .act-btn.red    { background: #4a0d0d; border-color: var(--red-l); color: var(--red-l); }
+.tut-box .act-btn.red:hover { background: #7a1414; color: #fff; }
+.tut-box .act-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.tut-box .hidden { display: none !important; }
+
+/* ── Passo 0: briefing ── */
+.tut-intro { display: flex; align-items: center; justify-content: center; gap: 0; }
+.tut-intro-bg {
+  position: absolute; inset: 0;
+  background: url('/mapa.png') center 35% / cover;
+  filter: brightness(0.32) saturate(0.6);
+}
+.tut-intro-team { position: relative; flex: 1; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px 10px; }
+.tut-intro-team.blue { background: rgba(21,101,192,0.18); }
+.tut-intro-team.red  { background: rgba(183,28,28,0.18); }
+.tut-intro-team img { height: 230px; max-width: 90%; object-fit: contain; border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,0.7); }
+.tut-intro-team.blue img { border: 2px solid rgba(130,177,255,0.55); }
+.tut-intro-team.red  img { border: 2px solid rgba(255,138,128,0.55); }
+.tut-intro-name { font-size: 0.72rem; letter-spacing: 2.5px; font-weight: bold; }
+.tut-intro-team.blue .tut-intro-name { color: var(--blue-l); }
+.tut-intro-team.red  .tut-intro-name { color: var(--red-l); }
+.tut-intro-role { font-size: 0.7rem; color: var(--text-dim); text-align: center; }
+.tut-intro-vs { position: relative; padding: 0 12px; font-size: 1.3rem; font-weight: bold; color: var(--gold); letter-spacing: 3px; }
+
+/* ── Passo 1: o turno ── */
+.tut-turn { display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 10px; padding: 22px 26px; }
+.tut-turn-day { text-align: center; font-size: 0.74rem; letter-spacing: 3px; color: var(--gold); }
+.tut-turn-period { border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; background: rgba(255,255,255,0.02); }
+.tut-turn-period.day   { border-color: rgba(255,213,79,0.35); }
+.tut-turn-period.night { border-color: rgba(130,177,255,0.35); background: rgba(10,20,50,0.5); }
+.tut-turn-plabel { font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 8px; color: var(--gold-l); }
+.tut-turn-period.night .tut-turn-plabel { color: var(--blue-l); }
+.tut-turn-phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tphase { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; border-radius: 3px; border: 1px solid; font-size: 0.78rem; font-weight: bold; }
+.tphase b { font-size: 0.66rem; letter-spacing: 2px; opacity: 0.8; }
+.tphase small { font-weight: normal; font-size: 0.66rem; line-height: 1.4; color: var(--text-dim); }
+.tphase.mov { background: rgba(74,56,0,0.45); border-color: rgba(255,213,79,0.6); color: var(--gold-l); }
+.tphase.eng { background: rgba(74,31,0,0.5);  border-color: rgba(255,140,0,0.6);  color: #ffb74d; }
+.tphase.end { background: rgba(10,58,30,0.45); border-color: rgba(0,230,118,0.45); color: #69f0ae; }
+.tut-turn-arrow { text-align: center; color: var(--dim); font-size: 0.8rem; }
+
+/* ── Passo 2: unidades ── */
+.tut-units { display: flex; align-items: center; justify-content: center; gap: 24px; padding: 18px; }
+.tut-unit-card { height: 300px; max-width: 45%; object-fit: contain; border: 2px solid rgba(130,177,255,0.5); border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,0.7); }
+.tut-unit-legend { display: flex; flex-direction: column; gap: 6px; max-width: 330px; }
+#tut-unit-canvas { width: 300px; max-width: 100%; height: auto; margin-bottom: 4px; }
+.tleg { display: grid; grid-template-columns: 44px 1fr; gap: 8px; align-items: baseline; font-size: 0.74rem; color: var(--text); }
+.tleg-k { color: var(--gold-l); font-weight: bold; text-align: right; }
+
+/* ── Simulações (passos 3–5) ── */
+.tut-sim { display: flex; flex-direction: column; }
+.sim-hud {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 6px 12px; font-size: 0.74rem; letter-spacing: 1px; color: var(--dim);
+  background: rgba(8,28,48,0.97); border-bottom: 1px solid var(--border);
+}
+.hud-badge { padding: 2px 8px; border: 1px solid var(--blue-l); color: var(--blue-l); background: #0d2e6a; font-weight: bold; letter-spacing: 2px; font-size: 0.66rem; }
+.hud-phase { color: var(--gold-l); }
+.hud-turn { margin-left: auto; padding: 2px 10px; background: var(--green); color: #000; font-weight: bold; letter-spacing: 3px; font-size: 0.66rem; border-radius: 2px; }
+.sim-canvas-wrap { position: relative; line-height: 0; }
+.sim-canvas { width: 100%; height: auto; display: block; cursor: pointer; }
+.sim-status {
+  padding: 8px 12px; font-size: 0.76rem; line-height: 1.45; color: var(--text);
+  border-top: 1px solid var(--border); background: rgba(13,46,106,0.35);
+  border-left: 3px solid var(--blue-l); min-height: 2.6em;
+}
+.sim-status.warn { border-left-color: rgb(255,87,34); background: rgba(255,87,34,0.10); }
+.sim-status.ok   { border-left-color: var(--green); background: rgba(0,230,118,0.08); }
+
+/* Painel da unidade (igual ao jogo) */
+.tut-box .u-name { font-size: 0.95rem; font-weight: bold; }
+.tut-box .u-name.blue { color: var(--blue-l); }
+.tut-box .hp-bar { height: 6px; background: #0a2035; border-radius: 3px; overflow: hidden; }
+.tut-box .hp-fill { height: 100%; background: #69f0ae; }
+.tut-box .u-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; font-size: var(--fs-sm); color: var(--dim); }
+.tut-box .u-stats span:nth-child(even) { color: var(--text); text-align: right; }
+.tut-box .u-hint { font-size: 0.72rem; color: var(--green); }
+.tut-box .fuel-plan { padding: 5px 7px; border-left: 3px solid rgb(0,230,118); background: rgba(0,230,118,0.06); font-size: var(--fs-xs); line-height: 1.5; }
+.tut-box .fuel-plan.mid  { border-left-color: rgb(255,179,0); background: rgba(255,179,0,0.07); }
+.tut-box .fuel-plan.high { border-left-color: rgb(255,87,34); background: rgba(255,87,34,0.09); }
+.tut-box .fuel-plan b { color: #fff; }
+.tut-box .phase-legend { margin-top: 4px; }
+.tut-box .leg-row { display: flex; align-items: center; gap: 7px; font-size: 0.7rem; color: var(--dim); padding: 2px 0; }
+.tut-box .leg-swatch { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+.tut-box .leg-swatch.green  { background: rgba(0,230,118,0.4); border: 1.5px solid rgba(0,230,118,0.8); }
+.tut-box .leg-swatch.amber  { background: rgba(255,179,0,0.35); border: 1.5px solid rgba(255,179,0,0.85); }
+.tut-box .leg-swatch.orange { background: rgba(255,87,34,0.35); border: 1.5px solid rgba(255,87,34,0.9); }
+
+/* Lista de engajamentos (igual ao jogo) */
+.tut-box .eng-panel { border: 1px solid rgba(255,112,67,0.35); border-radius: 3px; background: rgba(255,112,67,0.05); padding: 8px; }
+.tut-box .eng-title { font-size: var(--fs-xs); letter-spacing: 2px; color: #ff8a65; margin-bottom: 6px; }
+.tut-box .eng-list { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto; }
+.tut-box .eng-empty { font-size: var(--fs-xs); color: var(--dim); line-height: 1.5; margin: 0; }
+.tut-box .eng-entry { display: flex; align-items: flex-start; gap: 7px; padding: 5px 6px; border-radius: 2px; background: rgba(255,255,255,0.03); border: 1px solid rgba(80,120,160,0.18); }
+.tut-box .eng-entry.active { border-color: rgba(255,214,79,0.7); background: rgba(255,214,79,0.07); }
+.tut-box .eng-num { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ff7043; display: inline-flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: bold; }
+.tut-box .eng-entry.active .eng-num { border-color: #ffd64f; }
+.tut-box .eng-body { flex: 1; min-width: 0; font-size: var(--fs-xs); line-height: 1.45; }
+.tut-box .eng-att { background: none; border: none; padding: 0; font: inherit; color: var(--gold-l); cursor: pointer; text-decoration: underline dotted; }
+.tut-box .eng-arrow { color: #ff8a65; margin: 0 3px; }
+.tut-box .eng-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; flex-wrap: wrap; }
+.tut-box .atk-wpn-tag { color: var(--gold); font-size: 0.68rem; }
+.tut-box .eng-dist { color: var(--dim); font-size: 0.66rem; }
+.tut-box .atk-amt-ctrl { display: flex; gap: 4px; margin-left: auto; }
+.tut-box .atk-adj-btn { background: rgba(80,120,160,0.25); border: 1px solid rgba(80,140,200,0.4); color: var(--text); width: 20px; height: 20px; font-size: 0.85rem; line-height: 1; cursor: pointer; border-radius: 3px; padding: 0; }
+.tut-box .eng-del { flex-shrink: 0; background: none; border: 1px solid rgba(255,80,80,0.4); color: var(--red-l); border-radius: 2px; cursor: pointer; font-size: 0.7rem; padding: 1px 6px; }
+.tut-box .eng-note { margin: 4px 0 0; font-size: 0.64rem; color: var(--dim); }
+
+/* Janela de armamento (igual ao jogo) */
+.tut-box .tut-wp {
+  position: absolute; z-index: 5; line-height: 1.3;
+  background: var(--panel); border: 1px solid var(--blue-l);
+  padding: 12px 14px; width: 240px; box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+}
+.tut-box .wp-title { font-size: 0.62rem; letter-spacing: 2px; color: var(--dim); text-align: center; margin-bottom: 4px; }
+.tut-box .wp-subtitle { font-size: 0.76rem; color: var(--blue-l); text-align: center; margin-bottom: 8px; }
+.tut-box .wp-list { margin-bottom: 8px; }
+.tut-box .wp-row { border: 1px solid var(--border); padding: 6px 8px; margin-bottom: 6px; background: rgba(5,20,40,0.8); }
+.tut-box .wp-row:has(input:checked) { border-color: var(--blue-l); background: rgba(21,101,192,0.22); }
+.tut-box .wp-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.78rem; }
+.tut-box .wp-label input { accent-color: var(--blue-l); }
+.tut-box .wp-name { color: var(--gold); font-weight: bold; flex: 1; }
+.tut-box .wp-qty { color: var(--dim); font-size: 0.7rem; }
+.tut-box .wp-qty-ctrl { display: flex; align-items: center; gap: 8px; margin-top: 6px; padding-left: 20px; }
+.tut-box .wp-adj { width: 22px; height: 22px; padding: 0; background: rgba(21,101,192,0.3); border: 1px solid var(--border); color: var(--text); cursor: pointer; font-family: inherit; }
+.tut-box .wp-amt { min-width: 24px; text-align: center; font-size: 0.85rem; }
+.tut-box .wp-footer { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
+.tut-box .wp-footer .act-btn { padding: 7px 8px; font-size: 0.7rem; }
+
+/* ── Passo 6: painel de combate (igual ao jogo) ── */
+.tut-res { display: flex; align-items: center; justify-content: center; padding: 20px; }
+.tut-box .br-box { background: var(--panel); border: 2px solid rgba(100,160,230,0.5); padding: 1.2rem 1.4rem 1rem; width: min(470px, 100%); box-shadow: 0 0 60px rgba(0,50,120,0.6); }
+.tut-box .br-header { font-size: 0.82rem; letter-spacing: 2px; color: var(--gold); text-align: center; margin-bottom: 0.8rem; }
+.tut-box .br-combatants { font-size: 0.86rem; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; align-items: center; flex-wrap: wrap; gap: 2px; }
+.tut-box .cm-blue { color: var(--blue-l); font-weight: bold; }
+.tut-box .cm-red  { color: var(--red-l); font-weight: bold; }
+.tut-box .br-arrow { color: var(--gold); font-weight: bold; }
+.tut-box .br-wpn-tag { color: var(--gold-l); font-size: 0.72rem; font-weight: bold; background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.4); border-radius: 3px; padding: 1px 5px; margin-left: 4px; }
+.tut-box .br-row { font-size: 0.78rem; padding: 7px 8px; margin-bottom: 4px; border-bottom: 1px solid rgba(80,120,160,0.12); border-left: 3px solid transparent; color: var(--text-dim); }
+.tut-box .br-hit  { color: var(--green); border-left-color: var(--green); background: rgba(0,230,118,0.06); }
+.tut-box .br-miss { border-left-color: rgba(90,138,170,0.5); }
+.tut-box .br-int  { color: #80cbc4; }
+.tut-box .br-detail { margin-top: 3px; font-weight: bold; }
+.tut-box .br-degrad { margin-top: 3px; font-size: 0.72rem; color: #ffb74d; }
+.tut-box .br-decision { margin-top: 12px; text-align: center; padding: 12px 10px 10px; border: 1px solid rgba(201,168,76,0.45); border-radius: 4px; background: rgba(201,168,76,0.06); }
+.tut-box .br-question { color: #ffe082; font-size: 0.78rem; margin-bottom: 10px; }
+.tut-box .br-btns { display: flex; gap: 12px; }
+.tut-br-info { margin-top: 10px; font-size: 0.74rem; line-height: 1.5; color: var(--text); text-align: left; }
+.tut-br-info b { color: var(--gold-l); }
+
+/* ── Passo 7: logística ── */
+.tut-log { display: flex; flex-direction: column; justify-content: center; gap: 18px; padding: 22px 26px; }
+.tut-log-title { font-size: 0.72rem; letter-spacing: 3px; color: var(--gold); }
+.tut-tiers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.ttier { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.78rem; }
+.ttier small { font-size: 0.64rem; color: var(--text-dim); text-align: center; }
+.thex {
+  width: 64px; height: 56px; display: flex; align-items: center; justify-content: center;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  font-weight: bold; font-size: 1rem; color: #fff;
+}
+.ttier.t1 .thex { background: rgba(0,230,118,0.45); } .ttier.t1 b { color: rgb(0,230,118); }
+.ttier.t2 .thex { background: rgba(255,179,0,0.55); } .ttier.t2 b { color: rgb(255,179,0); }
+.ttier.t3 .thex { background: rgba(255,87,34,0.6); }  .ttier.t3 b { color: rgb(255,112,67); }
+.tut-log-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tut-log-card { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--blue-l); background: rgba(13,46,106,0.25); font-size: 0.76rem; line-height: 1.5; }
+.tut-log-card b { color: var(--gold-l); }
+.tut-log-ico { font-size: 1.2rem; }
+
+/* ── Passo 8: objetivos ── */
+.tut-win { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-content: center; padding: 22px; }
+.tobj { border: 1px solid var(--border); background: rgba(255,255,255,0.02); padding: 12px 14px; }
+.tobj.blue { border-top: 3px solid var(--blue-l); }
+.tobj.red  { border-top: 3px solid var(--red-l); }
+.tobj-title { font-size: 0.72rem; letter-spacing: 2px; font-weight: bold; margin-bottom: 8px; }
+.tobj.blue .tobj-title { color: var(--blue-l); }
+.tobj.red  .tobj-title { color: var(--red-l); }
+.tobj ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem; line-height: 1.4; }
+.tobj-deadline { grid-column: 1 / -1; font-size: 0.74rem; color: var(--gold-l); border: 1px dashed rgba(201,168,76,0.45); padding: 8px 12px; background: rgba(201,168,76,0.05); }
+
+/* ── Telas estreitas ── */
+@media (max-width: 900px) {
+  .tut-grid { grid-template-columns: 1fr; }
+  .tut-stage { border-right: none; border-bottom: 1px solid var(--border); min-height: 0; overflow: visible; }
+  .tut-res { padding: 14px 10px; }
+  .tut-rules-wide { grid-template-columns: 1fr; }
+  .tut-units { flex-direction: column; }
+  .tut-unit-card { height: 220px; max-width: 80%; }
+  .tut-intro-team img { height: 150px; }
+  .tut-win { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .tut-overlay { padding: 0; }
+  .tut-box { max-height: 100vh; height: 100%; border: none; }
+  .tut-logo { display: none !important; }
+  .tut-dots { gap: 6px; }
+  .tut-title { font-size: 0.95rem; }
+  .tut-turn-phases { grid-template-columns: 1fr; }
+  .tut-tiers { grid-template-columns: repeat(3, 1fr); }
+  .tut-log-cards { grid-template-columns: 1fr; }
+  .sim-hud { font-size: 0.66rem; gap: 8px; }
+  .tut-box .tut-footer .act-btn { min-width: 0; padding: 8px 12px; }
+}
+
+/* ── Botão "Como jogar" da página inicial ── */
 .tut-cta-btn {
   background: rgba(201,168,76,0.1);
   border: 1px solid rgba(201,168,76,0.45);
   color: var(--gold-l);
   font-family: 'Courier New', monospace;
-  font-size: 0.8rem;
-  font-weight: bold;
-  letter-spacing: 2px;
-  padding: 11px 16px;
-  cursor: pointer;
-  width: 100%;
+  font-size: 0.8rem; font-weight: bold; letter-spacing: 2px;
+  padding: 11px 16px; cursor: pointer; width: 100%;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
   margin-bottom: 0.5rem;
 }
-.tut-cta-btn:hover {
-  background: rgba(201,168,76,0.22);
-  border-color: var(--gold);
-  color: var(--gold);
-}
-.tut-or-direct {
-  color: var(--dim); font-size: 0.72rem;
-  margin: 0.6rem 0; letter-spacing: 0.5px;
-}
-
-/* ── Step 5: Demo interativo ── */
-.tut-demo-visual {
-  flex-direction: column !important;
-  align-items: stretch !important;
-  padding: 0;
-  position: relative;
-}
-
-/* Weapon selection dialog overlay */
-.tut-wd {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(4,12,26,0.97);
-  border: 1px solid rgba(201,168,76,0.55);
-  box-shadow: 0 0 40px rgba(21,101,192,0.3);
-  padding: 14px 18px;
-  min-width: 200px;
-  display: flex; flex-direction: column; gap: 8px;
-  z-index: 10;
-  font-family: 'Courier New', monospace;
-}
-.tut-wd.hidden { display: none; }
-.tut-wd-title {
-  font-size: 0.72rem; letter-spacing: 2px;
-  color: var(--gold); text-align: center;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 6px; margin-bottom: 2px;
-}
-.tut-wd-row {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.68rem; color: var(--text);
-}
-.tut-wd-stock { color: var(--dim); font-size: 0.62rem; }
-.tut-wd-qty {
-  display: flex; align-items: center; justify-content: center;
-  gap: 14px; padding: 4px 0;
-}
-.tut-wd-btn {
-  background: rgba(21,101,192,0.2);
-  border: 1px solid rgba(130,177,255,0.4);
-  color: var(--blue-l);
-  font-family: inherit; font-size: 1rem; font-weight: bold;
-  width: 26px; height: 26px;
-  cursor: pointer; line-height: 1;
-  transition: background 0.15s;
-}
-.tut-wd-btn:hover { background: rgba(21,101,192,0.4); }
-#tut-wd-num {
-  font-size: 1.1rem; font-weight: bold;
-  color: var(--gold-l); min-width: 20px; text-align: center;
-}
-.tut-wd-confirm {
-  background: rgba(183,28,28,0.3);
-  border: 1px solid rgba(255,138,128,0.6);
-  color: var(--red-l);
-  font-family: inherit; font-size: 0.68rem;
-  letter-spacing: 1.5px; font-weight: bold;
-  padding: 7px; cursor: pointer;
-  transition: background 0.15s;
-}
-.tut-wd-confirm:hover { background: rgba(183,28,28,0.55); }
-.tut-wd-cancel {
-  background: none; border: none;
-  color: var(--dim); font-family: inherit;
-  font-size: 0.62rem; cursor: pointer;
-  text-align: center; padding: 2px;
-  transition: color 0.15s;
-}
-.tut-wd-cancel:hover { color: var(--text); }
-#tut-demo-canvas {
-  display: block;
-  width: 340px;
-  max-width: 100%;
-  height: 160px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-.tut-demo-bar {
-  flex: 1;
-  display: flex; align-items: center; justify-content: center;
-  padding: 4px 14px;
-  text-align: center;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.62rem; letter-spacing: 1.5px;
-  background: rgba(4,12,24,0.92);
-  border-top: 1px solid var(--border);
-  color: var(--green);
-  min-height: 38px;
-}
-.tut-demo-bar.atk    { color: var(--red-l); }
-.tut-demo-bar.result { color: var(--gold); }
-
-/* ── Standalone footer nav buttons (works without game.css) ── */
-.tut-footer .act-btn {
-  width: auto; padding: 8px 18px;
-  font-family: 'Courier New', monospace; font-size: 0.72rem;
-  letter-spacing: 1.5px; font-weight: bold; text-transform: uppercase;
-  border-radius: 2px; cursor: pointer; border: 1px solid transparent;
-  transition: background 0.15s, border-color 0.15s;
-}
-.tut-footer .act-btn.blue  { background: #1565c0; border-color: #82b1ff; color: #fff; }
-.tut-footer .act-btn.blue:hover  { background: #1976d2; }
-.tut-footer .act-btn.gray  { background: rgba(20,35,55,0.8); border-color: rgba(80,120,160,0.35); color: #5a8aaa; }
-.tut-footer .act-btn.gray:hover  { border-color: rgba(130,177,255,0.45); color: #d0e8f4; }
-.tut-footer .act-btn.green { background: rgba(0,100,50,0.6); border-color: #00e676; color: #00e676; }
-.tut-footer .act-btn.green:hover { background: rgba(0,150,80,0.7); }
+.tut-cta-btn:hover { background: rgba(201,168,76,0.22); border-color: var(--gold); color: var(--gold); }
+.tut-or-direct { color: var(--dim); font-size: 0.72rem; margin: 0.6rem 0; letter-spacing: 0.5px; }
