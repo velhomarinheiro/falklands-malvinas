@@ -12,6 +12,22 @@
     "nightPlain": "Noturno"
   },
   "ui": {
+    "engTitle": "ENGAJAMENTOS REGISTRADOS ({{n}})",
+    "engEmpty": "Nenhum engajamento registrado. Selecione uma unidade sua e clique num alvo vermelho; cada engajamento aparece aqui e como seta numerada no mapa.",
+    "engAuto": "arma automática",
+    "engDist": "{{n}} hex",
+    "engSelect": "Selecionar o atacante no mapa",
+    "engRemove": "Remover engajamento",
+    "engLess": "Diminuir salva",
+    "engMore": "Aumentar salva",
+    "engFuelNote": "Cada engajamento custa +1 FP ao navio atacante.",
+    "engUnitCount": "⚔ {{n}} engajamento(s) registrado(s) para esta seleção",
+    "fuelTiers": "⛽ Consumo neste período: até 1 hex = 1 FP · 2 hexes = 2 FP.",
+    "fuelTiersHigh": "⚡ Esta unidade pode navegar em alta velocidade. Consumo neste período: até 1 hex = 1 FP · 2 hexes = 2 FP · 3 ou mais hexes = 3 FP.",
+    "fuelPlan": "⛽ Consumo neste período: <b>{{cost}} FP</b> (restarão {{left}}/{{max}} FP)",
+    "fuelNext": "↑ Avançar mais 1 hex aumenta o consumo para {{cost}} FP.",
+    "fuelNextHigh": "⚡ Avançar mais 1 hex entra em alta velocidade: consumo de {{cost}} FP.",
+    "fuelHigh": "⚡ Alta velocidade: consumo de 3 FP neste período.",
     "reconnectFailed": "Não foi possível reconectar — a partida foi encerrada.",
     "opponentReconnected": "🔌 Adversário reconectou.",
     "youReconnected": "🔌 Você reconectou à partida.",
@@ -59,7 +75,7 @@
     "conditionsMetSummary": "{{team}} — condições atendidas ({{achieved}}/{{total}}):",
     "endMovement": "Encerrar Movimentação",
     "endMovementCount": "Encerrar Movimentação ({{n}})",
-    "confirmAttacks": "Confirmar Ataques ({{n}})",
+    "confirmAttacks": "Encerrar Fase de Engajamentos ({{n}})",
     "fleetBlue": "Azul: {{count}}",
     "fleetRed": "Verm: {{count}}",
     "turnLabel": "Turno {{turn}}",
@@ -133,8 +149,8 @@
     "victoryFallback": "As condições aparecem aqui quando a partida começa.",
     "victoryDeadline": "<h4>PRAZO</h4><p>Ao fim de <b>{{days}} dias</b> sem vencedor, ganha quem tiver maior progresso nos seus objetivos — o progresso conta <b>dano parcial</b>, não só condições concluídas. O painel <b>OBJETIVOS DE VITÓRIA</b> acompanha os dois lados em tempo real.</p>",
     "partida": "<h4>MODOS DE JOGO</h4><ul><li><b>Dois jogadores:</b> quem cria a sala joga com a Argentina (Azul) e passa o código de 6 letras; quem entra com o código joga com o Reino Unido (Vermelha).</li><li><b>Solo contra o BOT:</b> escolha Argentina ou Reino Unido na página inicial. A doutrina do adversário (formação dividida ou concentrada, postura ofensiva ou defensiva) pode ser escolhida ou sorteada.</li><li><b>Sala com facilitador:</b> o instrutor abre a sala e os dois jogadores entram com o código, escolhendo Azul ou Vermelha. O facilitador ajusta as forças antes do início, cria e move unidades neutras, autoriza os movimentos e ratifica os resultados dos combates. Ele também pode enviar mensagens a uma equipe ou às duas.</li></ul><h4>FORÇAS NO MAPA</h4><p><b>Azul</b> = Argentina; <b>Vermelha</b> = Reino Unido. Unidades <b>neutras</b> (verdes — mercantes, pesqueiros, navio-hospital, navio de pesquisa, aeronave civil) são vistas por todos e não podem ser atacadas.</p><h4>CONTROLES</h4><ul><li><b>Clique</b> numa unidade sua para selecioná-la; clique nos hexágonos para traçar a rota ou nos alvos para atacar.</li><li>Hexágono com várias unidades abre a lista da pilha; <b>Grupo (juntos)</b> move a pilha inteira.</li><li><b>Passe o mouse</b> sobre uma unidade para ver as estatísticas; <b>clique direito</b> abre o card completo.</li><li><b>Roda do mouse</b> ou botões + ⊙ − fazem o zoom; arraste com o botão do meio (ou Alt + clique) para mover o mapa.</li><li>Teclas: <b>H</b> ajuda · <b>S</b> som · <b>F</b> névoa visual · <b>Esc</b> fecha janelas.</li></ul><h4>CONEXÃO E REGISTRO</h4><p>Se a conexão cair ou a página for recarregada, volte em até <b>75 segundos</b> para retomar a partida no mesmo lugar. <b>Exportar log</b> salva o registro da partida; <b>Abandonar jogo</b> encerra a partida e dá a vitória ao adversário.</p><p>O contexto histórico do exercício está no <b>Estudo de Caso</b>, na página inicial.</p>",
-    "fases": "<h4>ESTRUTURA DO TURNO</h4><p>Cada <b>turno</b> é um dia de operação com dois períodos: <b>☀ Diurno</b> e <b>🌙 Noturno</b>. Cada período tem uma fase de <b>Movimentação</b> e uma de <b>Combate</b>.</p><h4>MOVIMENTAÇÃO SIMULTÂNEA</h4><p>Os dois lados planejam ao mesmo tempo. Selecione uma unidade e clique, passo a passo, nos hexágonos <b>verdes</b> (alcance da unidade); <b>↩</b> desfaz o último passo. O inimigo aparece na posição anterior até ambos confirmarem — encerre com <b>Encerrar Movimentação</b>.</p><p>Navios só navegam no mar; submarinos não entram em águas rasas; tropas terrestres só andam em terra e no litoral. Tropas embarcadas, forças especiais e aeronaves que não decolaram <b>acompanham o navio</b> que as transporta; a força de desembarque salta para terra quando o navio chega ao litoral das ilhas.</p><h4>CAMPOS MINADOS</h4><p>Um navio ou submarino que entra num hexágono minado do inimigo para ali e pode sofrer dano. Só os <b>caça-minas</b> varrem as minas e seguem viagem.</p><h4>DETECÇÃO E NOITE</h4><p>Você só vê inimigos dentro do alcance de detecção das suas unidades (névoa de guerra). À noite a detecção cai (−2), <b>exceto a dos submarinos</b>, que usam sonar. Submarinos só são vistos por unidades com alcance de detecção antissubmarino. Forças especiais nunca são detectadas; bases aéreas e portos são sempre visíveis.</p><h4>COM FACILITADOR</h4><p>Depois que os dois lados encerram a movimentação, o facilitador <b>autoriza</b> os movimentos (pode negar ou reposicionar uma unidade). Depois do combate, ele <b>ratifica</b> os resultados antes de o turno avançar. Enquanto isso, os jogadores aguardam.</p><h4>PRAZO OPERACIONAL</h4><p>A operação dura no máximo <b>{{days}} dias</b>. Ao fim do prazo, vence quem tiver maior progresso nos seus objetivos.</p>",
-    "combate": "<h4>DECLARAR ATAQUES</h4><p>Na fase de combate, selecione uma unidade e clique em alvos <b>vermelhos</b> (detectados e no alcance). Escolha a arma e o tamanho da salva e confirme com <b>Confirmar Ataques</b>. Os ataques dos dois lados são resolvidos de forma intercalada, como se fossem simultâneos.</p><h4>RODADAS DE COMBATE</h4><p>Cada engajamento tem até <b>2 rodadas</b> (mísseis de ataque terrestre têm só uma). Após a primeira, ambos decidem <b>CONTINUAR</b> ou <b>PARAR</b>. Quem continua sozinho ganha <b>vantagem de iniciativa</b> (rola 2d6 e usa o maior). Na segunda rodada o grupo defensor <b>contra-ataca</b> com armas de curto alcance.</p><h4>INTERCEPTAÇÃO E GRUPO</h4><p>Mísseis e ataques aéreos podem ser interceptados pela defesa antiaérea do alvo — navios <b>empilhados no mesmo hexágono</b> somam suas defesas e se defendem como grupo. Torpedos e mísseis ar-ar não são interceptáveis.</p><h4>DANO E DEGRADAÇÃO</h4><p>O dano reduz o <b>SP</b> (poder de permanência); com SP 0 a unidade é destruída, e leva junto as tropas, aeronaves e forças especiais que estiverem a bordo. Golpes não fatais também <b>degradam</b> um subsistema aleatório: detecção, movimento, capacidade de combate ou combustível máximo.</p>",
+    "fases": "<h4>ESTRUTURA DO TURNO</h4><p>Cada <b>turno</b> é um dia de operação com dois períodos: <b>☀ Diurno</b> e <b>🌙 Noturno</b>. Cada período tem uma fase de <b>Movimentação</b> e uma de <b>Combate</b>.</p><h4>MOVIMENTAÇÃO SIMULTÂNEA</h4><p>Os dois lados planejam ao mesmo tempo. Selecione uma unidade e clique, passo a passo, nos hexágonos <b>verdes</b> (alcance da unidade); <b>↩</b> desfaz o último passo. Para navios, o alcance aparece colorido pelo consumo do período: verde = 1 FP, âmbar = 2 FP e laranja = 3 FP (<b>alta velocidade</b>, a partir de 3 hexágonos). O inimigo aparece na posição anterior até ambos confirmarem — encerre com <b>Encerrar Movimentação</b>.</p><p>Navios só navegam no mar; submarinos não entram em águas rasas; tropas terrestres só andam em terra e no litoral. Tropas embarcadas, forças especiais e aeronaves que não decolaram <b>acompanham o navio</b> que as transporta; a força de desembarque salta para terra quando o navio chega ao litoral das ilhas.</p><h4>CAMPOS MINADOS</h4><p>Um navio ou submarino que entra num hexágono minado do inimigo para ali e pode sofrer dano. Só os <b>caça-minas</b> varrem as minas e seguem viagem.</p><h4>DETECÇÃO E NOITE</h4><p>Você só vê inimigos dentro do alcance de detecção das suas unidades (névoa de guerra). À noite a detecção cai (−2), <b>exceto a dos submarinos</b>, que usam sonar. Submarinos só são vistos por unidades com alcance de detecção antissubmarino. Forças especiais nunca são detectadas; bases aéreas e portos são sempre visíveis.</p><h4>COM FACILITADOR</h4><p>Depois que os dois lados encerram a movimentação, o facilitador <b>autoriza</b> os movimentos (pode negar ou reposicionar uma unidade). Depois do combate, ele <b>ratifica</b> os resultados antes de o turno avançar. Enquanto isso, os jogadores aguardam.</p><h4>PRAZO OPERACIONAL</h4><p>A operação dura no máximo <b>{{days}} dias</b>. Ao fim do prazo, vence quem tiver maior progresso nos seus objetivos.</p>",
+    "combate": "<h4>DECLARAR ATAQUES</h4><p>Na fase de combate, selecione uma unidade e clique em alvos <b>vermelhos</b> (detectados e no alcance). Escolha a arma e o tamanho da salva. Cada engajamento registrado aparece numa lista no painel e como seta numerada no mapa — dá para ajustar a salva ou remover antes de encerrar com <b>Encerrar Fase de Engajamentos</b>. Os ataques dos dois lados são resolvidos de forma intercalada, como se fossem simultâneos.</p><h4>RODADAS DE COMBATE</h4><p>Cada engajamento tem até <b>2 rodadas</b> (mísseis de ataque terrestre têm só uma). Após a primeira, ambos decidem <b>CONTINUAR</b> ou <b>PARAR</b>. Quem continua sozinho ganha <b>vantagem de iniciativa</b> (rola 2d6 e usa o maior). Na segunda rodada o grupo defensor <b>contra-ataca</b> com armas de curto alcance.</p><h4>INTERCEPTAÇÃO E GRUPO</h4><p>Mísseis e ataques aéreos podem ser interceptados pela defesa antiaérea do alvo — navios <b>empilhados no mesmo hexágono</b> somam suas defesas e se defendem como grupo. Torpedos e mísseis ar-ar não são interceptáveis.</p><h4>DANO E DEGRADAÇÃO</h4><p>O dano reduz o <b>SP</b> (poder de permanência); com SP 0 a unidade é destruída, e leva junto as tropas, aeronaves e forças especiais que estiverem a bordo. Golpes não fatais também <b>degradam</b> um subsistema aleatório: detecção, movimento, capacidade de combate ou combustível máximo.</p>",
     "logistica": "<h4>PONTOS DE COMBUSTÍVEL (FP)</h4><p>Navios e submarinos convencionais têm FP limitados. Custo por período: parado = 1 FP, mover 1 hex = 1, 2 hexes = 2, 3 ou mais = 3 (no máximo 4 FP por período). Atacar e absorver dano custam +1 FP cada.</p><p><b>0 FP = unidade inoperante</b>: não move, não ataca e não se defende até reabastecer.</p><h4>REABASTECIMENTO NAVAL</h4><p>Termine o período <b>empilhado</b> com um navio-tanque, navio logístico ou porto aliado: os FP voltam ao máximo. Submarinos nucleares não consomem FP.</p><h4>AERONAVES</h4><p>Aeronaves têm FP = 2× movimento e só gastam combustível no ar. Depois do combate, voltam à base (base aérea ou porta-aviões) e ficam prontas no período seguinte, com tanque cheio. Aeronave no ar que fica sem combustível longe de uma base é <b>perdida</b>.</p><p><b>Reabastecimento em voo:</b> aeronave pronta que começa o período no mesmo hexágono de um avião-tanque amigo (KC-130 ou Victor) recebe <b>+50% de FP</b> acima do tanque normal, estendendo o raio de ação daquela sortida.</p><h4>MUNIÇÃO</h4><p>Mísseis e torpedos são <b>finitos</b> (veja N/N no painel). Recompletamento: navios e submarinos Azuis que ficam parados num porto argentino, aeronaves que voltam à base e unidades terrestres Azuis. A força Vermelha <b>não recompleta armas navais no mar</b> — economize salvas.</p>"
   },
   "glossary": {
@@ -287,7 +303,7 @@
     "tut3AtkStep1": "Selecione seu atacante",
     "tut3AtkStep2": "Clique alvos <em>vermelhos</em>",
     "tut3AtkStep3": "Ajuste quantidade de armas",
-    "tut3AtkStep4": "Confirme: <em>Confirmar Ataques</em>",
+    "tut3AtkStep4": "Encerre: <em>Encerrar Fase de Engajamentos</em>",
     "tut3Title": "FASES DO TURNO",
     "tut3Body": "Todo turno tem 2 fases — ambos os jogadores agem <b>simultaneamente</b>.<br>Movimentação primeiro: planeje as rotas e confirme. Depois, o combate resolve os ataques.<br>O resultado de cada engajamento é exibido com dados e danos em tempo real.",
     "tut4ObjTitle": "OBJETIVOS DE VITÓRIA",
@@ -324,6 +340,9 @@
     "facilitatedHint": "Você arbitra · dois jogadores entram pelo código e escolhem a equipe"
   },
   "game": {
+    "legendFuel2": "Movimento com consumo de 2 FP",
+    "legendFuel3": "Alta velocidade: consumo de 3 FP",
+    "legendEngagements": "Engajamento registrado",
     "pageTitle": "Zona de Exclusão — Atlântico Sul, 1982 — Teatro de Operações",
     "pageDescription": "Teatro de operações do wargame naval histórico Zona de Exclusão — Atlântico Sul, 1982.",
     "headerTitle": "ZONA DE EXCLUSÃO — ATLÂNTICO SUL, 1982",
@@ -387,7 +406,7 @@
     "tabVitoria": "Vitória",
     "tabGlossario": "Glossário",
     "cardAlt": "Card da unidade",
-    "confirmAttacksZero": "Confirmar Ataques (0)"
+    "confirmAttacksZero": "Encerrar Fase de Engajamentos (0)"
   },
   "log": {
     "TEAM_BLUE": "Força Azul",

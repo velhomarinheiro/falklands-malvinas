@@ -322,6 +322,9 @@ html[lang="en"] .logo-pt { display: none !important; }
 .leg-row { display: flex; align-items: center; gap: 7px; font-size: 0.7rem; color: var(--dim); padding: 2px 0; }
 .leg-swatch { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
 .leg-swatch.green { background: rgba(0,230,118,0.4); border: 1.5px solid rgba(0,230,118,0.8); }
+.leg-swatch.amber { background: rgba(255,179,0,0.35); border: 1.5px solid rgba(255,179,0,0.85); }
+.leg-swatch.orange { background: rgba(255,87,34,0.35); border: 1.5px solid rgba(255,87,34,0.9); }
+.leg-swatch.eng { height: 0; border-radius: 0; border-top: 2.5px dashed rgba(255,112,67,0.95); }
 .leg-swatch.red   {
   background: repeating-linear-gradient(45deg,
     rgba(255,80,80,0.3), rgba(255,80,80,0.3) 3px,
@@ -1402,3 +1405,32 @@ body.facilitator-mode .phase-legend { display: none; }
 /* Lobby: escolha de equipe numa sala com facilitador */
 #lobby-team-choice p { margin-bottom: 1rem; }
 .team-choice-row { display: flex; flex-direction: column; gap: 10px; }
+
+/* ═══ LISTA DE ENGAJAMENTOS (fase de combate) ═══════════════════════════════ */
+.eng-panel { margin: 4px 0 10px; border: 1px solid rgba(255,112,67,0.35); border-radius: 3px; background: rgba(255,112,67,0.05); padding: 8px; }
+.eng-title { font-size: var(--fs-xs); letter-spacing: 2px; color: #ff8a65; margin-bottom: 6px; }
+.eng-list { display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow-y: auto; }
+.eng-empty { font-size: var(--fs-xs); color: var(--dim); line-height: 1.5; margin: 0; }
+.eng-entry { display: flex; align-items: flex-start; gap: 7px; padding: 5px 6px; border-radius: 2px; background: rgba(255,255,255,0.03); border: 1px solid rgba(80,120,160,0.18); }
+.eng-entry.active { border-color: rgba(255,214,79,0.7); background: rgba(255,214,79,0.07); }
+.eng-num { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ff7043; display: inline-flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: bold; color: #fff; }
+.eng-entry.active .eng-num { border-color: #ffd64f; }
+.eng-body { flex: 1; min-width: 0; font-size: var(--fs-xs); line-height: 1.45; }
+.eng-att { background: none; border: none; padding: 0; font: inherit; color: var(--gold-l); cursor: pointer; text-align: left; text-decoration: underline dotted; }
+.eng-att:hover { color: #fff; }
+.eng-att:focus-visible, .eng-del:focus-visible { outline: 2px solid var(--gold-l); outline-offset: 1px; }
+.eng-arrow { color: #ff8a65; margin: 0 3px; }
+.eng-tgt { color: var(--text); }
+.eng-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; flex-wrap: wrap; }
+.eng-meta .atk-wpn-tag { margin-left: 0; }
+.eng-dist { color: var(--dim); font-size: 0.66rem; }
+.eng-meta .atk-amt-ctrl { margin-left: auto; }
+.eng-del { flex-shrink: 0; background: none; border: 1px solid rgba(255,80,80,0.4); color: var(--red-l); border-radius: 2px; cursor: pointer; font-size: 0.7rem; padding: 1px 6px; }
+.eng-del:hover { background: rgba(255,80,80,0.15); }
+.eng-note { margin: 4px 0 0; font-size: 0.64rem; color: var(--dim); }
+
+/* Consumo de combustível do movimento planejado */
+.fuel-plan { margin-top: 6px; padding: 5px 7px; border-left: 3px solid rgb(0,230,118); background: rgba(0,230,118,0.06); font-size: var(--fs-xs); line-height: 1.5; color: var(--text); }
+.fuel-plan.mid  { border-left-color: rgb(255,179,0); background: rgba(255,179,0,0.07); }
+.fuel-plan.high { border-left-color: rgb(255,87,34); background: rgba(255,87,34,0.09); }
+.fuel-plan b { color: #fff; }

@@ -36,7 +36,7 @@ Each **turn** is one day of operations with two periods: **☀ Day** and **🌙 
 
 ### SIMULTANEOUS MOVEMENT
 
-Both sides plan at the same time. Select a unit and click, step by step, on the **green** hexes (the unit's range); **↩** undoes the last step. The enemy appears at its previous position until both sides confirm — finish with **End Movement**.
+Both sides plan at the same time. Select a unit and click, step by step, on the **green** hexes (the unit's range); **↩** undoes the last step. For ships, the range is colored by that period's fuel cost: green = 1 FP, amber = 2 FP and orange = 3 FP (**high speed**, from 3 hexes on). The enemy appears at its previous position until both sides confirm — finish with **End Movement**.
 
 Ships sail only at sea; submarines cannot enter shallow water; land forces move only on land and along the coast. Embarked troops, special forces and aircraft that did not take off **follow the ship** carrying them; the landing force goes ashore once the ship reaches the islands' coast.
 
@@ -60,7 +60,7 @@ The operation lasts at most **8 days**. When time runs out, whoever has made the
 
 ### DECLARING ATTACKS
 
-In the combat phase, select a unit and click **red** targets (detected and in range). Choose the weapon and salvo size, then confirm with **Confirm Attacks**. Both sides' attacks are resolved interleaved, as if simultaneous.
+In the combat phase, select a unit and click **red** targets (detected and in range). Choose the weapon and salvo size. Each registered engagement appears in a list on the panel and as a numbered arrow on the map — you can adjust the salvo or remove it before finishing with **End Engagement Phase**. Both sides' attacks are resolved interleaved, as if simultaneous.
 
 ### BATTLE ROUNDS
 

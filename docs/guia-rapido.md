@@ -36,7 +36,7 @@ Cada **turno** é um dia de operação com dois períodos: **☀ Diurno** e **�
 
 ### MOVIMENTAÇÃO SIMULTÂNEA
 
-Os dois lados planejam ao mesmo tempo. Selecione uma unidade e clique, passo a passo, nos hexágonos **verdes** (alcance da unidade); **↩** desfaz o último passo. O inimigo aparece na posição anterior até ambos confirmarem — encerre com **Encerrar Movimentação**.
+Os dois lados planejam ao mesmo tempo. Selecione uma unidade e clique, passo a passo, nos hexágonos **verdes** (alcance da unidade); **↩** desfaz o último passo. Para navios, o alcance aparece colorido pelo consumo do período: verde = 1 FP, âmbar = 2 FP e laranja = 3 FP (**alta velocidade**, a partir de 3 hexágonos). O inimigo aparece na posição anterior até ambos confirmarem — encerre com **Encerrar Movimentação**.
 
 Navios só navegam no mar; submarinos não entram em águas rasas; tropas terrestres só andam em terra e no litoral. Tropas embarcadas, forças especiais e aeronaves que não decolaram **acompanham o navio** que as transporta; a força de desembarque salta para terra quando o navio chega ao litoral das ilhas.
 
@@ -60,7 +60,7 @@ A operação dura no máximo **8 dias**. Ao fim do prazo, vence quem tiver maior
 
 ### DECLARAR ATAQUES
 
-Na fase de combate, selecione uma unidade e clique em alvos **vermelhos** (detectados e no alcance). Escolha a arma e o tamanho da salva e confirme com **Confirmar Ataques**. Os ataques dos dois lados são resolvidos de forma intercalada, como se fossem simultâneos.
+Na fase de combate, selecione uma unidade e clique em alvos **vermelhos** (detectados e no alcance). Escolha a arma e o tamanho da salva. Cada engajamento registrado aparece numa lista no painel e como seta numerada no mapa — dá para ajustar a salva ou remover antes de encerrar com **Encerrar Fase de Engajamentos**. Os ataques dos dois lados são resolvidos de forma intercalada, como se fossem simultâneos.
 
 ### RODADAS DE COMBATE
 

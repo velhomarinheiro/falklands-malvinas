@@ -151,12 +151,19 @@
         <div class="panel-title" data-i18n="game.actions">AÇÕES</div>
         <div id="phase-hint" class="phase-hint hidden"></div>
         <button id="end-phase-btn"  class="act-btn yellow hidden" data-i18n="ui.endMovement">Encerrar Movimentação</button>
-        <button id="combat-btn"     class="act-btn orange hidden" data-i18n="game.confirmAttacksZero">Confirmar Ataques (0)</button>
+        <div id="eng-panel" class="eng-panel hidden">
+          <div id="eng-title" class="eng-title">ENGAJAMENTOS REGISTRADOS (0)</div>
+          <div id="eng-list" class="eng-list"></div>
+        </div>
+        <button id="combat-btn"     class="act-btn orange hidden" data-i18n="game.confirmAttacksZero">Encerrar Fase de Engajamentos (0)</button>
         <button id="undo-step-btn"  class="act-btn gray   hidden" data-i18n="game.undoStep">↩ Desfazer Passo</button>
         <button id="cancel-btn"     class="act-btn gray   hidden" data-i18n="game.cancelSelection">Cancelar Seleção</button>
         <div class="phase-legend">
           <div class="leg-row"><span class="leg-swatch green"></span><span data-i18n="game.legendMovement">Hexágonos de movimento</span></div>
+          <div class="leg-row"><span class="leg-swatch amber"></span><span data-i18n="game.legendFuel2">Movimento com consumo de 2 FP</span></div>
+          <div class="leg-row"><span class="leg-swatch orange"></span><span data-i18n="game.legendFuel3">Alta velocidade: consumo de 3 FP</span></div>
           <div class="leg-row"><span class="leg-swatch red"  ></span><span data-i18n="game.legendTargets">Alvos no alcance</span></div>
+          <div class="leg-row"><span class="leg-swatch eng"></span><span data-i18n="game.legendEngagements">Engajamento registrado</span></div>
         </div>
         <div class="action-divider"></div>
         <button id="export-log-btn" class="act-btn gray hidden" data-i18n="game.exportLog">📋 Exportar Log</button>

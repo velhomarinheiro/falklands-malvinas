@@ -138,6 +138,22 @@ const WEAPON_DEFAULT_RANGE = {
   navalGun:1, airDefense:1, bmd:1, asw:2, airAttack:4, raid:2, aam:1,
 };
 
+// Custo de combustível naval do período pela distância percorrida — espelha
+// navalMoveCost em fuel_model.js: parado/1 hex = 1 FP, 2 hexes = 2 FP, 3 ou mais
+// hexes (alta velocidade) = 3 FP. Só navios e submarinos convencionais pagam.
+const HIGH_SPEED_DIST = 3;
+function navalMoveCost(dist) {
+  if (dist <= 1) return 1;
+  return Math.min(dist, HIGH_SPEED_DIST);
+}
+function usesNavalFuel(unit) { return unit?.fuel?.fuelType === 'naval'; }
+// Unidades selecionadas no momento (grupo ou unidade única).
+function selectedUnits() {
+  if (!gameState) return [];
+  const ids = selGroupIds.length > 0 ? selGroupIds : (selUnitId ? [selUnitId] : []);
+  return ids.map(id => gameState.units.find(u => u.id === id && u.hp > 0)).filter(Boolean);
+}
+
 function unitMovementRange(unit) {
   if (unit.category !== 'air') return unit.movement;
   return Math.floor((unit.fuel?.current ?? unit.movement) / 2);
@@ -856,16 +872,30 @@ $('unit-panel').addEventListener('click', e => {
   // Card thumbnail → open modal
   const thumb = e.target.closest('[data-card-unit]');
   if (thumb) { showCardModal(thumb.dataset.cardUnit); return; }
+});
 
-  const btn = e.target.closest('[data-atk-adj]');
-  if (!btn) return;
+// Lista de engajamentos registrados: ajustar salva, remover, selecionar atacante.
+$('eng-list').addEventListener('click', e => {
+  const adj = e.target.closest('[data-atk-adj]');
+  const del = e.target.closest('[data-atk-del]');
+  const sel = e.target.closest('[data-atk-sel]');
+  const btn = adj || del || sel;
+  if (!btn || !isMyTurn()) return;
   const attackerId = btn.dataset.attacker;
   const targetId   = btn.dataset.target;
-  const delta      = Number(btn.dataset.atk_adj);
-  const atk = pendingAtks.find(a => a.attackerId === attackerId && a.targetId === targetId);
-  if (!atk) return;
-  const maxAmt = Number(btn.dataset.max) || 4;
-  atk.amount = Math.max(1, Math.min(maxAmt, (atk.amount || 1) + delta));
+  const idx = pendingAtks.findIndex(a => a.attackerId === attackerId && a.targetId === targetId);
+  if (idx < 0) return;
+  if (adj) {
+    const atk = pendingAtks[idx];
+    const maxAmt = Number(adj.dataset.max) || 4;
+    atk.amount = Math.max(1, Math.min(maxAmt, (atk.amount || 1) + Number(adj.dataset.atk_adj)));
+  } else if (del) {
+    pendingAtks.splice(idx, 1);
+    SFX.play('attackRemove');
+  } else {
+    const u = gameState.units.find(x => x.id === attackerId && x.hp > 0);
+    if (u) { _selectUnit(u); return; }
+  }
   updateUI(); render();
 });
 
@@ -1588,27 +1618,67 @@ function fuelRow(unit) {
   return `<span>${t('ui.fuel')}</span><span class="${cls}">${cur}/${f.max} FP</span>`;
 }
 
-function buildAtkListHtml(atks) {
-  if (!atks.length) return '';
-  const items = atks.map(a => {
+// Consumo de combustível do movimento em planejamento: quanto o período vai
+// custar, quanto sobra e — antes de o jogador ampliar o deslocamento — quando
+// o próximo hexágono aumenta o consumo (2 FP e, a partir de 3, alta velocidade).
+function fuelPlanHtml() {
+  if (!gameState || gameState.phase !== 'movement' || !isMyTurn()) return '';
+  const units = selectedUnits().filter(usesNavalFuel);
+  if (!units.length) return '';
+  const range = Math.min(...selectedUnits().map(unitMovementRange));
+  const steps = Math.max(0, activePath.length - 1);
+  const cost  = navalMoveCost(steps);
+  const lead  = units.reduce((a, b) => ((a.fuel.current ?? 0) <= (b.fuel.current ?? 0) ? a : b));
+  const left  = Math.max(0, (lead.fuel.current ?? 0) - cost);
+  const lines = [];
+  if (steps === 0) {
+    lines.push(t(range >= HIGH_SPEED_DIST ? 'ui.fuelTiersHigh' : 'ui.fuelTiers'));
+  } else {
+    lines.push(t('ui.fuelPlan', {cost, left, max: lead.fuel.max}));
+    if (steps >= HIGH_SPEED_DIST) lines.push(t('ui.fuelHigh'));
+    else if (steps < range) {
+      const next = navalMoveCost(steps + 1);
+      if (next > cost) lines.push(t(next >= HIGH_SPEED_DIST ? 'ui.fuelNextHigh' : 'ui.fuelNext', {cost: next}));
+    }
+  }
+  const cls = steps >= HIGH_SPEED_DIST ? 'fuel-plan high' : steps >= 2 ? 'fuel-plan mid' : 'fuel-plan';
+  return `<div class="${cls}">${lines.map(l => `<div>${l}</div>`).join('')}</div>`;
+}
+
+// Lista de todos os engajamentos registrados na fase, numerados na mesma ordem
+// das setas desenhadas no mapa (drawEngagements).
+function buildEngagementListHtml() {
+  if (!pendingAtks.length) return `<p class="eng-empty">${t('ui.engEmpty')}</p>`;
+  const items = pendingAtks.map((a, i) => {
+    const att     = gameState?.units.find(u => u.id === a.attackerId);
     const tgt     = gameState?.units.find(u => u.id === a.targetId);
-    const tgtName = tgt?.name || a.targetId;
-    const attUnit = gameState?.units.find(u => u.id === a.attackerId);
-    const wpnInfo = attUnit?.weapons?.[a.weaponType];
+    const wpnInfo = att?.weapons?.[a.weaponType];
     const isExp   = a.weaponType ? !!WEAPON_EXPENDABLE[a.weaponType] : false;
-    const maxAmt  = wpnInfo?.quantity ?? (attUnit ? Math.max(1, ...Object.values(attUnit.weapons || {}).map(w => w.quantity || 0)) : 4);
+    const maxAmt  = wpnInfo?.quantity ?? 1;
     const amt     = a.amount || 1;
-    const wpnTag  = a.weaponType ? `<span class="atk-wpn-tag">[${weaponLabel(a.weaponType)}]</span>` : '';
-    return `<div class="atk-entry">
-      <span class="atk-target">→ ${tgtName} ${wpnTag}</span>
-      ${isExp ? `<span class="atk-amt-ctrl">
-        <button class="atk-adj-btn" data-atk-adj data-attacker="${a.attackerId}" data-target="${a.targetId}" data-atk_adj="-1" data-max="${maxAmt}">−</button>
-        <span class="atk-amt-val">${amt}</span>
-        <button class="atk-adj-btn" data-atk-adj data-attacker="${a.attackerId}" data-target="${a.targetId}" data-atk_adj="1" data-max="${maxAmt}">+</button>
-      </span>` : ''}
+    const wpn     = a.weaponType ? weaponLabel(a.weaponType) : t('ui.engAuto');
+    const dist    = att && tgt ? hexDist(att.col, att.row, tgt.col, tgt.row) : null;
+    const data    = `data-attacker="${a.attackerId}" data-target="${a.targetId}"`;
+    const active  = selGroupIds.includes(a.attackerId) || selUnitId === a.attackerId;
+    return `<div class="eng-entry${active ? ' active' : ''}">
+      <span class="eng-num">${i + 1}</span>
+      <div class="eng-body">
+        <button class="eng-att" data-atk-sel ${data} title="${t('ui.engSelect')}">${escapeHtml(att?.name || a.attackerId)}</button>
+        <span class="eng-arrow">→</span>
+        <span class="eng-tgt">${escapeHtml(tgt?.name || a.targetId)}</span>
+        <div class="eng-meta">
+          <span class="atk-wpn-tag">${wpn}${isExp ? ` ×${amt}` : ''}</span>
+          ${dist !== null ? `<span class="eng-dist">${t('ui.engDist', {n: dist})}</span>` : ''}
+          ${isExp ? `<span class="atk-amt-ctrl">
+            <button class="atk-adj-btn" data-atk-adj ${data} data-atk_adj="-1" data-max="${maxAmt}" title="${t('ui.engLess')}">−</button>
+            <button class="atk-adj-btn" data-atk-adj ${data} data-atk_adj="1" data-max="${maxAmt}" title="${t('ui.engMore')}">+</button>
+          </span>` : ''}
+        </div>
+      </div>
+      <button class="eng-del" data-atk-del ${data} title="${t('ui.engRemove')}">✕</button>
     </div>`;
   }).join('');
-  return `<div class="atk-list"><div class="atk-list-title">${t('ui.declaredAttacks')}</div>${items}</div>`;
+  return items + `<p class="eng-note">${t('ui.engFuelNote')}</p>`;
 }
 
 // ─── UI update ────────────────────────────────────────────────────────────────
@@ -1648,6 +1718,12 @@ function updateUI() {
     if (phase === 'combat') combatBtn.classList.remove('hidden');
   }
   combatBtn.textContent = t('ui.confirmAttacks', {n: pendingAtks.length});
+  const showEng = phase === 'combat' && isMyTurn() && !winner;
+  $('eng-panel').classList.toggle('hidden', !showEng);
+  if (showEng) {
+    $('eng-title').textContent = t('ui.engTitle', {n: pendingAtks.length});
+    $('eng-list').innerHTML = buildEngagementListHtml();
+  }
 
   const b = units.filter(u => u.team === 'blue' && u.hp > 0).length;
   const r = units.filter(u => u.team === 'red'  && u.hp > 0).length;
@@ -1670,9 +1746,8 @@ function updateUI() {
       ? `<div class="u-hint">${t('ui.path', {steps: pathSteps, max: pathStepsMov})}</div>` : '';
     const groupHint = selGroupIds.length > 1
       ? `<div class="u-hint">${t('ui.group', {count: selGroupIds.length})}</div>` : '';
-    const myAtks = selGroupIds.length > 0
-      ? pendingAtks.filter(a => selGroupIds.includes(a.attackerId))
-      : pendingAtks.filter(a => a.attackerId === sel.id);
+    const myAtkCount = pendingAtks.filter(a =>
+      selGroupIds.length > 0 ? selGroupIds.includes(a.attackerId) : a.attackerId === sel.id).length;
     const det  = sel.detectionRange || {};
     const comp = (sel.composition||[]).map(c=>`${c.quantity}× ${compTypeLabel(c.type)}`).join(' · ');
 
@@ -1713,8 +1788,9 @@ function updateUI() {
       ${comp ? `<div class="u-hint" style="color:var(--dim);font-size:0.67rem;line-height:1.5">${comp}</div>` : ''}
       ${groupHint}
       ${pathHint}
+      ${fuelPlanHtml()}
       ${atkHexes.length ? `<div class="u-hint">${t('ui.clickRedTargets')}</div>` : ''}
-      ${myAtks.length ? buildAtkListHtml(myAtks) : ''}
+      ${myAtkCount ? `<div class="u-hint atk-declared">${t('ui.engUnitCount', {n: myAtkCount})}</div>` : ''}
       ${cardThumb}
     `;
   } else {
@@ -1902,6 +1978,7 @@ function render() {
   drawHighlights();
   drawInfrastructure();
   drawUnits();
+  drawEngagements();
   drawUnitFlashes();
   drawCoordLabels();
   if (hoverHex) drawHover();
@@ -1984,16 +2061,34 @@ function drawHighlights() {
       'rgba(255,220,0,0.20)', 'rgba(255,220,0,0.65)',
       'rgba(255,220,0,0.40)', 'rgba(255,220,0,0.95)');
   }
-  // Full reachable range (dim green) — clicking auto-routes to the hex
+  // Navios com combustível: o alcance é colorido pela faixa de consumo do
+  // período (verde 1 FP, âmbar 2 FP, laranja 3 FP = alta velocidade), com o
+  // custo escrito no primeiro anel de cada faixa — o jogador vê onde ampliar o
+  // movimento passa a gastar mais antes de traçar a rota.
+  const fuelTiers = selectedUnits().some(usesNavalFuel);
+  const stepsTaken = Math.max(0, activePath.length - 1);
+  const tierOf = dist => fuelTiers ? navalMoveCost(stepsTaken + dist) : 1;
+  // Full reachable range (dim) — clicking auto-routes to the hex
   for (const h of reachableHexes.values()) {
     if (h.dist === 1) continue; // adjacent ring drawn brighter below
     const {x, y} = hexToPixel(h.col, h.row);
-    drawHex(ctx, x, y, 'rgba(0,230,118,0.09)', 'rgba(0,230,118,0.30)', 1.0);
+    const c = FUEL_TIER_RGB[tierOf(h.dist)];
+    drawHex(ctx, x, y, `rgba(${c},0.10)`, `rgba(${c},0.34)`, 1.0);
   }
-  // Valid next steps (green)
+  // Valid next steps
   for (const h of moveHexes) {
     const {x, y} = hexToPixel(h.col, h.row);
-    drawHex(ctx, x, y, 'rgba(0,230,118,0.22)', 'rgba(0,230,118,0.70)', 1.8);
+    const c = FUEL_TIER_RGB[tierOf(1)];
+    drawHex(ctx, x, y, `rgba(${c},0.22)`, `rgba(${c},0.72)`, 1.8);
+  }
+  if (fuelTiers) {
+    const nextHexes = moveHexes.map(h => ({...h, dist: 1}));
+    for (const h of [...nextHexes, ...reachableHexes.values()]) {
+      const tier = tierOf(h.dist);
+      // rótulo só onde a faixa muda (o primeiro anel com o novo custo)
+      if (tier === 1 || tierOf(h.dist - 1) === tier) continue;
+      drawFuelTag(h.col, h.row, tier);
+    }
   }
   // Attack hexes (red + diagonal hatch — shape cue for colorblind players)
   for (const h of atkHexes) {
@@ -2005,6 +2100,79 @@ function drawHighlights() {
     drawHexHatch(x, y, declared ? 'rgba(255,150,150,0.55)' : 'rgba(255,90,90,0.35)');
   }
   if (isFacilitator) facDrawOverlays();
+}
+
+const FUEL_TIER_RGB = { 1: '0,230,118', 2: '255,179,0', 3: '255,87,34' };
+function drawFuelTag(col, row, tier) {
+  const {x, y} = hexToPixel(col, row);
+  ctx.save();
+  ctx.font         = `bold ${Math.round(HEX_R * 0.26)}px sans-serif`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor  = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur   = 3;
+  ctx.fillStyle    = `rgb(${FUEL_TIER_RGB[tier]})`;
+  ctx.fillText(`${tier} FP${tier >= HIGH_SPEED_DIST ? ' ⚡' : ''}`, x, y + HEX_R * 0.55);
+  ctx.restore();
+}
+
+// Setas dos engajamentos registrados: atacante → alvo, numeradas na mesma
+// ordem da lista do painel. Desenhadas acima das unidades.
+function drawEngagements() {
+  if (!gameState || gameState.phase !== 'combat' || !pendingAtks.length) return;
+  const pairCount = new Map();
+  pendingAtks.forEach((a, i) => {
+    const att = gameState.units.find(u => u.id === a.attackerId);
+    const tgt = gameState.units.find(u => u.id === a.targetId);
+    if (!att || !tgt) return;
+    const p1 = hexToPixel(att.col, att.row), p2 = hexToPixel(tgt.col, tgt.row);
+    const active = selGroupIds.includes(a.attackerId) || selUnitId === a.attackerId;
+    const color  = active ? 'rgba(255,214,79,0.95)' : 'rgba(255,112,67,0.85)';
+    // vários engajamentos entre os mesmos hexágonos: afasta as setas lateralmente
+    const key = `${att.col},${att.row}>${tgt.col},${tgt.row}`;
+    const k   = pairCount.get(key) || 0; pairCount.set(key, k + 1);
+    const dx = p2.x - p1.x, dy = p2.y - p1.y, len = Math.hypot(dx, dy);
+    ctx.save();
+    if (len < 1) {           // mesmo hexágono: só o número sobre o alvo
+      drawEngBadge(p2.x + k * HEX_R * 0.45, p2.y - HEX_R * 0.55, i + 1, color);
+      ctx.restore(); return;
+    }
+    const ux = dx / len, uy = dy / len, off = k * HEX_R * 0.22;
+    const nx = -uy * off, ny = ux * off;
+    // alvo marcado com contorno, para continuar visível sem a unidade selecionada
+    drawHex(ctx, p2.x, p2.y, null, color, 2.4);
+    const sx = p1.x + ux * HEX_R * 0.30 + nx, sy = p1.y + uy * HEX_R * 0.30 + ny;
+    const ex = p2.x - ux * HEX_R * 0.45 + nx, ey = p2.y - uy * HEX_R * 0.45 + ny;
+    ctx.strokeStyle = color;
+    ctx.fillStyle   = color;
+    ctx.lineWidth   = active ? 3 : 2.2;
+    ctx.setLineDash([HEX_R * 0.22, HEX_R * 0.14]);
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur  = 3;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.setLineDash([]);
+    const ah = HEX_R * 0.32;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - ux * ah - uy * ah * 0.55, ey - uy * ah + ux * ah * 0.55);
+    ctx.lineTo(ex - ux * ah + uy * ah * 0.55, ey - uy * ah - ux * ah * 0.55);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+    drawEngBadge(sx + (ex - sx) * 0.42, sy + (ey - sy) * 0.42, i + 1, color);
+  });
+}
+function drawEngBadge(x, y, n, color) {
+  const r = HEX_R * 0.24;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(10,20,32,0.92)'; ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = color; ctx.stroke();
+  ctx.fillStyle    = '#fff';
+  ctx.font         = `bold ${Math.round(r * 1.15)}px sans-serif`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(String(n), x, y + 0.5);
+  ctx.restore();
 }
 
 // Hachura diagonal recortada ao hex — alvos de ataque distinguem-se dos hexes
